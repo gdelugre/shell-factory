@@ -14,6 +14,14 @@
 #define CHANNEL REUSE_SOCKET
 #endif
 
+#ifndef HOST
+#define HOST 0
+#endif
+
+#ifndef PORT
+#define PORT 0
+#endif
+
 struct channel
 {
     int rx;
@@ -27,6 +35,9 @@ enum channel_mode
     USE_STDOUT,
     USE_STDERR,
 };
+
+static const unsigned long connect_back_addr = HOST;
+static const unsigned short connect_back_port = PORT;
 
 static inline
 int _socket(int domain, int type, int protocol)
@@ -56,16 +67,20 @@ int find_open_socket()
 }
 
 static inline
-int tcp_connect(long addr, short port)
+int tcp_connect(const long addr, const short port)
 {
+    _Static_assert(connect_back_addr != 0, "Must specify an address to connect to.\n");
+    _Static_assert(connect_back_port != 0, "Must specify a port to connect to.\n");
+
     struct sockaddr_in serv_addr;
     int sock = _socket(AF_INET, SOCK_STREAM, 0);
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = port;
-    serv_addr.sin_addr.s_addr = addr;
+    serv_addr.sin_port = connect_back_port;
+    serv_addr.sin_addr.s_addr = connect_back_addr;
 
-    _connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+    if ( _connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0 )
+        return -1;
 
     return sock;
 }
@@ -82,8 +97,9 @@ struct channel get_communication_channel()
             chan.rx = chan.tx = find_open_socket();
             break;
 
-        //case CONNECT_BACK:
-        //    chan.rx = chan.tx = tcp_connect(HOST, PORT);
+        case CONNECT_BACK:
+            chan.rx = chan.tx = tcp_connect(HOST, PORT);
+            break;
         
         case USE_STDOUT:
             chan.rx = 0;

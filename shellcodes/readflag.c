@@ -12,7 +12,7 @@ SHELLCODE_ENTRY {
     struct channel chan = get_communication_channel();
     char c;
 
-    while ( _read(chan.rx, &c, sizeof(c)) > 0 )
+    while ( _read(flag_fd, &c, sizeof(c)) > 0 )
     {
         _write(chan.tx, &c, sizeof(c));
     }
