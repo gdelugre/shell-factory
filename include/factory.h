@@ -7,6 +7,8 @@
 #define SHELLCODE_ENTRY _Noreturn void _start(void) { do {
 #define SHELLCODE_END } while(0); for(;;); }
 
+#define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
+
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
 

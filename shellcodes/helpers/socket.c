@@ -10,12 +10,14 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#include "io.c"
+
 #ifndef CHANNEL
 #define CHANNEL REUSE_SOCKET
 #endif
 
 #ifndef HOST
-#define HOST 0
+#define HOST -1
 #endif
 
 #ifndef PORT
@@ -32,12 +34,13 @@ enum channel_mode
 {
     REUSE_SOCKET,
     CONNECT_BACK,
+    TCP_LISTEN,
     USE_STDOUT,
     USE_STDERR,
 };
 
-static const unsigned long connect_back_addr = HOST;
-static const unsigned short connect_back_port = PORT;
+static const unsigned long host_addr = HOST;
+static const unsigned short host_port = PORT;
 
 static inline
 int _socket(int domain, int type, int protocol)
@@ -49,6 +52,24 @@ static inline
 int _connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
     return INTERNAL_SYSCALL(connect,, 3, sockfd, addr, addrlen);
+}
+
+static inline
+int _listen(int socket, int backlog)
+{
+    return INTERNAL_SYSCALL(listen,, 2, socket, backlog);
+}
+
+static inline
+int _bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+{
+    return INTERNAL_SYSCALL(bind,, 3, sockfd, addr, addrlen);
+}
+
+static inline
+int _accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+{
+    return INTERNAL_SYSCALL(accept,, 3, sockfd, addr, addrlen);
 }
 
 static inline
@@ -69,20 +90,45 @@ int find_open_socket()
 static inline
 int tcp_connect(const long addr, const short port)
 {
-    _Static_assert(connect_back_addr != 0, "Must specify an address to connect to.\n");
-    _Static_assert(connect_back_port != 0, "Must specify a port to connect to.\n");
+    _Static_assert(CHANNEL != CONNECT_BACK || host_addr != -1, "Must specify an address to connect to.\n");
+    _Static_assert(CHANNEL != CONNECT_BACK || host_port != 0, "Must specify a port to connect to.\n");
 
     struct sockaddr_in serv_addr;
     int sock = _socket(AF_INET, SOCK_STREAM, 0);
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = connect_back_port;
-    serv_addr.sin_addr.s_addr = connect_back_addr;
+    serv_addr.sin_port = host_port;
+    serv_addr.sin_addr.s_addr = host_addr;
 
     if ( _connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0 )
         return -1;
 
     return sock;
+}
+
+static inline
+int tcp_listen(const long addr, const short port)
+{
+    _Static_assert(CHANNEL != TCP_LISTEN || host_addr != -1, "Must specify an address to listen to.\n");
+    _Static_assert(CHANNEL != TCP_LISTEN || host_port != 0, "Must specify a port to listen to.\n");
+
+    struct sockaddr_in serv_addr, client_addr;
+    socklen_t client_len = sizeof(client_addr);
+    int client_sock, listen_sock = _socket(AF_INET, SOCK_STREAM, 0);
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = host_port;
+    serv_addr.sin_addr.s_addr = host_addr;    
+
+    if ( _bind(listen_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) )
+        return -1;
+
+    _listen(listen_sock, 0);
+
+    client_sock = _accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
+    _close(listen_sock);
+
+    return client_sock;
 }
 
 static inline
@@ -99,6 +145,10 @@ struct channel get_communication_channel()
 
         case CONNECT_BACK:
             chan.rx = chan.tx = tcp_connect(HOST, PORT);
+            break;
+
+        case TCP_LISTEN:
+            chan.rx = chan.tx = tcp_listen(HOST, PORT);
             break;
         
         case USE_STDOUT:

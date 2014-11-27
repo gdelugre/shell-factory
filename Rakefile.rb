@@ -4,7 +4,7 @@ require 'rake/clean'
 require 'ipaddr'
 
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
-CFLAGS = "-std=gnu11 -Os -fPIC -fomit-frame-pointer -finline-functions -flto -nodefaultlibs -nostdlib #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
+CFLAGS = "-std=gnu11 -Os -fPIC -fno-common -fno-toplevel-reorder -fomit-frame-pointer -finline-functions -flto -nodefaultlibs -nostdlib #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
 
 def build(target, *opts)
     default_opts = [ "CHANNEL", "HOST", "PORT" ]
@@ -27,8 +27,8 @@ task :execve do
     build(:execve, "SET_ARGV0", "DUP_FD")
 end
 
-task :memexec do
-    build(:memexec)
+task :memexec do 
+    build(:memexec, "MEMORY")
 end
 
 CLEAN.include("bins/*.{elf,bin}")
