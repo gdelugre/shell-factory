@@ -3,11 +3,25 @@
 
 #include <factory.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <signal.h>
+
+static inline
+pid_t _fork(void)
+{
+    return INTERNAL_SYSCALL(fork,, 0);
+}
 
 static inline
 int _execve(const char *filename, char *const argv[], char *const envp[])
 {
     return INTERNAL_SYSCALL(execve,, 3, filename, argv, envp);
+}
+
+static inline
+int _kill(pid_t pid, int sig)
+{
+    return INTERNAL_SYSCALL(kill,, 2, pid, sig);
 }
 
 static inline
