@@ -24,7 +24,7 @@ task :readflag do
 end
 
 task :execve do
-    build(:execve, "SET_ARGV0", "DUP_FD")
+    build(:execve, "SET_ARGV0")
 end
 
 task :memexec do 

