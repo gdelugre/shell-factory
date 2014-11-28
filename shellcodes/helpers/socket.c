@@ -39,9 +39,6 @@ enum channel_mode
     USE_STDERR,
 };
 
-static const unsigned long host_addr = HOST;
-static const unsigned short host_port = PORT;
-
 static inline
 int _socket(int domain, int type, int protocol)
 {
@@ -90,6 +87,9 @@ int find_open_socket()
 static inline
 int tcp_connect(const long addr, const short port)
 {
+    const unsigned long host_addr = HOST;
+    const unsigned short host_port = PORT;
+
     _Static_assert(CHANNEL != CONNECT_BACK || host_addr != -1, "Must specify an address to connect to.\n");
     _Static_assert(CHANNEL != CONNECT_BACK || host_port != 0, "Must specify a port to connect to.\n");
 
@@ -109,6 +109,9 @@ int tcp_connect(const long addr, const short port)
 static inline
 int tcp_listen(const long addr, const short port)
 {
+    const unsigned long host_addr = HOST;
+    const unsigned short host_port = PORT;
+
     _Static_assert(CHANNEL != TCP_LISTEN || host_addr != -1, "Must specify an address to listen to.\n");
     _Static_assert(CHANNEL != TCP_LISTEN || host_port != 0, "Must specify a port to listen to.\n");
 
