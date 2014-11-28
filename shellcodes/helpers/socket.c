@@ -16,12 +16,15 @@
 #define CHANNEL REUSE_SOCKET
 #endif
 
+#define UNDEFINED_HOST -1
+#define UNDEFINED_PORT 0
+
 #ifndef HOST
-#define HOST -1
+#define HOST UNDEFINED_HOST
 #endif
 
 #ifndef PORT
-#define PORT 0
+#define PORT UNDEFINED_PORT
 #endif
 
 struct channel
@@ -33,7 +36,7 @@ struct channel
 enum channel_mode
 {
     REUSE_SOCKET,
-    CONNECT_BACK,
+    TCP_CONNECT,
     TCP_LISTEN,
     USE_STDOUT,
     USE_STDERR,
@@ -90,8 +93,8 @@ int tcp_connect(const long addr, const short port)
     const unsigned long host_addr = HOST;
     const unsigned short host_port = PORT;
 
-    _Static_assert(CHANNEL != CONNECT_BACK || host_addr != -1, "Must specify an address to connect to.\n");
-    _Static_assert(CHANNEL != CONNECT_BACK || host_port != 0, "Must specify a port to connect to.\n");
+    _Static_assert(CHANNEL != TCP_CONNECT || host_addr != UNDEFINED_HOST, "Must specify an address to connect to.\n");
+    _Static_assert(CHANNEL != TCP_CONNECT || host_port != UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
     struct sockaddr_in serv_addr;
     int sock = _socket(AF_INET, SOCK_STREAM, 0);
@@ -112,8 +115,8 @@ int tcp_listen(const long addr, const short port)
     const unsigned long host_addr = HOST;
     const unsigned short host_port = PORT;
 
-    _Static_assert(CHANNEL != TCP_LISTEN || host_addr != -1, "Must specify an address to listen to.\n");
-    _Static_assert(CHANNEL != TCP_LISTEN || host_port != 0, "Must specify a port to listen to.\n");
+    _Static_assert(CHANNEL != TCP_LISTEN || host_addr != UNDEFINED_HOST, "Must specify an address to listen to.\n");
+    _Static_assert(CHANNEL != TCP_LISTEN || host_port != UNDEFINED_PORT, "Must specify a port to listen to.\n");
 
     struct sockaddr_in serv_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -146,7 +149,7 @@ struct channel get_communication_channel()
             chan.rx = chan.tx = find_open_socket();
             break;
 
-        case CONNECT_BACK:
+        case TCP_CONNECT:
             chan.rx = chan.tx = tcp_connect(HOST, PORT);
             break;
 

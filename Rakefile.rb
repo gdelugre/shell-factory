@@ -36,4 +36,8 @@ task :memexec do
     build(:memexec, "MEMORY")
 end
 
+rule '' do |task|
+    build(task.name)
+end
+
 CLEAN.include("bins/*.{elf,bin}")

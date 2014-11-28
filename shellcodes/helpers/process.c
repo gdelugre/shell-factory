@@ -40,16 +40,18 @@ int _kill(pid_t pid, int sig)
     return INTERNAL_SYSCALL(kill,, 2, pid, sig);
 }
 
-static inline
+static inline __attribute__((noreturn))
 void __exit(int status)
 {
     INTERNAL_SYSCALL(exit,, 1, status);
+    for(;;);
 }
 
-static inline
+static inline __attribute__((noreturn))
 void _exit_group(int status)
 {
     INTERNAL_SYSCALL(exit_group,, 1, status);
+    for (;;);
 }
 
 static inline

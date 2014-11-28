@@ -22,7 +22,7 @@ void *_memset(void *s, int c, size_t n)
 static inline
 void _bzero(void *s, size_t n)
 {
-    memset(s, 0, n);
+    _memset(s, 0, n);
 }
 
 static inline

@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #if defined(__arm__)
+#define PAGE_SIZE 4096
+
 static inline 
 void *get_sp(void)
 {
@@ -18,6 +20,8 @@ void set_sp(void *sp)
   asm volatile("mov sp, %0\n" :: "r" (sp));
 }
 #elif defined(__amd64__)
+#define PAGE_SIZE 4096
+
 static inline
 void *get_sp(void)
 {
@@ -84,6 +88,8 @@ uint64_t read_tsc(void)
     return (tsch << 32) | tscl;
 }
 #elif defined(__i386__)
+#define PAGE_SIZE 4096
+
 static inline
 void * get_sp(void)
 {
@@ -126,9 +132,9 @@ unsigned int x86_apid_id(void)
 static inline 
 uint64_t read_tsc() 
 {
-        uint64_t tsc;
-        __asm__ __volatile__ ("rdtsc" : "=A" (tsc) );
-        return tsc;
+    uint64_t tsc;
+    __asm__ __volatile__ ("rdtsc" : "=A" (tsc) );
+    return tsc;
 }
 #endif
 

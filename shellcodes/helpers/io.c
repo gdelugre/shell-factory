@@ -1,5 +1,5 @@
-#ifndef _FS_HELPER_H
-#define _FS_HELPER_H
+#ifndef _IO_HELPER_H
+#define _IO_HELPER_H
 
 #include <factory.h>
 #include <sys/types.h>
