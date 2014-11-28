@@ -2,7 +2,7 @@
 #define _STRING_HELPER_H
 
 static inline
-void *memcpy(void *dest, const void *src, size_t n)
+void *_memcpy(void *dest, const void *src, size_t n)
 {
     int i;
     for ( i = 0; i < n; i++ )
@@ -11,7 +11,7 @@ void *memcpy(void *dest, const void *src, size_t n)
 }
 
 static inline
-void *memset(void *s, int c, size_t n)
+void *_memset(void *s, int c, size_t n)
 {
     int i;
     for ( i = 0; i < n; i++ )
@@ -20,13 +20,13 @@ void *memset(void *s, int c, size_t n)
 }
 
 static inline
-void bzero(void *s, size_t n)
+void _bzero(void *s, size_t n)
 {
     memset(s, 0, n);
 }
 
 static inline
-size_t strlen(const char *s)
+size_t _strlen(const char *s)
 {
     size_t len = 0;
     while ( s[len] )
