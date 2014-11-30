@@ -5,12 +5,19 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <linux/sched.h>
+#include <sys/ptrace.h>
+#include <asm/ptrace.h>
 
 #include "socket.c"
 #include "string.c"
+#include "memory.c"
 #include "io.c"
 
 typedef void (* sighandler_t)(int);
+typedef int (* thread_routine)(void *);
+
+#define THREAD_STACK_SIZE 0x10000
 
 SYSTEM_CALL
 pid_t _fork(void)
@@ -22,6 +29,12 @@ SYSTEM_CALL
 int _execve(const char *filename, char *const argv[], char *const envp[])
 {
     return INTERNAL_SYSCALL(execve,, 3, filename, argv, envp);
+}
+
+SYSTEM_CALL
+long _clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
+{
+    return INTERNAL_SYSCALL(clone,, 5, flags, child_stack, ptid, tls, ctid);
 }
 
 SYSTEM_CALL
@@ -43,14 +56,14 @@ int _kill(pid_t pid, int sig)
 }
 
 SYSTEM_CALL NO_RETURN
-void __exit(int status)
+void _exit_thread(int status)
 {
     INTERNAL_SYSCALL(exit,, 1, status);
     for(;;);
 }
 
 SYSTEM_CALL NO_RETURN
-void _exit_group(int status)
+void _exit_process(int status)
 {
     INTERNAL_SYSCALL(exit_group,, 1, status);
     for (;;);
@@ -80,6 +93,27 @@ void execute(const char *filename, char *const argv[], char *const envp[], struc
 #endif
 
     _execve(filename, argv, envp);
+}
+
+FUNCTION
+pid_t create_thread(thread_routine thread_entry, void *arg)
+{
+    void *child_stack;
+    size_t stack_size = THREAD_STACK_SIZE;
+    pid_t tid;
+
+    child_stack = _mmap(NULL, stack_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, 0, 0);
+
+    tid = _clone(
+        CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM,
+        child_stack + stack_size,
+        NULL, NULL, NULL
+    );
+
+    if ( !tid )
+        _exit_thread(thread_entry(arg));
+    else
+        return tid;
 }
 
 #endif
