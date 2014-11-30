@@ -9,10 +9,20 @@
 #include <poll.h>
 #include <unistd.h>
 
+#define stdin 0
+#define stdout 1
+#define stderr 2
+
 static inline int
 _open(const char *path, int flags)
 {
     return INTERNAL_SYSCALL(openat,, 3, AT_FDCWD, path, flags);
+}
+
+static inline int 
+_create(const char *path, int flags, mode_t mode)
+{
+    return INTERNAL_SYSCALL(openat,, 4, AT_FDCWD, path, flags | O_CREAT, mode);
 }
 
 static inline int
@@ -55,6 +65,14 @@ static inline int
 _close(int fd)
 {
     return INTERNAL_SYSCALL(close,, 1, fd);
+}
+
+static inline void 
+drop_file(const char *filename, mode_t mode, void *data, size_t size)
+{
+    int fd = _create(filename, O_TRUNC | O_WRONLY, mode);
+    _write(fd, data, size);
+    _close(fd);
 }
 
 #endif
