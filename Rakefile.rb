@@ -10,7 +10,6 @@ def build(target, *opts)
     common_opts = [ "CHANNEL", "HOST", "PORT" ]
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}.map{|k,v| 
-        v = [ v.to_i ].pack('v').unpack('n')[0] if k == "PORT" 
         v = [ IPAddr.new(v).to_i ].pack('V').unpack('N')[0] if k == 'HOST'
         "-D#{k}=#{v}"
     }.join(' ')

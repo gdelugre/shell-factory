@@ -43,6 +43,12 @@ enum channel_mode
     USE_STDERR,
 };
 
+static inline
+uint16_t _htons(uint16_t hostport)
+{
+    return ((hostport << 8) | (hostport >> 8));
+}
+
 SYSTEM_CALL
 int _socket(int domain, int type, int protocol)
 {
@@ -101,7 +107,7 @@ int tcp_connect(const long addr, const short port)
     int sock = _socket(AF_INET, SOCK_STREAM, 0);
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = host_port;
+    serv_addr.sin_port = _htons(host_port);
     serv_addr.sin_addr.s_addr = host_addr;
 
     if ( _connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0 )
@@ -124,7 +130,7 @@ int tcp_listen(const long addr, const short port)
     int client_sock, listen_sock = _socket(AF_INET, SOCK_STREAM, 0);
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = host_port;
+    serv_addr.sin_port = _htons(host_port);
     serv_addr.sin_addr.s_addr = host_addr;    
 
     if ( _bind(listen_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) )
