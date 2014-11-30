@@ -1,7 +1,7 @@
 #ifndef _STRING_HELPER_H
 #define _STRING_HELPER_H
 
-static inline
+FUNCTION
 void *_memcpy(void *dest, const void *src, size_t n)
 {
     int i;
@@ -10,7 +10,7 @@ void *_memcpy(void *dest, const void *src, size_t n)
     return dest;
 }
 
-static inline
+FUNCTION
 void *_memset(void *s, int c, size_t n)
 {
     int i;
@@ -19,13 +19,13 @@ void *_memset(void *s, int c, size_t n)
     return s;
 }
 
-static inline
+FUNCTION
 void _bzero(void *s, size_t n)
 {
     _memset(s, 0, n);
 }
 
-static inline
+FUNCTION
 size_t _strlen(const char *s)
 {
     size_t len = 0;

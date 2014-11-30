@@ -13,7 +13,7 @@
 #include "io.c"
 
 #ifndef CHANNEL
-#define CHANNEL REUSE_SOCKET
+#define CHANNEL NO_CHANNEL
 #endif
 
 #define UNDEFINED_HOST -1
@@ -35,6 +35,7 @@ struct channel
 
 enum channel_mode
 {
+    NO_CHANNEL,
     REUSE_SOCKET,
     TCP_CONNECT,
     TCP_LISTEN,
@@ -42,37 +43,37 @@ enum channel_mode
     USE_STDERR,
 };
 
-static inline
+SYSTEM_CALL
 int _socket(int domain, int type, int protocol)
 {
     return INTERNAL_SYSCALL(socket,, 3, domain, type, protocol);
 }
 
-static inline
+SYSTEM_CALL
 int _connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
     return INTERNAL_SYSCALL(connect,, 3, sockfd, addr, addrlen);
 }
 
-static inline
+SYSTEM_CALL
 int _listen(int socket, int backlog)
 {
     return INTERNAL_SYSCALL(listen,, 2, socket, backlog);
 }
 
-static inline
+SYSTEM_CALL
 int _bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
     return INTERNAL_SYSCALL(bind,, 3, sockfd, addr, addrlen);
 }
 
-static inline
+SYSTEM_CALL
 int _accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
     return INTERNAL_SYSCALL(accept,, 3, sockfd, addr, addrlen);
 }
 
-static inline
+FUNCTION
 int find_open_socket()
 {
     for ( int fd = 0; fd != 0xFFFF; fd++ )
@@ -87,7 +88,7 @@ int find_open_socket()
     return -1;
 }
 
-static inline
+FUNCTION
 int tcp_connect(const long addr, const short port)
 {
     const unsigned long host_addr = HOST;
@@ -109,7 +110,7 @@ int tcp_connect(const long addr, const short port)
     return sock;
 }
 
-static inline
+FUNCTION
 int tcp_listen(const long addr, const short port)
 {
     const unsigned long host_addr = HOST;
@@ -137,7 +138,7 @@ int tcp_listen(const long addr, const short port)
     return client_sock;
 }
 
-static inline
+FUNCTION
 struct channel get_communication_channel()
 {
     int sock;
@@ -167,12 +168,37 @@ struct channel get_communication_channel()
             chan.tx = 2;
             break;
 
+        case NO_CHANNEL:
         default:
             chan.rx = chan.tx = -1;
             break;
     }
 
     return chan;
+}
+
+FUNCTION
+int channel_recv(struct channel chan, void *buf, size_t count)
+{
+    size_t bytes_left = count;
+    ssize_t nr_read;
+
+    while ( bytes_left > 0 )
+    {
+        nr_read = _read(chan.rx, buf + count - bytes_left, count);
+        if ( nr_read < 0 )
+            return -1;
+
+        bytes_left -= nr_read; 
+    }
+
+    return 0;
+}
+
+FUNCTION
+int channel_send(struct channel chan, void *buf, size_t count)
+{
+    return _write(chan.tx, buf, count);
 }
 
 #endif

