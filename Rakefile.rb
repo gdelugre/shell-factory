@@ -3,14 +3,23 @@ require 'rake/clean'
 
 require 'ipaddr'
 
+class IPAddr
+    def to_define
+        if self.ipv4?
+            "\\{#{self.to_s.gsub(".",",")}\\}"
+        end
+    end
+end
+
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
-CFLAGS = "-std=gnu11 -Os -fPIC -fno-common -fno-toplevel-reorder -fomit-frame-pointer -finline-functions -nodefaultlibs -nostdlib #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
+CFLAGS = "-std=gnu11 -Wall -Os -fPIC -fno-common -fno-toplevel-reorder -fomit-frame-pointer -finline-functions -nodefaultlibs -nostdlib #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
 
 def build(target, *opts)
     common_opts = [ "CHANNEL", "HOST", "PORT" ]
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}.map{|k,v| 
-        v = [ IPAddr.new(v).to_i ].pack('V').unpack('N')[0] if k == 'HOST'
+        #v = [ IPAddr.new(v).to_i ].pack('V').unpack('N')[0] if k == 'HOST'
+        v = IPAddr.new(v).to_define if k == 'HOST'
         "-D#{k}=#{v}"
     }.join(' ')
     cflags = CFLAGS.dup

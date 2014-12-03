@@ -12,19 +12,31 @@
 
 #include "io.c"
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+
+typedef uint8_t ipv4_addr_t[4];
+typedef uint8_t ipv6_addr_t[16];
+
+#define IPV4(a,b,c,d) (ipv4_addr_t) { a,b,c,d }
+#define IPV6(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
+    (ipv6_addr_t) { a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p }
+
 #ifndef CHANNEL
 #define CHANNEL NO_CHANNEL
 #endif
 
-#define UNDEFINED_HOST -1
-#define UNDEFINED_PORT 0
-
 #ifndef HOST
-#define HOST UNDEFINED_HOST
+#define UNDEFINED_HOST 1
+#else
+#define UNDEFINED_HOST 0
 #endif
 
 #ifndef PORT
-#define PORT UNDEFINED_PORT
+#define UNDEFINED_PORT 1
+#else
+#define UNDEFINED_PORT 0
 #endif
 
 struct channel
@@ -42,6 +54,12 @@ enum channel_mode
     USE_STDOUT,
     USE_STDERR,
 };
+
+static inline
+in_addr_t _inet_addr(const ipv4_addr_t addr)
+{
+    return (addr[3] << 24 | addr[2] << 16 | addr[1] << 8 | addr[0]);
+}
 
 static inline
 uint16_t _htons(uint16_t hostport)
@@ -95,20 +113,17 @@ int find_open_socket()
 }
 
 FUNCTION
-int tcp_connect(const long addr, const short port)
+int tcp_connect(const ipv4_addr_t host_addr, const uint16_t host_port)
 {
-    const unsigned long host_addr = HOST;
-    const unsigned short host_port = PORT;
+    _Static_assert(CHANNEL != TCP_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
+    _Static_assert(CHANNEL != TCP_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
-    _Static_assert(CHANNEL != TCP_CONNECT || host_addr != UNDEFINED_HOST, "Must specify an address to connect to.\n");
-    _Static_assert(CHANNEL != TCP_CONNECT || host_port != UNDEFINED_PORT, "Must specify a port to connect to.\n");
+    struct sockaddr_in  serv_addr;
+    int                 sock = _socket(AF_INET, SOCK_STREAM, 0);
 
-    struct sockaddr_in serv_addr;
-    int sock = _socket(AF_INET, SOCK_STREAM, 0);
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = _htons(host_port);
-    serv_addr.sin_addr.s_addr = host_addr;
+    serv_addr.sin_family        = AF_INET;
+    serv_addr.sin_port          = _htons(host_port);
+    serv_addr.sin_addr.s_addr   = _inet_addr(host_addr);
 
     if ( _connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0 )
         return -1;
@@ -117,21 +132,18 @@ int tcp_connect(const long addr, const short port)
 }
 
 FUNCTION
-int tcp_listen(const long addr, const short port)
+int tcp_listen(const ipv4_addr_t host_addr, const uint16_t host_port)
 {
-    const unsigned long host_addr = HOST;
-    const unsigned short host_port = PORT;
+    _Static_assert(CHANNEL != TCP_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
+    _Static_assert(CHANNEL != TCP_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
 
-    _Static_assert(CHANNEL != TCP_LISTEN || host_addr != UNDEFINED_HOST, "Must specify an address to listen to.\n");
-    _Static_assert(CHANNEL != TCP_LISTEN || host_port != UNDEFINED_PORT, "Must specify a port to listen to.\n");
+    struct sockaddr_in  serv_addr, client_addr;
+    socklen_t           client_len = sizeof(client_addr);
+    int                 client_sock, listen_sock = _socket(AF_INET, SOCK_STREAM, 0);
 
-    struct sockaddr_in serv_addr, client_addr;
-    socklen_t client_len = sizeof(client_addr);
-    int client_sock, listen_sock = _socket(AF_INET, SOCK_STREAM, 0);
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = _htons(host_port);
-    serv_addr.sin_addr.s_addr = host_addr;    
+    serv_addr.sin_family        = AF_INET;
+    serv_addr.sin_port          = _htons(host_port);
+    serv_addr.sin_addr.s_addr   = _inet_addr(host_addr);
 
     if ( _bind(listen_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) )
         return -1;
@@ -147,8 +159,9 @@ int tcp_listen(const long addr, const short port)
 FUNCTION
 struct channel get_communication_channel()
 {
-    int sock;
     struct channel chan;
+    const ipv4_addr_t host = HOST;
+    const uint16_t port = PORT;
 
     switch ( CHANNEL )
     {
@@ -157,11 +170,11 @@ struct channel get_communication_channel()
             break;
 
         case TCP_CONNECT:
-            chan.rx = chan.tx = tcp_connect(HOST, PORT);
+            chan.rx = chan.tx = tcp_connect(host, port);
             break;
 
         case TCP_LISTEN:
-            chan.rx = chan.tx = tcp_listen(HOST, PORT);
+            chan.rx = chan.tx = tcp_listen(host, port);
             break;
         
         case USE_STDOUT:

@@ -86,11 +86,9 @@ sighandler_t _signal(int sig, sighandler_t handler)
 FUNCTION
 void execute(const char *filename, char *const argv[], char *const envp[], struct channel chan)
 {
-#if (CHANNEL != NO_CHANNEL) && (CHANNEL != USE_STDOUT)
-    _dup2(chan.rx, stdin)
-    _dup2(chan.tx, stdout)
-    _dup2(chan.tx, stdout)
-#endif
+    _dup2(chan.rx, stdin);
+    _dup2(chan.tx, stdout);
+    _dup2(chan.tx, stdout);
 
     _execve(filename, argv, envp);
 }
