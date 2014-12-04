@@ -20,23 +20,38 @@ class IPAddr
 end
 
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
-CFLAGS = "-std=gnu11 -Wall -Os -fPIC -fno-common -fno-toplevel-reorder -fomit-frame-pointer -finline-functions -nodefaultlibs -nostdlib #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
+CFLAGS = %w{-std=gnu11
+            -Wall
+            -Os
+            -fPIC
+            -fno-common
+            -fno-toplevel-reorder
+            -fomit-frame-pointer
+            -finline-functions
+            -nodefaultlibs -nostdlib
+         } #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
 
 def build(target, *opts)
-    common_opts = [ "CHANNEL", "HOST", "PORT" ]
+    common_opts = [ "CHANNEL", "HOST", "PORT", "NO_BUILTIN" ]
     options = common_opts + opts
-    defines = ENV.select{|e| options.include?(e)}.map{|k,v| 
-        #v = [ IPAddr.new(v).to_i ].pack('V').unpack('N')[0] if k == 'HOST'
-        v = IPAddr.new(v).to_define if k == 'HOST'
-        "-D#{k}=#{v}"
-    }.join(' ')
+    defines = ENV.select{|e| options.include?(e)}
     cflags = CFLAGS.dup
 
-    if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "gcc -S #{cflags} shellcodes/#{target}.c -o bins/#{target}.S #{defines}"
+    if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1
+        cflags << "-fno-builtin"
     end
 
-    sh "gcc #{cflags} shellcodes/#{target}.c -o bins/#{target}.elf #{defines}"
+    if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
+        sh "gcc -S #{cflags.join(" ")} shellcodes/#{target}.c -o bins/#{target}.S #{defines}"
+    end
+
+    cflags += INCLUDE_DIRS.map{|d| "-I#{d}"}
+    defines = defines.map{|k,v|
+        v = IPAddr.new(v).to_define if k == 'HOST'
+        "-D#{k}=#{v}"
+    }
+
+    sh "gcc #{cflags.join(' ')} shellcodes/#{target}.c -o bins/#{target}.elf #{defines.join(' ')}"
     sh "objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf bins/#{target}.bin" 
 end
 

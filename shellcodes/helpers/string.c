@@ -6,19 +6,29 @@
 FUNCTION
 void *_memcpy(void *dest, const void *src, size_t n)
 {
-    int i;
-    for ( i = 0; i < n; i++ )
-        ((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
-    return dest;
+    if ( NO_BUILTIN )
+    {
+        int i;
+        for ( i = 0; i < n; i++ )
+            ((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
+        return dest;
+    }
+    else
+        return BUILTIN(memcpy)(dest, src, n);
 }
 
 FUNCTION
 void *_memset(void *s, int c, size_t n)
 {
-    int i;
-    for ( i = 0; i < n; i++ )
-        ((unsigned char *)s)[i] = c;
-    return s;
+    if ( NO_BUILTIN )
+    {
+        int i;
+        for ( i = 0; i < n; i++ )
+            ((unsigned char *)s)[i] = c;
+        return s;
+    }
+    else
+        return BUILTIN(memset)(s, c, n);
 }
 
 FUNCTION

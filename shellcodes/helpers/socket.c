@@ -34,12 +34,14 @@ typedef uint16_t ip_port_t;
 #endif
 
 #ifndef HOST
+#define HOST {0}
 #define UNDEFINED_HOST 1
 #else
 #define UNDEFINED_HOST 0
 #endif
 
 #ifndef PORT
+#define PORT 0
 #define UNDEFINED_PORT 1
 #else
 #define UNDEFINED_PORT 0

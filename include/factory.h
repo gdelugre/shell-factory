@@ -11,6 +11,11 @@
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define FUNCTION static inline __attribute__((section(".funcs")))
 #define SYSTEM_CALL static inline
+#define BUILTIN(func) __builtin_ ## func
+
+#ifndef NO_BUILTIN
+#define NO_BUILTIN 0
+#endif
 
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
