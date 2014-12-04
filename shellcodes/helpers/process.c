@@ -8,6 +8,7 @@
 #include <linux/sched.h>
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
+#include <sys/prctl.h>
 
 #include "socket.c"
 #include "string.c"
@@ -35,6 +36,12 @@ SYSTEM_CALL
 long _clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
 {
     return INTERNAL_SYSCALL(clone,, 5, flags, child_stack, ptid, tls, ctid);
+}
+
+SYSTEM_CALL
+int _prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg4, unsigned long arg5)
+{
+    return INTERNAL_SYSCALL(prctl,, 5, option, arg2, arg3, arg4, arg5);
 }
 
 SYSTEM_CALL
@@ -81,6 +88,12 @@ sighandler_t _signal(int sig, sighandler_t handler)
     _sigaction(sig, &act, &old_act);
 
     return (sighandler_t) old_act.sa_restorer;
+}
+
+FUNCTION
+void set_current_thread_name(const char *comm)
+{
+    _prctl(PR_SET_NAME, (unsigned long) comm, 0, 0, 0);
 }
 
 FUNCTION
