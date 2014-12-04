@@ -29,7 +29,7 @@ CFLAGS = %w{-std=gnu11
             -fomit-frame-pointer
             -finline-functions
             -nodefaultlibs -nostdlib
-         } #{INCLUDE_DIRS.map{|d| "-I#{d}"}.join(" ")}"
+         }
 
 def build(target, *opts)
     common_opts = [ "CHANNEL", "HOST", "PORT", "NO_BUILTIN" ]
