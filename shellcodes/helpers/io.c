@@ -114,6 +114,7 @@ int _close(int fd)
     return INTERNAL_SYSCALL(close,, 1, fd);
 }
 
+FUNCTION
 int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t *dsize)
 {
     int                 ret;
