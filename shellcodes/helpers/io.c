@@ -8,10 +8,26 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <unistd.h>
+#include <errno.h>
+
+#include "memory.c"
 
 #define stdin 0
 #define stdout 1
 #define stderr 2
+
+struct linux_dirent {
+    unsigned long   d_ino;
+    unsigned long   d_off;
+    unsigned short  d_reclen;
+    char            d_name[1];
+};
+
+#define foreach_dirent(dirents, dirent, off, dsize) \
+    for (off = 0, dirent = dirents; \
+            dirent && off < dsize; \
+            off += dirent->d_reclen, dirent = ((void *) dirent) + dirent->d_reclen)
+
 
 SYSTEM_CALL
 int _open(const char *path, int flags)
@@ -50,6 +66,12 @@ ssize_t _write(int fd, const void *buf, size_t count)
 }
 
 SYSTEM_CALL
+int _fsync(int fildes)
+{
+    return INTERNAL_SYSCALL(fsync,, 1, fildes);
+}
+
+SYSTEM_CALL
 int _poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {
     return INTERNAL_SYSCALL(poll,, 3, fds, nfds, timeout);
@@ -62,9 +84,53 @@ int _select(int nfds, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, s
 }
 
 SYSTEM_CALL
+int _getdents(unsigned int fd, struct linux_dirent *dirp, unsigned int count)
+{
+    return INTERNAL_SYSCALL(getdents,, 3, fd, dirp, count);
+}
+
+SYSTEM_CALL
 int _close(int fd)
 {
     return INTERNAL_SYSCALL(close,, 1, fd);
+}
+
+int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t *dsize)
+{
+    int                 ret;
+    int                 dirfd = _open(pathname, O_DIRECTORY | O_RDONLY);
+    size_t              buffer_sz = PAGE_SIZE;
+    size_t              read_size = 0;
+    void                *buffer = _malloc(buffer_sz);
+    struct linux_dirent *dirents = buffer;
+
+    if ( dirfd < 0 )
+        return dirfd;
+
+    for (;;)
+    {
+        ret = _getdents(dirfd, dirents, buffer_sz);
+        if ( ret == 0 )
+            break;
+     
+        if ( ret < 0 )
+        {
+            _free(buffer);
+            _close(dirfd);
+            return ret;
+        }
+
+        read_size += ret;
+        buffer_sz *= 2;
+        buffer = _realloc(buffer, buffer_sz);
+        dirents = buffer + read_size;
+    }
+
+    *p_dirents = (struct linux_dirent *) buffer;
+    *dsize = read_size;
+
+    _close(dirfd);
+    return 0;
 }
 
 FUNCTION
