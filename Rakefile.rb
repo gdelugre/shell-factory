@@ -19,6 +19,7 @@ class IPAddr
     end
 end
 
+OUTPUT_DIR = "bins"
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
 CFLAGS = %w{-std=gnu11
             -Wall
@@ -31,18 +32,23 @@ CFLAGS = %w{-std=gnu11
             -nodefaultlibs -nostdlib
          }
 
-def build(target, *opts)
+def compile(target, output_dir, *opts)
     common_opts = [ "CHANNEL", "HOST", "PORT", "NO_BUILTIN" ]
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
+    options = common_opts + opts
     cflags = CFLAGS.dup
-
+    
     if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1
         cflags << "-fno-builtin"
     end
 
     if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "gcc -S #{cflags.join(" ")} shellcodes/#{target}.c -o bins/#{target}.S #{defines}"
+        sh "gcc -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines}"
+    end
+
+    if ENV['OUTPUT_LIB'] and ENV['OUTPUT_LIB'].to_i == 1
+        cflags << '-shared'
     end
 
     cflags += INCLUDE_DIRS.map{|d| "-I#{d}"}
@@ -51,8 +57,18 @@ def build(target, *opts)
         "-D#{k}=#{v}"
     }
 
-    sh "gcc #{cflags.join(' ')} shellcodes/#{target}.c -o bins/#{target}.elf #{defines.join(' ')}"
-    sh "objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf bins/#{target}.bin" 
+    sh "gcc #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+end
+
+def generate_shellcode(target, output_dir)
+    sh "objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf #{output_dir}/#{target}.bin" 
+end
+
+def build(target, *opts)
+    output_dir = OUTPUT_DIR
+
+    compile(target, output_dir, *opts)
+    generate_shellcode(target, output_dir)
 end
 
 task :readflag do
