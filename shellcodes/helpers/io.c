@@ -28,6 +28,7 @@ struct linux_dirent {
             dirent && off < dsize; \
             off += dirent->d_reclen, dirent = ((void *) dirent) + dirent->d_reclen)
 
+#define dirent_name(dirent) dirent->d_name
 
 SYSTEM_CALL
 int _open(const char *path, int flags)
@@ -87,6 +88,24 @@ SYSTEM_CALL
 int _getdents(unsigned int fd, struct linux_dirent *dirp, unsigned int count)
 {
     return INTERNAL_SYSCALL(getdents,, 3, fd, dirp, count);
+}
+
+SYSTEM_CALL
+ssize_t _readlink(const char *pathname, char *buf, size_t bufsiz)
+{
+    return INTERNAL_SYSCALL(readlink,, 3, pathname, buf, bufsiz);
+}
+
+SYSTEM_CALL
+int _fstat(int fd, struct stat *buf)
+{
+    return INTERNAL_SYSCALL(fstat,, 2, fd, buf);
+}
+
+SYSTEM_CALL
+int _stat(int fd, struct stat *buf)
+{
+    return INTERNAL_SYSCALL(stat,, 2, fd, buf);
 }
 
 SYSTEM_CALL

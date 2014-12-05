@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <linux/sched.h>
+#include <linux/limits.h>
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 #include <sys/prctl.h>
@@ -19,6 +20,7 @@ typedef void (* sighandler_t)(int);
 typedef int (* thread_routine)(void *);
 
 #define THREAD_STACK_SIZE 0x10000
+#define COMM_MAX 16
 
 SYSTEM_CALL
 pid_t _fork(void)
@@ -94,6 +96,76 @@ FUNCTION
 void set_current_thread_name(const char *comm)
 {
     _prctl(PR_SET_NAME, (unsigned long) comm, 0, 0, 0);
+}
+
+FUNCTION
+pid_t find_process_by_name(const char *proc_name)
+{
+    size_t dsize, off, n;
+    struct linux_dirent *dirents, *current;
+    pid_t pid;
+    char comm_path[PATH_MAX]; 
+    char comm[COMM_MAX + 1];
+    int fd;
+
+    read_directory("/proc", &dirents, &dsize);
+
+    foreach_dirent(dirents, current, off, dsize)
+    {
+        pid = _atoi(dirent_name(current));
+        if ( pid == 0 )
+            continue;
+
+        _sprintf(comm_path, "/proc/%s/comm", dirent_name(current));
+        fd = _open(comm_path, O_RDONLY); 
+        n = _read(fd, comm, sizeof(comm));
+        comm[n - 1] = '\0';
+        _close(fd);
+
+        if ( _strcmp(proc_name, comm) == 0 )
+        {
+            _free(dirents);
+            return pid;
+        }
+    }
+
+    _free(dirents);
+    return 0;
+}
+
+FUNCTION
+pid_t find_process_by_path(const char *exe_path)
+{
+    size_t dsize, off;
+    ssize_t n;
+    struct linux_dirent *dirents, *current;
+    pid_t pid;
+    char link_path[PATH_MAX]; 
+    char exe[PATH_MAX + 1];
+
+    read_directory("/proc", &dirents, &dsize);
+
+    foreach_dirent(dirents, current, off, dsize)
+    {
+        pid = _atoi(dirent_name(current));
+        if ( pid == 0 )
+            continue;
+
+        _sprintf(link_path, "/proc/%s/exe", dirent_name(current));
+        n = _readlink(link_path, exe, sizeof(exe));
+        if ( n < 0 )
+            continue;
+
+        exe[n] = '\0';
+        if ( _strcmp(exe_path, exe) == 0 )
+        {
+            _free(dirents);
+            return pid;
+        }
+    }
+
+    _free(dirents);
+    return 0;
 }
 
 FUNCTION
