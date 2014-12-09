@@ -2,6 +2,8 @@
 #define _IO_HELPER_H
 
 #include <factory.h>
+
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
@@ -127,7 +129,7 @@ int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t
     if ( dirfd < 0 )
         return dirfd;
 
-    for (;;)
+    while ( true )
     {
         ret = _getdents(dirfd, dirents, buffer_sz);
         if ( ret == 0 )

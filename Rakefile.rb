@@ -33,7 +33,7 @@ CFLAGS = %w{-std=gnu11
          }
 
 def compile(target, output_dir, *opts)
-    common_opts = [ "CHANNEL", "HOST", "PORT", "NO_BUILTIN" ]
+    common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts

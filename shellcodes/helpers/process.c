@@ -2,6 +2,8 @@
 #define _PROCESS_HELPER_H
 
 #include <factory.h>
+
+#include <stdbool.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -68,14 +70,14 @@ SYSTEM_CALL NO_RETURN
 void _exit_thread(int status)
 {
     INTERNAL_SYSCALL(exit,, 1, status);
-    for(;;);
+    while ( true );
 }
 
 SYSTEM_CALL NO_RETURN
 void _exit_process(int status)
 {
     INTERNAL_SYSCALL(exit_group,, 1, status);
-    for (;;);
+    while ( true );
 }
 
 FUNCTION

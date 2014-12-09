@@ -3,6 +3,7 @@
 
 #include <factory.h>
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -12,6 +13,7 @@
 
 #include "string.c"
 #include "io.c"
+#include "process.c"
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -45,6 +47,10 @@ typedef uint16_t ip_port_t;
 #define UNDEFINED_PORT 1
 #else
 #define UNDEFINED_PORT 0
+#endif
+
+#ifndef FORK_ON_ACCEPT
+#define FORK_ON_ACCEPT 0
 #endif
 
 struct channel
@@ -91,6 +97,18 @@ SYSTEM_CALL
 int _socket(int domain, int type, int protocol)
 {
     return INTERNAL_SYSCALL(socket,, 3, domain, type, protocol);
+}
+
+SYSTEM_CALL
+int _getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen)
+{
+    return INTERNAL_SYSCALL(getsockopt,, 5, sockfd, level, optname, optval, optlen);
+}
+
+SYSTEM_CALL
+int _setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
+{
+    return INTERNAL_SYSCALL(setsockopt,, 5, sockfd, level, optname, optval, optlen);
 }
 
 SYSTEM_CALL
@@ -201,49 +219,72 @@ int sctp6_connect(const ip_addr_t host_addr, const ip_port_t host_port)
     return sock6_stream_connect(IPPROTO_SCTP, host_addr, host_port);
 }
 
+SYSTEM_CALL pid_t _fork(void);
+
+FUNCTION
+int sock_stream_bind_server(int listen_sock,
+                            struct sockaddr *serv_addr,
+                            struct sockaddr *client_addr,
+                            socklen_t addr_len)
+{
+    socklen_t   client_len = addr_len;
+    int         client_sock;
+
+    if ( _bind(listen_sock, serv_addr, addr_len) )
+        return -1;
+
+    _listen(listen_sock, 1);
+
+    if ( FORK_ON_ACCEPT )
+    {
+        while ( true ) 
+        {
+            client_sock = _accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
+            if ( _fork() == 0 )
+                break;
+            else
+                _close(client_sock);
+        }
+    }
+    else
+        client_sock = _accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
+
+    _close(listen_sock);
+    return client_sock;
+}
+
 FUNCTION
 int sock_stream_listen(int protocol, const ip_addr_t host_addr, const ip_port_t host_port)
 {
     struct sockaddr_in  serv_addr, client_addr;
-    socklen_t           client_len = sizeof(client_addr);
-    int                 client_sock, listen_sock = _socket(AF_INET, SOCK_STREAM, protocol);
+    int                 listen_sock = _socket(AF_INET, SOCK_STREAM, protocol);
 
     serv_addr.sin_family        = AF_INET;
     serv_addr.sin_port          = _htons(host_port);
     serv_addr.sin_addr.s_addr   = _inet_addr(host_addr);
 
-    if ( _bind(listen_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) )
-        return -1;
-
-    _listen(listen_sock, 1);
-
-    client_sock = _accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
-    _close(listen_sock);
-
-    return client_sock;
+    return sock_stream_bind_server(listen_sock,
+            (struct sockaddr *) &serv_addr,
+            (struct sockaddr *) &client_addr,
+            sizeof(serv_addr));
 }
+
 
 FUNCTION
 int sock6_stream_listen(int protocol, const ip_addr_t host_addr, const ip_port_t host_port)
 {
     struct sockaddr_in6 serv_addr, client_addr;
-    socklen_t           client_len = sizeof(client_addr);
-    int                 client_sock, listen_sock = _socket(AF_INET6, SOCK_STREAM, protocol);
+    int                 listen_sock = _socket(AF_INET6, SOCK_STREAM, protocol);
 
     serv_addr.sin6_flowinfo     = 0;
     serv_addr.sin6_family       = AF_INET6;
     serv_addr.sin6_port         = _htons(host_port);
     _inet6_addr(host_addr, &serv_addr);
 
-    if ( _bind(listen_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) )
-        return -1;
-
-    _listen(listen_sock, 1);
-
-    client_sock = _accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
-    _close(listen_sock);
-
-    return client_sock;
+    return sock_stream_bind_server(listen_sock,
+            (struct sockaddr *) &serv_addr,
+            (struct sockaddr *) &client_addr,
+            sizeof(serv_addr));
 }
 
 FUNCTION
