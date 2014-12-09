@@ -36,21 +36,25 @@ typedef uint16_t ip_port_t;
 #endif
 
 #ifndef HOST
-#define HOST {0}
-#define UNDEFINED_HOST 1
+    #define HOST            {0}
+    #define UNDEFINED_HOST  1
 #else
-#define UNDEFINED_HOST 0
+    #define UNDEFINED_HOST  0
 #endif
 
 #ifndef PORT
-#define PORT 0
-#define UNDEFINED_PORT 1
+    #define PORT            0
+    #define UNDEFINED_PORT  1
 #else
-#define UNDEFINED_PORT 0
+    #define UNDEFINED_PORT  0
 #endif
 
 #ifndef FORK_ON_ACCEPT
-#define FORK_ON_ACCEPT 0
+    #define FORK_ON_ACCEPT  0
+#endif
+
+#ifndef REUSE_ADDR
+    #define REUSE_ADDR      0
 #endif
 
 struct channel
@@ -229,6 +233,12 @@ int sock_stream_bind_server(int listen_sock,
 {
     socklen_t   client_len = addr_len;
     int         client_sock;
+
+    if ( REUSE_ADDR )
+    {
+        int option = 1;
+        _setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+    }
 
     if ( _bind(listen_sock, serv_addr, addr_len) )
         return -1;
