@@ -11,10 +11,22 @@ void * get_sp(void)
     return sp;
 }
 
-static inline 
+static inline
 void set_sp(void *sp)
 {
-  asm volatile("movl %0, %%esp\n" :: "r" (sp));
+    asm volatile("movl %0, %%esp\n" :: "r" (sp));
+}
+
+static inline
+void add_sp(size_t offset)
+{
+    asm volatile("addl %0, %%esp\n" :: "Z" (offset));
+}
+
+static inline
+void sub_sp(size_t offset)
+{
+    asm volatile("subl %0, %%esp\n" :: "Z" (offset));
 }
 
 static inline

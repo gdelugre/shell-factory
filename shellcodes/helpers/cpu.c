@@ -7,13 +7,20 @@
 #include "arch/arm.c"
 #elif defined(__amd64__)
 #include "arch/amd64.c"
-#elif defined(__386__)
+#elif defined(__i386__)
 #include "arch/i386.c"
 #elif defined(__mips__) && (_MIPS_SZPTR == 32)
 #include "arch/mips.c"
 #endif
 
-#define STACK_SHIFT(delta) set_sp(get_sp() + delta)
+#define STACK_SHIFT(delta) add_sp(delta)
+
+FUNCTION
+void *alloca(size_t size)
+{
+    sub_sp(size);
+    return get_sp();
+}
 
 FUNCTION
 uint16_t cpu_to_be16(uint16_t v)

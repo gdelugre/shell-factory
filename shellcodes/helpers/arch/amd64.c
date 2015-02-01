@@ -12,17 +12,29 @@ void *get_sp(void)
 }
 
 static inline
+void set_sp(void *sp)
+{
+    asm volatile("movq %0, %%rsp\n" :: "r" (sp));
+}
+
+static inline
+void add_sp(size_t offset)
+{
+    asm volatile("addq %0, %%rsp\n" :: "Z" (offset));
+}
+
+static inline
+void sub_sp(size_t offset)
+{
+    asm volatile("subq %0, %%rsp\n" :: "Z" (offset));
+}
+
+static inline
 void *get_ip(void)
 {
     void *ip;
     asm volatile("lea 0x0(%%rip), %0\n" : "=r" (ip));
     return ip;
-}
-
-static inline 
-void set_sp(void *sp)
-{
-    asm volatile("movq %0, %%rsp\n" :: "r" (sp));
 }
 
 static inline
