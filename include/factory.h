@@ -10,7 +10,7 @@
 #define NO_RETURN __attribute__((noreturn))
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define FUNCTION static inline __attribute__((section(".funcs")))
-#define SYSTEM_CALL static inline
+#define SYSTEM_CALL static inline __attribute__((section(".funcs")))
 #define BUILTIN(func) __builtin_ ## func
 
 #ifndef NO_BUILTIN
@@ -26,8 +26,16 @@
 #include <sysdeps/unix/sysv/linux/x86_64/sysdep.h>
 #elif defined(__arm__)
 #include <sysdeps/unix/sysv/linux/arm/sysdep.h>
+#elif defined(__mips__) && (_MIPS_SZPTR == 32)
+#include <sysdeps/unix/sysv/linux/mips/mips32/sysdep.h>
 #else
 #error "Architecture not implemented."
 #endif
+
+#define DO_SYSCALL(name, num_args, ...) ({ \
+  int err_val; \
+  (void) err_val; \
+  INTERNAL_SYSCALL(name, err_val, num_args, __VA_ARGS__); \
+  });
 
 #endif /* _SYSTEM_H */

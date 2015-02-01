@@ -100,43 +100,43 @@ uint16_t _htons(ip_port_t hostport)
 SYSTEM_CALL
 int _socket(int domain, int type, int protocol)
 {
-    return INTERNAL_SYSCALL(socket,, 3, domain, type, protocol);
+    return DO_SYSCALL(socket, 3, domain, type, protocol);
 }
 
 SYSTEM_CALL
 int _getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen)
 {
-    return INTERNAL_SYSCALL(getsockopt,, 5, sockfd, level, optname, optval, optlen);
+    return DO_SYSCALL(getsockopt, 5, sockfd, level, optname, optval, optlen);
 }
 
 SYSTEM_CALL
 int _setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
 {
-    return INTERNAL_SYSCALL(setsockopt,, 5, sockfd, level, optname, optval, optlen);
+    return DO_SYSCALL(setsockopt, 5, sockfd, level, optname, optval, optlen);
 }
 
 SYSTEM_CALL
 int _connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
-    return INTERNAL_SYSCALL(connect,, 3, sockfd, addr, addrlen);
+    return DO_SYSCALL(connect, 3, sockfd, addr, addrlen);
 }
 
 SYSTEM_CALL
 int _listen(int socket, int backlog)
 {
-    return INTERNAL_SYSCALL(listen,, 2, socket, backlog);
+    return DO_SYSCALL(listen, 2, socket, backlog);
 }
 
 SYSTEM_CALL
 int _bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
-    return INTERNAL_SYSCALL(bind,, 3, sockfd, addr, addrlen);
+    return DO_SYSCALL(bind, 3, sockfd, addr, addrlen);
 }
 
 SYSTEM_CALL
 int _accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-    return INTERNAL_SYSCALL(accept,, 3, sockfd, addr, addrlen);
+    return DO_SYSCALL(accept, 3, sockfd, addr, addrlen);
 }
 
 FUNCTION
@@ -146,7 +146,7 @@ int find_open_socket()
     {
         struct stat sb;
 
-        INTERNAL_SYSCALL(fstat,, 2, fd, &sb);
+        DO_SYSCALL(fstat, 2, fd, &sb);
         if ( S_ISSOCK(sb.st_mode) )
             return fd;
     }

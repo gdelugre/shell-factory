@@ -24,13 +24,20 @@ INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
 CFLAGS = %w{-std=gnu11
             -Wall
             -Os
-            -fPIC
             -fno-common
             -fno-toplevel-reorder
             -fomit-frame-pointer
             -finline-functions
             -nodefaultlibs -nostdlib
+            -Wl,-e_start
          }
+
+# Architecture-dependent flags.
+ARCH_CFLAGS =
+{
+    /mips/ => %w{-mshared -mno-abicalls},
+    /.*/ => %w{-fPIC}
+}
 
 def compile(target, toolchain, output_dir, *opts)
     common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR}
@@ -38,6 +45,13 @@ def compile(target, toolchain, output_dir, *opts)
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
     cflags = CFLAGS.dup
+
+    ARCH_CFLAGS.each_pair { |arch, flags|
+        if toolchain =~ arch
+            cflags += flags
+            break
+        end
+    }
     
     if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1
         cflags << "-fno-builtin"

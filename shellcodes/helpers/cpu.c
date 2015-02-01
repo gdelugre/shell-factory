@@ -9,6 +9,8 @@
 #include "arch/amd64.c"
 #elif defined(__386__)
 #include "arch/i386.c"
+#elif defined(__mips__) && (_MIPS_SZPTR == 32)
+#include "arch/mips.c"
 #endif
 
 #define STACK_SHIFT(delta) set_sp(get_sp() + delta)

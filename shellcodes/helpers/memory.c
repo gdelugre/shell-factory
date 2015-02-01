@@ -21,25 +21,25 @@ typedef struct {
 SYSTEM_CALL
 int _mprotect(void *addr, size_t len, int prot)
 {
-    return INTERNAL_SYSCALL(mprotect,, 3, addr, len, prot);
+    return DO_SYSCALL(mprotect, 3, addr, len, prot);
 }
 
 SYSTEM_CALL
 void *_mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
 {
-    return (void *) INTERNAL_SYSCALL(mmap,, 6, addr, len, prot, flags, fildes, off);
+    return (void *) DO_SYSCALL(mmap, 6, addr, len, prot, flags, fildes, off);
 }
 
 SYSTEM_CALL
 void *_mremap(void *old_address, size_t old_size, size_t new_size, int flags)
 {
-    return (void *) INTERNAL_SYSCALL(mremap,, 4, old_address, old_size, new_size, flags);
+    return (void *) DO_SYSCALL(mremap, 4, old_address, old_size, new_size, flags);
 }
 
 SYSTEM_CALL
 int _munmap(void *addr, size_t len)
 {
-    return INTERNAL_SYSCALL(munmap,, 2, addr, len);
+    return DO_SYSCALL(munmap, 2, addr, len);
 }
 
 FUNCTION 

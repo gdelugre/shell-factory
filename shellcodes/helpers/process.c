@@ -27,56 +27,56 @@ typedef int (* thread_routine)(void *);
 SYSTEM_CALL
 pid_t _fork(void)
 {
-    return INTERNAL_SYSCALL(fork,, 0);
+    return DO_SYSCALL(fork, 0);
 }
 
 SYSTEM_CALL
 int _execve(const char *filename, char *const argv[], char *const envp[])
 {
-    return INTERNAL_SYSCALL(execve,, 3, filename, argv, envp);
+    return DO_SYSCALL(execve, 3, filename, argv, envp);
 }
 
 SYSTEM_CALL
 long _clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
 {
-    return INTERNAL_SYSCALL(clone,, 5, flags, child_stack, ptid, tls, ctid);
+    return DO_SYSCALL(clone, 5, flags, child_stack, ptid, tls, ctid);
 }
 
 SYSTEM_CALL
 int _prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg4, unsigned long arg5)
 {
-    return INTERNAL_SYSCALL(prctl,, 5, option, arg2, arg3, arg4, arg5);
+    return DO_SYSCALL(prctl, 5, option, arg2, arg3, arg4, arg5);
 }
 
 SYSTEM_CALL
 unsigned int _alarm(unsigned int seconds)
 {
-    return INTERNAL_SYSCALL(alarm,, 1, seconds);
+    return DO_SYSCALL(alarm, 1, seconds);
 }
 
 SYSTEM_CALL
 int _sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
 {
-    return INTERNAL_SYSCALL(rt_sigaction,, 4, signum, act, oldact, 8);
+    return DO_SYSCALL(rt_sigaction, 4, signum, act, oldact, 8);
 }
 
 SYSTEM_CALL
 int _kill(pid_t pid, int sig)
 {
-    return INTERNAL_SYSCALL(kill,, 2, pid, sig);
+    return DO_SYSCALL(kill, 2, pid, sig);
 }
 
 SYSTEM_CALL NO_RETURN
 void _exit_thread(int status)
 {
-    INTERNAL_SYSCALL(exit,, 1, status);
+    DO_SYSCALL(exit, 1, status);
     while ( true );
 }
 
 SYSTEM_CALL NO_RETURN
 void _exit_process(int status)
 {
-    INTERNAL_SYSCALL(exit_group,, 1, status);
+    DO_SYSCALL(exit_group, 1, status);
     while ( true );
 }
 
