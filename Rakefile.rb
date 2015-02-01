@@ -52,6 +52,10 @@ def compile(target, toolchain, output_dir, *opts)
             break
         end
     }
+
+    if ENV['CFLAGS']
+        cflags += ENV['CFLAGS'].split
+    end
     
     if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1
         cflags << "-fno-builtin"
