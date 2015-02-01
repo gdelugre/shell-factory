@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#include "cpu.c"
 #include "string.c"
 #include "io.c"
 #include "process.c"
@@ -19,7 +20,11 @@
 #define STR(x) STR_HELPER(x)
 
 
-typedef uint8_t ipv4_addr_t[4];
+typedef union {
+    uint8_t bytes[4];
+    uint32_t value;
+} ipv4_addr_t;
+
 typedef uint8_t ipv6_addr_t[16];
 typedef union {
     ipv4_addr_t ip4;
@@ -82,7 +87,7 @@ enum channel_mode
 static inline
 in_addr_t _inet_addr(const ip_addr_t addr)
 {
-    return (addr.ip4[3] << 24 | addr.ip4[2] << 16 | addr.ip4[1] << 8 | addr.ip4[0]);
+    return addr.ip4.value;
 }
 
 static inline
@@ -94,7 +99,7 @@ void _inet6_addr(const ip_addr_t addr, struct sockaddr_in6 *saddr)
 static inline
 uint16_t _htons(ip_port_t hostport)
 {
-    return ((hostport << 8) | (hostport >> 8));
+    return cpu_to_be16(hostport);
 }
 
 SYSTEM_CALL
