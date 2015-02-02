@@ -27,7 +27,11 @@ int _mprotect(void *addr, size_t len, int prot)
 SYSTEM_CALL
 void *_mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
 {
+#if (defined(__arm__) && defined(__ARM_EABI__))
+    return arch_sys_mmap(addr, len, prot, flags, fildes, off);
+#else
     return (void *) DO_SYSCALL(mmap, 6, addr, len, prot, flags, fildes, off);
+#endif
 }
 
 SYSTEM_CALL

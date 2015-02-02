@@ -51,7 +51,11 @@ int _prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg
 SYSTEM_CALL
 unsigned int _alarm(unsigned int seconds)
 {
+#if defined(__arm__) && defined(__ARM_EABI__)
+    return arch_sys_alarm(seconds);
+#else
     return DO_SYSCALL(alarm, 1, seconds);
+#endif
 }
 
 SYSTEM_CALL
