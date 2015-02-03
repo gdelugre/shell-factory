@@ -11,14 +11,14 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "cpu.c"
-#include "string.c"
-#include "io.c"
-#include "process.c"
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
+/* Syscalls defined in this file. */
+SYSTEM_CALL int _socket(int, int, int);
+SYSTEM_CALL int _getsockopt(int, int, int , void *, socklen_t *);
+SYSTEM_CALL int _setsockopt(int, int, int, const void *, socklen_t);
+SYSTEM_CALL int _connect(int, const struct sockaddr *, socklen_t);
+SYSTEM_CALL int _listen(int, int);
+SYSTEM_CALL int _bind(int, const struct sockaddr *, socklen_t);
+SYSTEM_CALL int _accept(int, struct sockaddr *, socklen_t *);
 
 typedef union {
     uint8_t bytes[4];
@@ -83,6 +83,11 @@ enum channel_mode
     USE_STDOUT,
     USE_STDERR,
 };
+
+#include "cpu.c"
+#include "string.c"
+#include "io.c"
+#include "process.c"
 
 static inline
 in_addr_t _inet_addr(const ip_addr_t addr)
@@ -227,8 +232,6 @@ int sctp6_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 
     return sock6_stream_connect(IPPROTO_SCTP, host_addr, host_port);
 }
-
-SYSTEM_CALL pid_t _fork(void);
 
 FUNCTION
 int sock_stream_bind_server(int listen_sock,

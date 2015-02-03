@@ -12,8 +12,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "memory.c"
-
 #define stdin 0
 #define stdout 1
 #define stderr 2
@@ -31,6 +29,24 @@ struct linux_dirent {
             off += dirent->d_reclen, dirent = ((void *) dirent) + dirent->d_reclen)
 
 #define dirent_name(dirent) dirent->d_name
+
+/* System calls defined in this file. */
+SYSTEM_CALL int     _open(const char *, int);
+SYSTEM_CALL int     _create(const char *, int, mode_t);
+SYSTEM_CALL int     _dup2(int, int);
+SYSTEM_CALL off_t   _lseek(int, off_t, int);
+SYSTEM_CALL ssize_t _read(int, void *, size_t);
+SYSTEM_CALL ssize_t _write(int, const void *, size_t);
+SYSTEM_CALL int     _fsync(int);
+SYSTEM_CALL int     _poll(struct pollfd *, nfds_t, int);
+SYSTEM_CALL int     _select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+SYSTEM_CALL int     _getdents(unsigned int, struct linux_dirent *, unsigned int);
+SYSTEM_CALL ssize_t _readlink(const char *, char *, size_t);
+SYSTEM_CALL int     _fstat(int, struct stat *);
+SYSTEM_CALL int     _stat(int, struct stat *);
+SYSTEM_CALL int     _close(int);
+
+#include "memory.c"
 
 SYSTEM_CALL
 int _open(const char *path, int flags)

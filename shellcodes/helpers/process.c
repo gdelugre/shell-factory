@@ -13,6 +13,16 @@
 #include <asm/ptrace.h>
 #include <sys/prctl.h>
 
+/* System calls defined in this file. */
+SYSTEM_CALL pid_t           _fork(void);
+SYSTEM_CALL int             _execve(const char *, char *const[], char *const[]);
+SYSTEM_CALL long            _clone(unsigned long, void *, void *, void *, void *);
+SYSTEM_CALL int             _prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
+SYSTEM_CALL unsigned int    _alarm(unsigned int);
+SYSTEM_CALL int             _kill(pid_t, int);
+SYSTEM_CALL NO_RETURN void  _exit_thread(int);
+SYSTEM_CALL NO_RETURN void  _exit_process(int);
+
 #include "socket.c"
 #include "string.c"
 #include "memory.c"

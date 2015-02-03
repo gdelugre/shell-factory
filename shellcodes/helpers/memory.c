@@ -6,6 +6,12 @@
 #include <factory.h>
 #include <sys/mman.h>
 
+/* System calls defined in this file. */
+SYSTEM_CALL int     _mprotect(void *, size_t, int);
+SYSTEM_CALL void *  _mmap(void *, size_t, int, int, int, off_t);
+SYSTEM_CALL void *  _mremap(void *, size_t, size_t, int);
+SYSTEM_CALL int     _munmap(void *, size_t);
+
 #include "cpu.c"
 #include "string.c"
 
