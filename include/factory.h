@@ -45,6 +45,8 @@ void __libc_do_syscall(void)
 }
 #endif
 
+#define SYSCALL_EXISTS(name) defined(__NR_## name)
+
 #define DO_SYSCALL(name, num_args, ...) ({ \
   int err_val; \
   (void) err_val; \

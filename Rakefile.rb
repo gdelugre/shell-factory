@@ -54,7 +54,7 @@ def compile(target, toolchain, output_dir, *opts)
     }
 
     if ENV['CFLAGS']
-        cflags += ENV['CFLAGS'].split
+        cflags += [ ENV['CFLAGS'] ]
     end
     
     if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1

@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <linux/net.h>
 
 /* Syscalls defined in this file. */
 SYSTEM_CALL int _socket(int, int, int);
@@ -107,46 +108,89 @@ uint16_t _htons(ip_port_t hostport)
     return cpu_to_be16(hostport);
 }
 
+#if SYSCALL_EXISTS(socketcall)
+SYSTEM_CALL
+int _socketcall(int num, long *args)
+{
+    return DO_SYSCALL(socketcall, 2, num, args);
+}
+#endif
+
 SYSTEM_CALL
 int _socket(int domain, int type, int protocol)
 {
+#if SYSCALL_EXISTS(socket)
     return DO_SYSCALL(socket, 3, domain, type, protocol);
+#else
+    long args[] = { domain, type, protocol };
+    return _socketcall(SYS_SOCKET, args);
+#endif
 }
 
 SYSTEM_CALL
 int _getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen)
 {
+#if SYSCALL_EXISTS(getsockopt)
     return DO_SYSCALL(getsockopt, 5, sockfd, level, optname, optval, optlen);
+#else
+    long args[] = { sockfd, level, optname, (long) optval, (long) optlen };
+    return _socketcall(SYS_GETSOCKOPT, args);
+#endif
 }
 
 SYSTEM_CALL
 int _setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
 {
+#if SYSCALL_EXISTS(setsockopt)
     return DO_SYSCALL(setsockopt, 5, sockfd, level, optname, optval, optlen);
+#else
+    long args[] = { sockfd, level, optname, (long) optval, optlen };
+    return _socketcall(SYS_SETSOCKOPT, args);
+#endif
 }
 
 SYSTEM_CALL
 int _connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
+#if SYSCALL_EXISTS(connect)
     return DO_SYSCALL(connect, 3, sockfd, addr, addrlen);
+#else
+    long args[] = { sockfd, (long) addr, addrlen };
+    return _socketcall(SYS_CONNECT, args);
+#endif
 }
 
 SYSTEM_CALL
 int _listen(int socket, int backlog)
 {
+#if SYSCALL_EXISTS(listen)
     return DO_SYSCALL(listen, 2, socket, backlog);
+#else
+    long args[] = { socket, backlog };
+    return _socketcall(SYS_LISTEN, args);
+#endif
 }
 
 SYSTEM_CALL
 int _bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
+#if SYSCALL_EXISTS(bind)
     return DO_SYSCALL(bind, 3, sockfd, addr, addrlen);
+#else
+    long args[] = { sockfd, (long) addr, addrlen };
+    return _socketcall(SYS_BIND, args);
+#endif
 }
 
 SYSTEM_CALL
 int _accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
+#if SYSCALL_EXISTS(accept)
     return DO_SYSCALL(accept, 3, sockfd, addr, addrlen);
+#else
+    long args[] = { sockfd, (long) addr, (long) addrlen };
+    return _socketcall(SYS_ACCEPT, args);
+#endif
 }
 
 FUNCTION
