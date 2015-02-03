@@ -32,6 +32,19 @@
 #error "Architecture not implemented."
 #endif
 
+#if defined(__arm__) && defined(__thumb__)
+__attribute__((section(".funcs"), naked))
+void __libc_do_syscall(void)
+{
+    asm volatile (
+        "push {r7, lr}\n"
+        "mov r7, ip\n"
+        "swi 0\n"
+        "pop {r7, pc}\n"
+    );
+}
+#endif
+
 #define DO_SYSCALL(name, num_args, ...) ({ \
   int err_val; \
   (void) err_val; \
