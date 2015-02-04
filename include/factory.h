@@ -4,6 +4,8 @@
 #include <asm/unistd.h>
 #include <stddef.h>
 
+#include <target/linux/amd64/syscall_abi.h>
+
 #define SHELLCODE_ENTRY _Noreturn void _start(void) { do {
 #define SHELLCODE_END } while(0); for(;;); }
 
