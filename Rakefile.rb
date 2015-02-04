@@ -23,6 +23,7 @@ OUTPUT_DIR = "bins"
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
 CFLAGS = %w{-std=gnu11
             -Wall
+            -Wextra
             -Os
             -fno-common
             -fno-toplevel-reorder

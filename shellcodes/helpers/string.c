@@ -10,7 +10,7 @@ void *_memcpy(void *dest, const void *src, size_t n)
 {
     if ( NO_BUILTIN )
     {
-        int i;
+        unsigned int i;
         for ( i = 0; i < n; i++ )
             ((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
         return dest;
@@ -24,7 +24,7 @@ void *_memset(void *s, int c, size_t n)
 {
     if ( NO_BUILTIN )
     {
-        int i;
+        unsigned int i;
         for ( i = 0; i < n; i++ )
             ((unsigned char *)s)[i] = c;
         return s;
@@ -38,7 +38,7 @@ int _memcmp(const void *s1, const void *s2, size_t n)
 {
     if ( NO_BUILTIN )
     {
-        int i;
+        unsigned int i;
         for ( i = 0; i < n; i++ )
             if ( ((unsigned char *)s1)[i] < ((unsigned char *)s2)[i] )
                 return -1;
@@ -153,7 +153,7 @@ unsigned int _atoi(const char *nptr)
     unsigned int num_digits = 0;
     unsigned int res = 0;
     unsigned int pow = 1;
-    int i;
+    unsigned int i;
 
     while ( _isdigit(*ptr++) )
         num_digits++;
