@@ -1,7 +1,9 @@
 #ifndef _MEMORY_HELPER_H
 #define _MEMORY_HELPER_H
 
-#define __USE_GNU
+#ifndef __USE_GNU
+#define __USE_GNU 1
+#endif
 
 #include <factory.h>
 #include <sys/mman.h>
@@ -68,10 +70,12 @@ FUNCTION
 void *_malloc(size_t size)
 {
     size_t chunk_size = sizeof(size_t) + size;
-    mchunk_t *mchunk = _mmap(NULL, 
-                        chunk_size,
-                        PROT_READ|PROT_WRITE, 
-                        MAP_ANONYMOUS|MAP_PRIVATE, 0, 0);
+    mchunk_t *mchunk = static_cast<mchunk_t *>(
+        _mmap(NULL, 
+              chunk_size,
+              PROT_READ|PROT_WRITE, 
+              MAP_ANONYMOUS|MAP_PRIVATE, 0, 0)
+    );
 
     mchunk->mchunk_size = chunk_size;
     return &mchunk->mchunk_data;
@@ -81,9 +85,11 @@ FUNCTION
 void *_realloc(void *ptr, size_t new_size)
 {
     size_t chunk_size = new_size + sizeof(size_t);
-    mchunk_t *mchunk = ptr - sizeof(size_t);
+    mchunk_t *mchunk = static_cast<mchunk_t *>((void *)((char *)ptr - sizeof(size_t)));
 
-    mchunk = _mremap(mchunk, mchunk->mchunk_size, chunk_size, MREMAP_MAYMOVE);
+    mchunk = static_cast<mchunk_t *>(
+        mremap(mchunk, mchunk->mchunk_size, chunk_size, MREMAP_MAYMOVE)
+    );
     mchunk->mchunk_size = chunk_size;
 
     return &mchunk->mchunk_data;
@@ -92,7 +98,7 @@ void *_realloc(void *ptr, size_t new_size)
 FUNCTION
 void _free(void *ptr)
 {
-    mchunk_t *mchunk = ptr - sizeof(size_t);
+    mchunk_t *mchunk = static_cast<mchunk_t *>((void *)((char *) ptr - sizeof(size_t)));
     _munmap(mchunk, mchunk->mchunk_size); 
 }
 

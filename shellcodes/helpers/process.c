@@ -205,7 +205,7 @@ pid_t create_thread(thread_routine thread_entry, void *arg)
 
     tid = _clone(
         CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM,
-        child_stack + stack_size,
+        (char *) child_stack + stack_size,
         NULL, NULL, NULL
     );
 

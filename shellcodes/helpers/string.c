@@ -1,7 +1,7 @@
 #ifndef _STRING_HELPER_H
 #define _STRING_HELPER_H
 
-#include <stdarg.h>
+#include <cstdarg>
 
 #include "io.c"
 
@@ -170,7 +170,7 @@ unsigned int _atoi(const char *nptr)
 FUNCTION
 size_t word_to_hex_str(char *str, unsigned long w)
 {
-    char hex_chars[16] = "0123456789abcdef";
+    char hex_chars[] = "0123456789abcdef";
     const size_t bitsize = sizeof(w) * 8;
     int off = bitsize - 4;
     char *out = str;
@@ -197,7 +197,7 @@ size_t word_to_hex_str(char *str, unsigned long w)
 FUNCTION
 size_t word_to_hex_fd(int fd, unsigned long w)
 {
-    char hex_chars[16] = "0123456789abcdef";
+    char hex_chars[] = "0123456789abcdef";
     const size_t bitsize = sizeof(w) * 8;
     int off = bitsize - 4;
     size_t count = 0;
@@ -252,7 +252,7 @@ int _vsprintf(char *str, const char *format, va_list ap)
                     *out++ = '%'; break;
 
                 case 's':
-                    param_str = va_arg(ap, typeof(param_str));
+                    param_str = va_arg(ap, char *);
                     param_str_sz = _strlen(param_str);
                     _memcpy(out, param_str, param_str_sz);
                     out += param_str_sz;
@@ -261,7 +261,7 @@ int _vsprintf(char *str, const char *format, va_list ap)
 
                 case 'p':
                 case 'x':
-                    param_word = va_arg(ap, typeof(param_word));
+                    param_word = va_arg(ap, unsigned long);
                     out += word_to_hex_str(out, param_word);
                     break;
 
@@ -309,7 +309,7 @@ int _vdprintf(int fd, const char *format, va_list ap)
                     break;
 
                 case 's':
-                    param_str = va_arg(ap, typeof(param_str));
+                    param_str = va_arg(ap, char *);
                     param_str_sz = _strlen(param_str);
                     _write(fd, param_str, param_str_sz);
                     count += param_str_sz;
@@ -318,7 +318,7 @@ int _vdprintf(int fd, const char *format, va_list ap)
 
                 case 'p':
                 case 'x':
-                    param_word = va_arg(ap, typeof(param_word));
+                    param_word = va_arg(ap, unsigned long);
                     count += word_to_hex_fd(fd, param_word);
                     break;
 

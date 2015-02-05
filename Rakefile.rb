@@ -21,7 +21,7 @@ end
 
 OUTPUT_DIR = "bins"
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
-CFLAGS = %w{-std=gnu11
+CFLAGS = %w{-std=c++11
             -Wall
             -Wextra
             -Os
@@ -30,7 +30,7 @@ CFLAGS = %w{-std=gnu11
             -fomit-frame-pointer
             -finline-functions
             -nodefaultlibs -nostdlib
-            -Wl,-e_start
+            -Wl,-e_Z6_startv
          }
 
 # Architecture-dependent flags.
@@ -63,7 +63,7 @@ def compile(target, toolchain, output_dir, *opts)
     end
 
     if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{toolchain}gcc -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines}"
+        sh "#{toolchain}g++ -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines}"
     end
 
     if ENV['OUTPUT_LIB'] and ENV['OUTPUT_LIB'].to_i == 1
@@ -76,7 +76,7 @@ def compile(target, toolchain, output_dir, *opts)
         "-D#{k}=#{v}"
     }
 
-    sh "#{toolchain}gcc #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+    sh "#{toolchain}g++ #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
 end
 
 def generate_shellcode(target, toolchain, output_dir)

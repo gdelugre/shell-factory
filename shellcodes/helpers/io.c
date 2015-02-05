@@ -26,7 +26,7 @@ struct linux_dirent {
 #define foreach_dirent(dirents, dirent, off, dsize) \
     for (off = 0, dirent = dirents; \
             dirent && off < dsize; \
-            off += dirent->d_reclen, dirent = ((void *) dirent) + dirent->d_reclen)
+            off += dirent->d_reclen, dirent = static_cast<struct linux_dirent *>((void *)(((char *) dirent) + dirent->d_reclen)))
 
 #define dirent_name(dirent) dirent->d_name
 
@@ -144,7 +144,7 @@ int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t
     size_t              buffer_sz = PAGE_SIZE;
     size_t              read_size = 0;
     void                *buffer = _malloc(buffer_sz);
-    struct linux_dirent *dirents = buffer;
+    struct linux_dirent *dirents = static_cast<linux_dirent *>(buffer);
 
     if ( dirfd < 0 )
         return dirfd;
@@ -165,7 +165,7 @@ int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t
         read_size += ret;
         buffer_sz *= 2;
         buffer = _realloc(buffer, buffer_sz);
-        dirents = buffer + read_size;
+        dirents = static_cast<struct linux_dirent *>((void *)((char *) buffer + read_size));
     }
 
     *p_dirents = (struct linux_dirent *) buffer;

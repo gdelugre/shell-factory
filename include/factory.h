@@ -4,9 +4,6 @@
 #include <asm/unistd.h>
 #include <stddef.h>
 
-#define SHELLCODE_ENTRY _Noreturn void _start(void) { do {
-#define SHELLCODE_END } while(0); for(;;); }
-
 #define NO_RETURN __attribute__((noreturn))
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define FUNCTION static inline __attribute__((section(".funcs")))
@@ -19,6 +16,9 @@
 
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
+
+#define SHELLCODE_ENTRY [[noreturn]] void _start(void) { do {
+#define SHELLCODE_END } while(0); for(;;); }
 
 #if defined(__i386__)
 #include <sysdeps/unix/sysv/linux/i386/sysdep.h>
