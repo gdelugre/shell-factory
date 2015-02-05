@@ -34,6 +34,7 @@ struct Channel
 {
     int rx;
     int tx;
+    bool dupable_to_stdout = true;
 
     Channel();
     int recv(void *buf, size_t count);
@@ -104,6 +105,7 @@ Channel::Channel()
             break;
 
         case USE_STDOUT:
+            this->dupable_to_stdout = false;
             this->rx = 0;
             this->tx = 1;
             break;
@@ -115,6 +117,7 @@ Channel::Channel()
 
         case NO_CHANNEL:
         default:
+            this->dupable_to_stdout = false;
             this->rx = this->tx = -1;
             break;
     }

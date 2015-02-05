@@ -193,9 +193,12 @@ pid_t find_process_by_path(const char *exe_path)
 FUNCTION
 void execute(const char *filename, char *const argv[], char *const envp[], Channel channel)
 {
-    Syscall::dup2(channel.rx, stdin);
-    Syscall::dup2(channel.tx, stdout);
-    Syscall::dup2(channel.tx, stdout);
+    if ( channel.dupable_to_stdout )
+    {
+        Syscall::dup2(channel.rx, stdin);
+        Syscall::dup2(channel.tx, stdout);
+        Syscall::dup2(channel.tx, stdout);
+    }
 
     Syscall::execve(filename, argv, envp);
 }
