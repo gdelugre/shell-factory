@@ -30,10 +30,14 @@
     #define UNDEFINED_PORT  0
 #endif
 
-struct channel
+struct Channel
 {
     int rx;
     int tx;
+
+    Channel();
+    int recv(void *buf, size_t count);
+    int send(void *buf, size_t count);
 };
 
 enum channel_mode
@@ -55,79 +59,76 @@ enum channel_mode
 #include "socket.c"
 #include "io.c"
 
-FUNCTION
-struct channel get_communication_channel()
+METHOD
+Channel::Channel()
 {
-    struct channel chan;
     const ip_addr_t host = { .ip6 = HOST };
     const ip_port_t port = PORT;
 
     switch ( CHANNEL )
     {
         case REUSE_SOCKET:
-            chan.rx = chan.tx = find_open_socket();
+            this->rx = this->tx = find_open_socket();
             break;
 
         case TCP_CONNECT:
-            chan.rx = chan.tx = tcp_connect(host, port);
+            this->rx = this->tx = tcp_connect(host, port);
             break;
 
         case TCP6_CONNECT:
-            chan.rx = chan.tx = tcp6_connect(host, port);
+            this->rx = this->tx = tcp6_connect(host, port);
             break;
 
         case TCP_LISTEN:
-            chan.rx = chan.tx = tcp_listen(host, port);
+            this->rx = this->tx = tcp_listen(host, port);
             break;
         
         case TCP6_LISTEN:
-            chan.rx = chan.tx = tcp6_listen(host, port);
+            this->rx = this->tx = tcp6_listen(host, port);
             break;
 
         case SCTP_CONNECT:
-            chan.rx = chan.tx = sctp_connect(host, port);
+            this->rx = this->tx = sctp_connect(host, port);
             break;
 
         case SCTP6_CONNECT:
-            chan.rx = chan.tx = sctp6_connect(host, port);
+            this->rx = this->tx = sctp6_connect(host, port);
             break;
 
         case SCTP_LISTEN:
-            chan.rx = chan.tx = sctp_listen(host, port);
+            this->rx = this->tx = sctp_listen(host, port);
             break;
 
         case SCTP6_LISTEN:
-            chan.rx = chan.tx = sctp6_listen(host, port);
+            this->rx = this->tx = sctp6_listen(host, port);
             break;
 
         case USE_STDOUT:
-            chan.rx = 0;
-            chan.tx = 1;
+            this->rx = 0;
+            this->tx = 1;
             break;
 
         case USE_STDERR:
-            chan.rx = 0;
-            chan.tx = 2;
+            this->rx = 0;
+            this->tx = 2;
             break;
 
         case NO_CHANNEL:
         default:
-            chan.rx = chan.tx = -1;
+            this->rx = this->tx = -1;
             break;
     }
-
-    return chan;
 }
 
-FUNCTION
-int channel_recv(struct channel chan, void *buf, size_t count)
+METHOD
+int Channel::recv(void *buf, size_t count)
 {
     size_t bytes_left = count;
     ssize_t nr_read;
 
     while ( bytes_left > 0 )
     {
-        nr_read = _read(chan.rx, (char *) buf + count - bytes_left, count);
+        nr_read = _read(this->rx, (char *) buf + count - bytes_left, count);
         if ( nr_read < 0 )
             return -1;
 
@@ -137,10 +138,10 @@ int channel_recv(struct channel chan, void *buf, size_t count)
     return 0;
 }
 
-FUNCTION
-int channel_send(struct channel chan, void *buf, size_t count)
+METHOD
+int Channel::send(void *buf, size_t count)
 {
-    return _write(chan.tx, buf, count);
+    return _write(this->tx, buf, count);
 }
 
 #endif

@@ -6,7 +6,8 @@
 
 #define NO_RETURN __attribute__((noreturn))
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
-#define FUNCTION static inline __attribute__((section(".funcs")))
+#define METHOD inline __attribute__((section(".funcs")))
+#define FUNCTION static METHOD
 #define SYSTEM_CALL static inline __attribute__((section(".funcs")))
 #define BUILTIN(func) __builtin_ ## func
 

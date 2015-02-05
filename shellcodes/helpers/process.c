@@ -185,11 +185,11 @@ pid_t find_process_by_path(const char *exe_path)
 }
 
 FUNCTION
-void execute(const char *filename, char *const argv[], char *const envp[], struct channel chan)
+void execute(const char *filename, char *const argv[], char *const envp[], Channel channel)
 {
-    _dup2(chan.rx, stdin);
-    _dup2(chan.tx, stdout);
-    _dup2(chan.tx, stdout);
+    _dup2(channel.rx, stdin);
+    _dup2(channel.tx, stdout);
+    _dup2(channel.tx, stdout);
 
     _execve(filename, argv, envp);
 }

