@@ -20,8 +20,8 @@ SYSTEM_CALL long            _clone(unsigned long, void *, void *, void *, void *
 SYSTEM_CALL int             _prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
 SYSTEM_CALL unsigned int    _alarm(unsigned int);
 SYSTEM_CALL int             _kill(pid_t, int);
-SYSTEM_CALL NO_RETURN void  _exit_thread(int);
-SYSTEM_CALL NO_RETURN void  _exit_process(int);
+NO_RETURN SYSTEM_CALL void  _exit_thread(int);
+NO_RETURN SYSTEM_CALL void  _exit_process(int);
 
 #include "channel.c"
 #include "string.c"
@@ -80,14 +80,14 @@ int _kill(pid_t pid, int sig)
     return DO_SYSCALL(kill, 2, pid, sig);
 }
 
-SYSTEM_CALL NO_RETURN
+NO_RETURN SYSTEM_CALL
 void _exit_thread(int status)
 {
     DO_SYSCALL(exit, 1, status);
     while ( true );
 }
 
-SYSTEM_CALL NO_RETURN
+NO_RETURN SYSTEM_CALL
 void _exit_process(int status)
 {
     DO_SYSCALL(exit_group, 1, status);

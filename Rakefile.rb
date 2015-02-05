@@ -30,7 +30,7 @@ CFLAGS = %w{-std=c++11
             -fomit-frame-pointer
             -finline-functions
             -nodefaultlibs -nostdlib
-            -Wl,-e_Z6_startv
+            -Wl,-e_start
          }
 
 # Architecture-dependent flags.
