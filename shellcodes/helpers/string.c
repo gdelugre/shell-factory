@@ -207,14 +207,14 @@ size_t word_to_hex_fd(int fd, unsigned long w)
 
     if ( off == 0 )
     {
-        _write(fd, &hex_chars[0], 1);
+        Syscall::write(fd, &hex_chars[0], 1);
         count++;
     }
     else
     {
         while ( off >= 0 )
         {
-            _write(fd, &hex_chars[(w >> off) & 0xF], 1);
+            Syscall::write(fd, &hex_chars[(w >> off) & 0xF], 1);
             off -= 4;
             count++;
         }
@@ -292,7 +292,7 @@ int _vdprintf(int fd, const char *format, va_list ap)
         c = *format++;
         if ( !escape && c != '%' )
         {
-            _write(fd, &c, 1);
+            Syscall::write(fd, &c, 1);
             count++;
         }
         else if ( !escape && c == '%' )
@@ -304,14 +304,14 @@ int _vdprintf(int fd, const char *format, va_list ap)
             switch ( c )
             {
                 case '%':
-                    _write(fd, &c, 1); 
+                    Syscall::write(fd, &c, 1); 
                     count++;
                     break;
 
                 case 's':
                     param_str = va_arg(ap, char *);
                     param_str_sz = _strlen(param_str);
-                    _write(fd, param_str, param_str_sz);
+                    Syscall::write(fd, param_str, param_str_sz);
                     count += param_str_sz;
                     escape = 0;
                     break;
@@ -330,7 +330,7 @@ int _vdprintf(int fd, const char *format, va_list ap)
         }
     }
 
-    _fsync(fd);
+    Syscall::fsync(fd);
     return count;
 }
 

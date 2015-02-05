@@ -128,7 +128,7 @@ int Channel::recv(void *buf, size_t count)
 
     while ( bytes_left > 0 )
     {
-        nr_read = _read(this->rx, (char *) buf + count - bytes_left, count);
+        nr_read = Syscall::read(this->rx, (char *) buf + count - bytes_left, count);
         if ( nr_read < 0 )
             return -1;
 
@@ -141,7 +141,7 @@ int Channel::recv(void *buf, size_t count)
 METHOD
 int Channel::send(void *buf, size_t count)
 {
-    return _write(this->tx, buf, count);
+    return Syscall::write(this->tx, buf, count);
 }
 
 #endif
