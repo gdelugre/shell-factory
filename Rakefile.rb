@@ -99,8 +99,8 @@ task :readflag do
     build(:readflag, "FLAG_PATH")
 end
 
-task :execve do
-    build(:execve, "SET_ARGV0")
+task :shellexec do
+    build(:shellexec, "COMMAND", "SET_ARGV0")
 end
 
 task :memexec do 
