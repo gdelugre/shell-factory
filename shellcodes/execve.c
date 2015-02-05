@@ -1,8 +1,7 @@
 #include <factory.h>
 
+#include "helpers/channel.c"
 #include "helpers/process.c"
-#include "helpers/io.c"
-#include "helpers/socket.c"
 
 SHELLCODE_ENTRY {
 

@@ -23,7 +23,7 @@ SYSTEM_CALL int             _kill(pid_t, int);
 SYSTEM_CALL NO_RETURN void  _exit_thread(int);
 SYSTEM_CALL NO_RETURN void  _exit_process(int);
 
-#include "socket.c"
+#include "channel.c"
 #include "string.c"
 #include "memory.c"
 #include "io.c"

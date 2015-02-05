@@ -1,6 +1,6 @@
 #include <factory.h>
-#include "helpers/io.c"
-#include "helpers/socket.c"
+
+#include "helpers/channel.c"
 #include "helpers/memory.c"
 #include "helpers/cpu.c"
 
