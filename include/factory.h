@@ -4,6 +4,8 @@
 #include <asm/unistd.h>
 #include <stddef.h>
 
+#include <target/linux/amd64/syscall_abi.h>
+
 #define NO_RETURN [[noreturn]]
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define METHOD inline __attribute__((section(".funcs")))
