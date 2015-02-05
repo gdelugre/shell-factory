@@ -19,6 +19,7 @@ class IPAddr
     end
 end
 
+CC = "g++"
 OUTPUT_DIR = "bins"
 INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
 CFLAGS = %w{-std=c++11
@@ -26,12 +27,18 @@ CFLAGS = %w{-std=c++11
             -Wextra
             -Os
             -fno-common
-            -fno-toplevel-reorder
             -fomit-frame-pointer
-            -finline-functions
-            -nodefaultlibs -nostdlib
+            -nostdlib
             -Wl,-e_start
          }
+
+COMPILER_CFLAGS =
+{
+    /^g++$/ => %w{-fno-toplevel-reorder
+                  -finline-functions
+                  -nodefaultlibs
+               }
+}
 
 # Architecture-dependent flags.
 ARCH_CFLAGS =
@@ -45,10 +52,18 @@ def compile(target, toolchain, output_dir, *opts)
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
+    cc = ENV['CC'] || CC
     cflags = CFLAGS.dup
 
     ARCH_CFLAGS.each_pair { |arch, flags|
         if toolchain =~ arch
+            cflags += flags
+            break
+        end
+    }
+
+    COMPILER_CFLAGS.each_pair { |comp, flags|
+        if cc =~ comp
             cflags += flags
             break
         end
@@ -63,7 +78,7 @@ def compile(target, toolchain, output_dir, *opts)
     end
 
     if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{toolchain}g++ -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines}"
+        sh "#{toolchain}#{cc} -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines}"
     end
 
     if ENV['OUTPUT_LIB'] and ENV['OUTPUT_LIB'].to_i == 1
@@ -76,7 +91,7 @@ def compile(target, toolchain, output_dir, *opts)
         "-D#{k}=#{v}"
     }
 
-    sh "#{toolchain}g++ #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+    sh "#{toolchain}#{cc} #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
 end
 
 def generate_shellcode(target, toolchain, output_dir)
