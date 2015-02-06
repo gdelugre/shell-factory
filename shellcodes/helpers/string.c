@@ -1,7 +1,7 @@
 #ifndef _STRING_HELPER_H
 #define _STRING_HELPER_H
 
-#include <stdarg.h>
+#include <cstdarg>
 
 #include "io.c"
 
@@ -10,7 +10,7 @@ void *_memcpy(void *dest, const void *src, size_t n)
 {
     if ( NO_BUILTIN )
     {
-        int i;
+        unsigned int i;
         for ( i = 0; i < n; i++ )
             ((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
         return dest;
@@ -24,7 +24,7 @@ void *_memset(void *s, int c, size_t n)
 {
     if ( NO_BUILTIN )
     {
-        int i;
+        unsigned int i;
         for ( i = 0; i < n; i++ )
             ((unsigned char *)s)[i] = c;
         return s;
@@ -38,7 +38,7 @@ int _memcmp(const void *s1, const void *s2, size_t n)
 {
     if ( NO_BUILTIN )
     {
-        int i;
+        unsigned int i;
         for ( i = 0; i < n; i++ )
             if ( ((unsigned char *)s1)[i] < ((unsigned char *)s2)[i] )
                 return -1;
@@ -153,7 +153,7 @@ unsigned int _atoi(const char *nptr)
     unsigned int num_digits = 0;
     unsigned int res = 0;
     unsigned int pow = 1;
-    int i;
+    unsigned int i;
 
     while ( _isdigit(*ptr++) )
         num_digits++;
@@ -170,7 +170,7 @@ unsigned int _atoi(const char *nptr)
 FUNCTION
 size_t word_to_hex_str(char *str, unsigned long w)
 {
-    char hex_chars[16] = "0123456789abcdef";
+    char hex_chars[] = "0123456789abcdef";
     const size_t bitsize = sizeof(w) * 8;
     int off = bitsize - 4;
     char *out = str;
@@ -197,7 +197,7 @@ size_t word_to_hex_str(char *str, unsigned long w)
 FUNCTION
 size_t word_to_hex_fd(int fd, unsigned long w)
 {
-    char hex_chars[16] = "0123456789abcdef";
+    char hex_chars[] = "0123456789abcdef";
     const size_t bitsize = sizeof(w) * 8;
     int off = bitsize - 4;
     size_t count = 0;
@@ -207,14 +207,14 @@ size_t word_to_hex_fd(int fd, unsigned long w)
 
     if ( off == 0 )
     {
-        _write(fd, &hex_chars[0], 1);
+        Syscall::write(fd, &hex_chars[0], 1);
         count++;
     }
     else
     {
         while ( off >= 0 )
         {
-            _write(fd, &hex_chars[(w >> off) & 0xF], 1);
+            Syscall::write(fd, &hex_chars[(w >> off) & 0xF], 1);
             off -= 4;
             count++;
         }
@@ -252,7 +252,7 @@ int _vsprintf(char *str, const char *format, va_list ap)
                     *out++ = '%'; break;
 
                 case 's':
-                    param_str = va_arg(ap, typeof(param_str));
+                    param_str = va_arg(ap, char *);
                     param_str_sz = _strlen(param_str);
                     _memcpy(out, param_str, param_str_sz);
                     out += param_str_sz;
@@ -261,7 +261,7 @@ int _vsprintf(char *str, const char *format, va_list ap)
 
                 case 'p':
                 case 'x':
-                    param_word = va_arg(ap, typeof(param_word));
+                    param_word = va_arg(ap, unsigned long);
                     out += word_to_hex_str(out, param_word);
                     break;
 
@@ -292,7 +292,7 @@ int _vdprintf(int fd, const char *format, va_list ap)
         c = *format++;
         if ( !escape && c != '%' )
         {
-            _write(fd, &c, 1);
+            Syscall::write(fd, &c, 1);
             count++;
         }
         else if ( !escape && c == '%' )
@@ -304,21 +304,21 @@ int _vdprintf(int fd, const char *format, va_list ap)
             switch ( c )
             {
                 case '%':
-                    _write(fd, &c, 1); 
+                    Syscall::write(fd, &c, 1); 
                     count++;
                     break;
 
                 case 's':
-                    param_str = va_arg(ap, typeof(param_str));
+                    param_str = va_arg(ap, char *);
                     param_str_sz = _strlen(param_str);
-                    _write(fd, param_str, param_str_sz);
+                    Syscall::write(fd, param_str, param_str_sz);
                     count += param_str_sz;
                     escape = 0;
                     break;
 
                 case 'p':
                 case 'x':
-                    param_word = va_arg(ap, typeof(param_word));
+                    param_word = va_arg(ap, unsigned long);
                     count += word_to_hex_fd(fd, param_word);
                     break;
 
@@ -330,7 +330,7 @@ int _vdprintf(int fd, const char *format, va_list ap)
         }
     }
 
-    _fsync(fd);
+    Syscall::fsync(fd);
     return count;
 }
 

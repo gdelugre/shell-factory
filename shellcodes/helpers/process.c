@@ -13,86 +13,91 @@
 #include <asm/ptrace.h>
 #include <sys/prctl.h>
 
-/* System calls defined in this file. */
-SYSTEM_CALL pid_t           _fork(void);
-SYSTEM_CALL int             _execve(const char *, char *const[], char *const[]);
-SYSTEM_CALL long            _clone(unsigned long, void *, void *, void *, void *);
-SYSTEM_CALL int             _prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
-SYSTEM_CALL unsigned int    _alarm(unsigned int);
-SYSTEM_CALL int             _kill(pid_t, int);
-SYSTEM_CALL NO_RETURN void  _exit_thread(int);
-SYSTEM_CALL NO_RETURN void  _exit_process(int);
-
-#include "socket.c"
-#include "string.c"
-#include "memory.c"
-#include "io.c"
-
 typedef void (* sighandler_t)(int);
 typedef int (* thread_routine)(void *);
 
 #define THREAD_STACK_SIZE 0x10000
 #define COMM_MAX 16
 
-SYSTEM_CALL
-pid_t _fork(void)
-{
-    return DO_SYSCALL(fork, 0);
+/* 
+ * System calls defined in this file. 
+ */
+namespace Syscall {
+
+    SYSTEM_CALL pid_t           fork(void);
+    SYSTEM_CALL int             execve(const char *, char *const[], char *const[]);
+    SYSTEM_CALL long            clone(unsigned long, void *, void *, void *, void *);
+    SYSTEM_CALL int             prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
+    SYSTEM_CALL unsigned int    alarm(unsigned int);
+    SYSTEM_CALL int             kill(pid_t, int);
+    NO_RETURN SYSTEM_CALL void  exit_thread(int);
+    NO_RETURN SYSTEM_CALL void  exit_process(int);
+
+    SYSTEM_CALL
+    pid_t fork(void)
+    {
+        return DO_SYSCALL(fork, 0);
+    }
+
+    SYSTEM_CALL
+    int execve(const char *filename, char *const argv[], char *const envp[])
+    {
+        return DO_SYSCALL(execve, 3, filename, argv, envp);
+    }
+
+    SYSTEM_CALL
+    long clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
+    {
+        return DO_SYSCALL(clone, 5, flags, child_stack, ptid, tls, ctid);
+    }
+
+    SYSTEM_CALL
+    int prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg4, unsigned long arg5)
+    {
+        return DO_SYSCALL(prctl, 5, option, arg2, arg3, arg4, arg5);
+    }
+
+    SYSTEM_CALL
+    unsigned int alarm(unsigned int seconds)
+    {
+        #if defined(__arm__) && defined(__ARM_EABI__)
+        return arch_sys_alarm(seconds);
+        #else
+        return DO_SYSCALL(alarm, 1, seconds);
+        #endif
+    }
+
+    SYSTEM_CALL
+    int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
+    {
+        return DO_SYSCALL(rt_sigaction, 4, signum, act, oldact, 8);
+    }
+
+    SYSTEM_CALL
+    int kill(pid_t pid, int sig)
+    {
+        return DO_SYSCALL(kill, 2, pid, sig);
+    }
+
+    NO_RETURN SYSTEM_CALL
+    void exit_thread(int status)
+    {
+        DO_SYSCALL(exit, 1, status);
+        while ( true );
+    }
+
+    NO_RETURN SYSTEM_CALL
+    void exit_process(int status)
+    {
+        DO_SYSCALL(exit_group, 1, status);
+        while ( true );
+    }
 }
 
-SYSTEM_CALL
-int _execve(const char *filename, char *const argv[], char *const envp[])
-{
-    return DO_SYSCALL(execve, 3, filename, argv, envp);
-}
-
-SYSTEM_CALL
-long _clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
-{
-    return DO_SYSCALL(clone, 5, flags, child_stack, ptid, tls, ctid);
-}
-
-SYSTEM_CALL
-int _prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg4, unsigned long arg5)
-{
-    return DO_SYSCALL(prctl, 5, option, arg2, arg3, arg4, arg5);
-}
-
-SYSTEM_CALL
-unsigned int _alarm(unsigned int seconds)
-{
-#if defined(__arm__) && defined(__ARM_EABI__)
-    return arch_sys_alarm(seconds);
-#else
-    return DO_SYSCALL(alarm, 1, seconds);
-#endif
-}
-
-SYSTEM_CALL
-int _sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
-{
-    return DO_SYSCALL(rt_sigaction, 4, signum, act, oldact, 8);
-}
-
-SYSTEM_CALL
-int _kill(pid_t pid, int sig)
-{
-    return DO_SYSCALL(kill, 2, pid, sig);
-}
-
-SYSTEM_CALL NO_RETURN
-void _exit_thread(int status)
-{
-    DO_SYSCALL(exit, 1, status);
-    while ( true );
-}
-
-SYSTEM_CALL NO_RETURN
-void _exit_process(int status)
-{
-    DO_SYSCALL(exit_group, 1, status);
-    while ( true );
-}
+#include "channel.c"
+#include "string.c"
+#include "memory.c"
+#include "io.c"
 
 FUNCTION
 sighandler_t _signal(int sig, sighandler_t handler)
@@ -103,7 +108,7 @@ sighandler_t _signal(int sig, sighandler_t handler)
     _memset(&act.sa_mask, 0, sizeof(sigset_t));
     act.sa_flags = SA_RESETHAND;
 
-    _sigaction(sig, &act, &old_act);
+    Syscall::sigaction(sig, &act, &old_act);
 
     return (sighandler_t) old_act.sa_restorer;
 }
@@ -111,7 +116,7 @@ sighandler_t _signal(int sig, sighandler_t handler)
 FUNCTION
 void set_current_thread_name(const char *comm)
 {
-    _prctl(PR_SET_NAME, (unsigned long) comm, 0, 0, 0);
+    Syscall::prctl(PR_SET_NAME, (unsigned long) comm, 0, 0, 0);
 }
 
 FUNCTION
@@ -133,10 +138,11 @@ pid_t find_process_by_name(const char *proc_name)
             continue;
 
         _sprintf(comm_path, "/proc/%s/comm", dirent_name(current));
-        fd = _open(comm_path, O_RDONLY); 
-        n = _read(fd, comm, sizeof(comm));
+        fd = Syscall::open(comm_path, O_RDONLY); 
+        n = Syscall::read(fd, comm, sizeof(comm));
         comm[n - 1] = '\0';
-        _close(fd);
+
+        Syscall::close(fd);
 
         if ( _strcmp(proc_name, comm) == 0 )
         {
@@ -168,7 +174,7 @@ pid_t find_process_by_path(const char *exe_path)
             continue;
 
         _sprintf(link_path, "/proc/%s/exe", dirent_name(current));
-        n = _readlink(link_path, exe, sizeof(exe));
+        n = Syscall::readlink(link_path, exe, sizeof(exe));
         if ( n < 0 )
             continue;
 
@@ -185,13 +191,16 @@ pid_t find_process_by_path(const char *exe_path)
 }
 
 FUNCTION
-void execute(const char *filename, char *const argv[], char *const envp[], struct channel chan)
+void execute(const char *filename, char *const argv[], char *const envp[], Channel channel)
 {
-    _dup2(chan.rx, stdin);
-    _dup2(chan.tx, stdout);
-    _dup2(chan.tx, stdout);
+    if ( channel.dupable_to_stdout )
+    {
+        Syscall::dup2(channel.rx, stdin);
+        Syscall::dup2(channel.tx, stdout);
+        Syscall::dup2(channel.tx, stdout);
+    }
 
-    _execve(filename, argv, envp);
+    Syscall::execve(filename, argv, envp);
 }
 
 FUNCTION
@@ -201,16 +210,16 @@ pid_t create_thread(thread_routine thread_entry, void *arg)
     size_t stack_size = THREAD_STACK_SIZE;
     pid_t tid;
 
-    child_stack = _mmap(NULL, stack_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, 0, 0);
+    child_stack = allocate_memory(stack_size, PROT_READ|PROT_WRITE);
 
-    tid = _clone(
+    tid = Syscall::clone(
         CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM,
-        child_stack + stack_size,
+        (char *) child_stack + stack_size,
         NULL, NULL, NULL
     );
 
     if ( !tid )
-        _exit_thread(thread_entry(arg));
+        Syscall::exit_thread(thread_entry(arg));
     else
         return tid;
 }

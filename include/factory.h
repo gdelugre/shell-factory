@@ -4,14 +4,10 @@
 #include <asm/unistd.h>
 #include <stddef.h>
 
-#include <target/linux/amd64/syscall_abi.h>
-
-#define SHELLCODE_ENTRY _Noreturn void _start(void) { do {
-#define SHELLCODE_END } while(0); for(;;); }
-
-#define NO_RETURN __attribute__((noreturn))
+#define NO_RETURN [[noreturn]]
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
-#define FUNCTION static inline __attribute__((section(".funcs")))
+#define METHOD inline __attribute__((section(".funcs")))
+#define FUNCTION static METHOD
 #define SYSTEM_CALL static inline __attribute__((section(".funcs")))
 #define BUILTIN(func) __builtin_ ## func
 
@@ -21,6 +17,15 @@
 
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
+
+#define SHELLCODE_ENTRY extern "C" {                            \
+                            NO_RETURN void _start(void) {       \
+                                do {
+
+#define SHELLCODE_END           } while(0);                     \
+                                for(;;);                        \
+                            }                                   \
+                        }
 
 #if defined(__i386__)
 #include <sysdeps/unix/sysv/linux/i386/sysdep.h>
@@ -33,6 +38,8 @@
 #else
 #error "Architecture not implemented."
 #endif
+
+#include <target/linux/amd64/syscall_abi.h>
 
 #if defined(__arm__) && defined(__thumb__)
 __attribute__((section(".funcs"), naked))
