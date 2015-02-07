@@ -27,6 +27,7 @@
                             }                                   \
                         }
 
+/* GLIBC helpers 
 #if defined(__i386__)
 #include <sysdeps/unix/sysv/linux/i386/sysdep.h>
 #elif defined(__x86_64__)
@@ -38,8 +39,9 @@
 #else
 #error "Architecture not implemented."
 #endif
+*/
 
-#include <target/linux/amd64/syscall_abi.h>
+#include <target/linux/syscall_abi.h>
 
 #if defined(__arm__) && defined(__thumb__)
 __attribute__((section(".funcs"), naked))
@@ -56,10 +58,13 @@ void __libc_do_syscall(void)
 
 #define SYSCALL_EXISTS(name) defined(__NR_## name)
 
+
 #define DO_SYSCALL(name, num_args, ...) ({ \
   int err_val; \
   (void) err_val; \
-  INTERNAL_SYSCALL(name, err_val, num_args, __VA_ARGS__); \
+  EMIT_SYSCALL(name, __VA_ARGS__); \
   });
+
+// INTERNAL_SYSCALL(name, err_val, num_args, __VA_ARGS__);
 
 #endif /* _SYSTEM_H */

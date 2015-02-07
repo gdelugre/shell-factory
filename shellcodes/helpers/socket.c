@@ -85,7 +85,7 @@ namespace Syscall {
         #if SYSCALL_EXISTS(setsockopt)
         return DO_SYSCALL(setsockopt, 5, sockfd, level, optname, optval, optlen);
         #else
-        long args[] = { sockfd, level, optname, (long) optval, optlen };
+        long args[] = { sockfd, level, optname, (long) optval, (long) optlen };
         return socketcall(SYS_SETSOCKOPT, args);
         #endif
     }
@@ -96,7 +96,7 @@ namespace Syscall {
         #if SYSCALL_EXISTS(connect)
         return DO_SYSCALL(connect, 3, sockfd, addr, addrlen);
         #else
-        long args[] = { sockfd, (long) addr, addrlen };
+        long args[] = { sockfd, (long) addr, (long) addrlen };
         return socketcall(SYS_CONNECT, args);
         #endif
     }
@@ -118,7 +118,7 @@ namespace Syscall {
         #if SYSCALL_EXISTS(bind)
         return DO_SYSCALL(bind, 3, sockfd, addr, addrlen);
         #else
-        long args[] = { sockfd, (long) addr, addrlen };
+        long args[] = { sockfd, (long) addr, (long) addrlen };
         return socketcall(SYS_BIND, args);
         #endif
     }
