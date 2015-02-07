@@ -43,6 +43,7 @@
 
 #include <target/syscall_abi.h>
 
+/*
 #if defined(__arm__) && defined(__thumb__)
 __attribute__((section(".funcs"), naked))
 void __libc_do_syscall(void)
@@ -55,9 +56,9 @@ void __libc_do_syscall(void)
     );
 }
 #endif
+*/
 
 #define SYSCALL_EXISTS(name) defined(__NR_## name)
-
 
 #define DO_SYSCALL(name, num_args, ...) ({ \
   int err_val; \
@@ -65,6 +66,12 @@ void __libc_do_syscall(void)
   EMIT_SYSCALL(name, __VA_ARGS__); \
   });
 
-// INTERNAL_SYSCALL(name, err_val, num_args, __VA_ARGS__);
+/*
+#define DO_SYSCALL(name, num_args, ...) ({ \
+  int err_val; \
+  (void) err_val; \
+  INTERNAL_SYSCALL(name, err_val, num_args, __VA_ARGS__); \
+  });
+*/
 
 #endif /* _SYSTEM_H */

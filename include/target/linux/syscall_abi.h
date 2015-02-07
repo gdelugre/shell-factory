@@ -1,10 +1,14 @@
 #ifndef _LINUX_SYSCALL_ABI_H
 #define _LINUX_SYSCALL_ABI_H
 
+#include <cstdint>
+
 #if defined(__i386__)
 #include <target/linux/i386/syscall_abi.h>
 #elif defined(__amd64__)
 #include <target/linux/amd64/syscall_abi.h>
+#elif defined(__arm__)
+#include <target/linux/arm/syscall_abi.h>
 #else
 #error "No syscall ABI defined for this architecture."
 #endif
@@ -62,41 +66,33 @@ auto GetArgumentByIndex(T ...args)
 }
 #pragma GCC diagnostic pop
 
-static inline
-long system_call(unsigned short number)
-{
-    register unsigned short __sys_num asm ( SYSCALL_NUMBER_REGISTER ) = number;
-    register long __sys_result asm ( SYSCALL_RESULT_REGISTER );
-
-    asm volatile ( 
-        SYSCALL_INSTRUCTION "\n"
-            : "=r" (__sys_result) 
-            : "r" (__sys_num) 
-            : "memory", "cc", SYSCALL_CLOBBERED_REGISTERS
-    );
-
-    return __sys_result;
-}
-
 #define SYSCALL_ARG_BIND_REGISTER(n, reg, ...)                                  \
     if ( nr_args > n )                                                          \
     {                                                                           \
-        register auto __arg##n asm (reg) = GetArgumentByIndex<n>(__VA_ARGS__); \
+        register auto __arg##n asm (reg) = GetArgumentByIndex<n>(__VA_ARGS__);  \
         asm ("" :: "r" (__arg##n));                                             \
     }
 
 #define SYSCALL_NAME_TO_NUM(name) __NR_##name
 
-#define EMIT_SYSCALL(name, ...)                             \
-({                                                          \
-    size_t nr_args = SyscallArgumentsLength(__VA_ARGS__);   \
-    unsigned short sys_num = SYSCALL_NAME_TO_NUM(name);     \
-    long sys_result;                                        \
-                                                            \
-    SYSCALL_PUSH_ARGUMENTS(__VA_ARGS__);                    \
-    sys_result = system_call(sys_num);                      \
-                                                            \
-    sys_result;                                             \
+#define EMIT_SYSCALL(name, ...)                                         \
+({                                                                      \
+    size_t nr_args = SyscallArgumentsLength(__VA_ARGS__);               \
+    short sys_num = SYSCALL_NAME_TO_NUM(name);                          \
+                                                                        \
+    SYSCALL_PUSH_ARGUMENTS(__VA_ARGS__);                                \
+                                                                        \
+    register short __sys_num asm ( SYSCALL_NUMBER_REGISTER ) = sys_num; \
+    register long __sys_result asm ( SYSCALL_RESULT_REGISTER );         \
+                                                                        \
+    asm volatile (                                                      \
+        SYSCALL_INSTRUCTION "\n"                                        \
+            : "=r" (__sys_result)                                       \
+            : "r" (__sys_num)                                           \
+            : "memory", "cc", SYSCALL_CLOBBERED_REGISTERS               \
+    );                                                                  \
+                                                                        \
+    __sys_result;                                                       \
 })
 
 #endif
