@@ -1,5 +1,5 @@
-#ifndef _GENERIC_SYSCALL_ABI_H
-#define _GENERIC_SYSCALL_ABI_H
+#ifndef _LINUX_SYSCALL_ABI_H
+#define _LINUX_SYSCALL_ABI_H
 
 #if defined(__i386__)
 #include <target/linux/i386/syscall_abi.h>

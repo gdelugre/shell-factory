@@ -41,7 +41,7 @@
 #endif
 */
 
-#include <target/linux/syscall_abi.h>
+#include <target/syscall_abi.h>
 
 #if defined(__arm__) && defined(__thumb__)
 __attribute__((section(".funcs"), naked))
