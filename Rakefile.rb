@@ -77,10 +77,6 @@ def compile(target, toolchain, output_dir, *opts)
         cflags << "-fno-builtin"
     end
 
-    if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{toolchain}#{cc} -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines}"
-    end
-
     if ENV['OUTPUT_LIB'] and ENV['OUTPUT_LIB'].to_i == 1
         cflags << '-shared'
     end
@@ -90,6 +86,10 @@ def compile(target, toolchain, output_dir, *opts)
         v = IPAddr.new(v).to_define if k == 'HOST'
         "-D#{k}=#{v}"
     }
+
+    if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
+        sh "#{toolchain}#{cc} -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines.join(' ')}"
+    end
 
     sh "#{toolchain}#{cc} #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
 end
