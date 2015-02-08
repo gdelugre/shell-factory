@@ -25,7 +25,7 @@ INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
 CFLAGS = %w{-std=c++1y
             -Wall
             -Wextra
-            -Os
+            -Wfatal-errors
             -fno-common
             -fomit-frame-pointer
             -nostdlib
@@ -34,10 +34,13 @@ CFLAGS = %w{-std=c++1y
 
 COMPILER_CFLAGS =
 {
-    /^g++$/ => %w{-fno-toplevel-reorder
+    /^g\+\+$/ => %w{-fno-toplevel-reorder
                   -finline-functions
                   -nodefaultlibs
-               }
+                  -Os
+               },
+
+    /^clang\+\+$/ => %w{-Oz}
 }
 
 # Architecture-dependent flags.
