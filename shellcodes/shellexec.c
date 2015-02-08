@@ -9,14 +9,19 @@
 
 SHELLCODE_ENTRY {
 
+    /* Command to execute. */
+    const char *cmd = TO_STRING(COMMAND);
+
+    /* No environment defined. */
+    char **const envp = NULL;
+
 #if (SET_ARGV0 == 1)
-    char *const argv[] = { (char *) TO_STRING(COMMAND), NULL };
+    char *const argv[] = { (char *) cmd, NULL };
 #else
-    char *const argv[] = { NULL };
+    char **const argv = envp;
 #endif
-    char *const envp[] = { NULL };
 
     Channel channel;
-    execute(TO_STRING(COMMAND), argv, envp, channel);
+    execute(cmd, argv, envp, channel);
 
 } SHELLCODE_END
