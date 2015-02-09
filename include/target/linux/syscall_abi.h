@@ -9,12 +9,14 @@
 #include <target/linux/amd64/syscall_abi.h>
 #elif defined(__arm__)
 #include <target/linux/arm/syscall_abi.h>
+#elif defined(__mips__)
+#include <target/linux/mips/syscall_abi.h>
 #else
 #error "No syscall ABI defined for this architecture."
 #endif
 
 #ifndef SYSCALL_CLOBBERED_REGISTERS
-#define SYSCALL_CLOBBERED_REGISTERS "cc"
+#define SYSCALL_CLOBBERED_REGISTERS "memory"
 #endif
 
 #pragma GCC diagnostic push

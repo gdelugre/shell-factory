@@ -46,7 +46,7 @@ COMPILER_CFLAGS =
 # Architecture-dependent flags.
 ARCH_CFLAGS =
 {
-    /mips/ => %w{-mshared -mno-abicalls},
+    /mips/ => %w{-mshared -mno-abicalls -mno-plt -mno-gpopt -mno-long-calls -G 0},
     /.*/ => %w{-fPIC}
 }
 
