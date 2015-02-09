@@ -52,10 +52,11 @@ ARCH_CFLAGS =
 }
 
 def cc_invoke(cc, triple)
+    return cc if triple.empty?
+
     case cc
     when 'g++'
-        triple += '-' unless triple.empty?
-        "#{triple}#{cc}"
+        "#{triple}-#{cc}"
 
     when 'clang++'
         "#{cc} -target #{triple} --sysroot /usr/#{triple}/"
@@ -69,6 +70,12 @@ def compile(target, triple, output_dir, *opts)
     options = common_opts + opts
     cc = ENV['CC'] || CC
     cflags = CFLAGS.dup
+
+    puts "[*] Generating shellcode '#{target}'"
+    puts "        Compiler: #{cc}"
+    puts "        Target architecture: #{triple.empty? ? `uname -m` : triple}"
+    puts "        Options: #{defines}"
+    puts
 
     ARCH_CFLAGS.each_pair { |arch, flags|
         if triple =~ arch
@@ -112,6 +119,9 @@ end
 def generate_shellcode(target, triple, output_dir)
     triple += '-' unless triple.empty?
     sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf #{output_dir}/#{target}.bin" 
+
+    puts
+    puts "[*] Generated shellcode: #{File.size("#{output_dir}/#{target}.bin")} bytes."
 end
 
 def build(target, *opts)
