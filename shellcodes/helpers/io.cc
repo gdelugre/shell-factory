@@ -153,7 +153,7 @@ namespace Syscall {
     }
 }
 
-#include "memory.c"
+#include "memory.cc"
 
 FUNCTION
 int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t *dsize)

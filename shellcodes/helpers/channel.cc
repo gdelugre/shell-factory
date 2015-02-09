@@ -57,8 +57,8 @@ enum channel_mode
     USE_STDERR,
 };
 
-#include "socket.c"
-#include "io.c"
+#include "socket.cc"
+#include "io.cc"
 
 METHOD
 Channel::Channel()

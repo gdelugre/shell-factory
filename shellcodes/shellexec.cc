@@ -1,7 +1,7 @@
 #include <factory.h>
 
-#include "helpers/channel.c"
-#include "helpers/process.c"
+#include "helpers/channel.cc"
+#include "helpers/process.cc"
 
 #ifndef COMMAND
 #define COMMAND /bin/sh

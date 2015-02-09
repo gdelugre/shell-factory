@@ -3,7 +3,7 @@
 
 #include <cstdarg>
 
-#include "io.c"
+#include "io.cc"
 
 FUNCTION
 void *_memcpy(void *dest, const void *src, size_t n)

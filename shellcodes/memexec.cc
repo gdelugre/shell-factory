@@ -1,7 +1,7 @@
 #include <factory.h>
 
-#include "helpers/channel.c"
-#include "helpers/memory.c"
+#include "helpers/channel.cc"
+#include "helpers/memory.cc"
 
 typedef __attribute__((noreturn)) void (* shellcode)(void);
 

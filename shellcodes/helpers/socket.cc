@@ -136,10 +136,10 @@ namespace Syscall {
     }
 }
 
-#include "cpu.c"
-#include "string.c"
-#include "io.c"
-#include "process.c"
+#include "cpu.cc"
+#include "string.cc"
+#include "io.cc"
+#include "process.cc"
 
 static inline
 in_addr_t _inet_addr(const ip_addr_t addr)

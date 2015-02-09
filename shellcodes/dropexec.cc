@@ -1,9 +1,9 @@
 #include <factory.h>
 
-#include "helpers/channel.c"
-#include "helpers/io.c"
-#include "helpers/memory.c"
-#include "helpers/process.c"
+#include "helpers/channel.cc"
+#include "helpers/io.cc"
+#include "helpers/memory.cc"
+#include "helpers/process.cc"
 
 SHELLCODE_ENTRY {
 

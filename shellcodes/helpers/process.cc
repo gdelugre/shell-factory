@@ -94,10 +94,10 @@ namespace Syscall {
     }
 }
 
-#include "channel.c"
-#include "string.c"
-#include "memory.c"
-#include "io.c"
+#include "channel.cc"
+#include "string.cc"
+#include "memory.cc"
+#include "io.cc"
 
 FUNCTION
 sighandler_t _signal(int sig, sighandler_t handler)

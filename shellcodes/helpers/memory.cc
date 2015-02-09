@@ -56,8 +56,8 @@ namespace Syscall {
     }
 }
 
-#include "cpu.c"
-#include "string.c"
+#include "cpu.cc"
+#include "string.cc"
 
 FUNCTION 
 void *allocate_memory(size_t size, int prot)

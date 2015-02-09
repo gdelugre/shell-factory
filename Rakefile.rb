@@ -92,10 +92,10 @@ def compile(target, toolchain, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{toolchain}#{cc} -S #{cflags.join(" ")} shellcodes/#{target}.c -o #{output_dir}/#{target}.S #{defines.join(' ')}"
+        sh "#{toolchain}#{cc} -S #{cflags.join(" ")} shellcodes/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
     end
 
-    sh "#{toolchain}#{cc} #{cflags.join(' ')} shellcodes/#{target}.c -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+    sh "#{toolchain}#{cc} #{cflags.join(' ')} shellcodes/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
 end
 
 def generate_shellcode(target, toolchain, output_dir)
