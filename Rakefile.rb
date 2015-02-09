@@ -51,7 +51,18 @@ ARCH_CFLAGS =
     /.*/ => %w{-fPIC}
 }
 
-def compile(target, toolchain, output_dir, *opts)
+def cc_invoke(cc, triple)
+    case cc
+    when 'g++'
+        triple += '-' unless triple.empty?
+        "#{triple}#{cc}"
+
+    when 'clang++'
+        "#{cc} -target #{triple} --sysroot /usr/#{triple}/"
+    end
+end
+
+def compile(target, triple, output_dir, *opts)
     common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
@@ -60,7 +71,7 @@ def compile(target, toolchain, output_dir, *opts)
     cflags = CFLAGS.dup
 
     ARCH_CFLAGS.each_pair { |arch, flags|
-        if toolchain =~ arch
+        if triple =~ arch
             cflags += flags
             break
         end
@@ -92,26 +103,24 @@ def compile(target, toolchain, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{toolchain}#{cc} -S #{cflags.join(" ")} shellcodes/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
+        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} shellcodes/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
     end
 
-    sh "#{toolchain}#{cc} #{cflags.join(' ')} shellcodes/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} shellcodes/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
 end
 
-def generate_shellcode(target, toolchain, output_dir)
-    sh "#{toolchain}objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf #{output_dir}/#{target}.bin" 
+def generate_shellcode(target, triple, output_dir)
+    triple += '-' unless triple.empty?
+    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf #{output_dir}/#{target}.bin" 
 end
 
 def build(target, *opts)
     output_dir = OUTPUT_DIR
-    toolchain = ''
+    triple = ''
+    triple = ENV['TRIPLE'] if ENV['TRIPLE']
 
-    if ENV['CROSS_COMPILE']
-        toolchain = ENV['CROSS_COMPILE'] + '-'
-    end
-
-    compile(target, toolchain, output_dir, *opts)
-    generate_shellcode(target, toolchain, output_dir)
+    compile(target, triple, output_dir, *opts)
+    generate_shellcode(target, triple, output_dir)
 end
 
 task :shellexec do

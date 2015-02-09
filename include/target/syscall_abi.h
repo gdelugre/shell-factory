@@ -68,6 +68,7 @@ auto GetArgumentByIndex(T ...args)
     }
 
 #define SYSCALL_NAME_TO_NUM(name) __NR_##name
+#define SYSCALL_EXISTS(name) defined(__NR_##name)
 
 #define EMIT_SYSCALL(name, ...)                                         \
 ({                                                                      \

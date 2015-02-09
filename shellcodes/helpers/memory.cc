@@ -24,6 +24,7 @@ namespace Syscall {
 
     SYSTEM_CALL int     mprotect(void *, size_t, int);
     SYSTEM_CALL void *  mmap(void *, size_t, int, int, int, off_t);
+    SYSTEM_CALL void *  mmap2(void *, size_t, int, int, int, off_t);
     SYSTEM_CALL void *  mremap(void *, size_t, size_t, int);
     SYSTEM_CALL int     munmap(void *, size_t);
 
@@ -33,13 +34,21 @@ namespace Syscall {
         return DO_SYSCALL(mprotect, 3, addr, len, prot);
     }
 
+    #if SYSCALL_EXISTS(mmap2)
+    SYSTEM_CALL
+    void *mmap2(void *addr, size_t len, int prot, int flags, int filedes, off_t pgoff)
+    {
+        return (void *) DO_SYSCALL(mmap2, 6, addr, len, prot, flags, filedes, pgoff);
+    }
+    #endif
+
     SYSTEM_CALL
     void *mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
     {
-    #if (defined(__arm__) && defined(__ARM_EABI__))
-        return arch_sys_mmap(addr, len, prot, flags, fildes, off);
-    #else
+    #if SYSCALL_EXISTS(mmap)
         return (void *) DO_SYSCALL(mmap, 6, addr, len, prot, flags, fildes, off);
+    #else
+        return Syscall::mmap2(addr, len, prot, flags, fildes, off / PAGE_SIZE);
     #endif
     }
 

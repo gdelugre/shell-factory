@@ -12,6 +12,7 @@
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 #include <sys/prctl.h>
+#include <sys/time.h>
 
 typedef void (* sighandler_t)(int);
 typedef int (* thread_routine)(void *);
@@ -29,6 +30,7 @@ namespace Syscall {
     SYSTEM_CALL long            clone(unsigned long, void *, void *, void *, void *);
     SYSTEM_CALL int             prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
     SYSTEM_CALL unsigned int    alarm(unsigned int);
+    SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
     SYSTEM_CALL int             kill(pid_t, int);
     NO_RETURN SYSTEM_CALL void  exit_thread(int);
     NO_RETURN SYSTEM_CALL void  exit_process(int);
@@ -57,13 +59,24 @@ namespace Syscall {
         return DO_SYSCALL(prctl, 5, option, arg2, arg3, arg4, arg5);
     }
 
+    #if SYSCALL_EXISTS(setitimer)
+    SYSTEM_CALL
+    int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
+    {
+        return DO_SYSCALL(setitimer, 3, which, value, ovalue);
+    }
+    #endif
+
     SYSTEM_CALL
     unsigned int alarm(unsigned int seconds)
     {
-        #if defined(__arm__) && defined(__ARM_EABI__)
-        return arch_sys_alarm(seconds);
-        #else
+        #if SYSCALL_EXISTS(alarm)
         return DO_SYSCALL(alarm, 1, seconds);
+        #else
+        struct itimerval itv = { {0,0}, {0,0} };
+
+        itv.it_value.tv_sec = seconds;
+        return Syscall::setitimer(ITIMER_REAL, &itv, &itv);
         #endif
     }
 
