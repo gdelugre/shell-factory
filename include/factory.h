@@ -41,6 +41,9 @@
 #endif
 */
 
+// XXX: Move to CPU definition header.
+#define PAGE_SIZE 4096
+
 #include <target/syscall_abi.h>
 
 /*

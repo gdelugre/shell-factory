@@ -2,7 +2,7 @@
 
 #include "helpers/channel.c"
 #include "helpers/memory.c"
-#include "helpers/cpu.c"
+//#include "helpers/cpu.c"
 
 typedef __attribute__((noreturn)) void (* shellcode)(void);
 
