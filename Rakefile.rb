@@ -114,10 +114,6 @@ def build(target, *opts)
     generate_shellcode(target, toolchain, output_dir)
 end
 
-task :readflag do
-    build(:readflag, "FLAG_PATH")
-end
-
 task :shellexec do
     build(:shellexec, "COMMAND", "SET_ARGV0")
 end
