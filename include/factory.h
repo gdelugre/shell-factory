@@ -30,7 +30,6 @@
 #define PAGE_SIZE 4096
 
 #include <target/syscall_abi.h>
-#include <asm/unistd.h>
 
 #define DO_SYSCALL(name, num_args, ...) ({ \
   int err_val; \

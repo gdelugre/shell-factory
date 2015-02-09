@@ -1,6 +1,12 @@
 #ifndef _LINUX_SYSCALL_ABI_H
 #define _LINUX_SYSCALL_ABI_H
 
+/* Syscall definitions */
+#include <sys/syscall.h>
+
+#define SYSCALL_NAME_TO_NUM(name) __NR_##name
+#define SYSCALL_EXISTS(name) defined(__NR_##name)
+
 #if defined(__i386__)
 #include <target/linux/i386/syscall_abi.h>
 #elif defined(__amd64__)

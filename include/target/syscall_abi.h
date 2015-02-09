@@ -67,9 +67,6 @@ auto GetArgumentByIndex(T ...args)
         asm ("" :: "r" (__arg##n));                                             \
     }
 
-#define SYSCALL_NAME_TO_NUM(name) __NR_##name
-#define SYSCALL_EXISTS(name) defined(__NR_##name)
-
 #define EMIT_SYSCALL(name, ...)                                         \
 ({                                                                      \
     size_t nr_args = SyscallArgumentsLength(__VA_ARGS__);               \
