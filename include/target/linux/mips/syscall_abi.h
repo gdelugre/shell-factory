@@ -2,7 +2,7 @@
 #define _SYSCALL_ABI_H
 
 /*
- * Calling convention for ARM EABI: 
+ * Calling convention for MIPS ABI:
  *
  * syscall number: v0
  * arg1          : a0

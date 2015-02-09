@@ -7,6 +7,8 @@
 #include <target/linux/amd64/syscall_abi.h>
 #elif defined(__arm__)
 #include <target/linux/arm/syscall_abi.h>
+#elif defined(__aarch64__)
+#include <target/linux/aarch64/syscall_abi.h>
 #elif defined(__mips__)
 #include <target/linux/mips/syscall_abi.h>
 #else

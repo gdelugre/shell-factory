@@ -1,7 +1,6 @@
 #ifndef _SYSTEM_H
 #define _SYSTEM_H
 
-#include <asm/unistd.h>
 #include <stddef.h>
 
 #define NO_RETURN [[noreturn]]
@@ -45,6 +44,7 @@
 #define PAGE_SIZE 4096
 
 #include <target/syscall_abi.h>
+#include <asm/unistd.h>
 
 /*
 #if defined(__arm__) && defined(__thumb__)

@@ -38,6 +38,7 @@ namespace Syscall {
     SYSTEM_CALL int     open(const char *, int);
     SYSTEM_CALL int     create(const char *, int, mode_t);
     SYSTEM_CALL int     dup2(int, int);
+    SYSTEM_CALL int     dup3(int, int, int);
     SYSTEM_CALL off_t   lseek(int, off_t, int);
     SYSTEM_CALL ssize_t read(int, void *, size_t);
     SYSTEM_CALL ssize_t write(int, const void *, size_t);
@@ -62,10 +63,23 @@ namespace Syscall {
         return DO_SYSCALL(openat, 4, AT_FDCWD, path, flags | O_CREAT, mode);
     }
 
+    /* Some architectures deprecated dup2 in favor of dup3. */
+    #if SYSCALL_EXISTS(dup3)
+    SYSTEM_CALL
+    int dup3(int oldfd, int newfd, int flags)
+    {
+        return DO_SYSCALL(dup3, 3, oldfd, newfd, flags);
+    }
+    #endif
+
     SYSTEM_CALL
     int dup2(int filedes, int filedes2)
     {   
+        #if !SYSCALL_EXISTS(dup2) && SYSCALL_EXISTS(dup3)
+        return dup3(filedes, filedes2, 0);
+        #else
         return DO_SYSCALL(dup2, 2, filedes, filedes2);
+        #endif
     }
 
     SYSTEM_CALL
