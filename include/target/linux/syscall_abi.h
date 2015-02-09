@@ -1,8 +1,6 @@
 #ifndef _LINUX_SYSCALL_ABI_H
 #define _LINUX_SYSCALL_ABI_H
 
-#include <cstdint>
-
 #if defined(__i386__)
 #include <target/linux/i386/syscall_abi.h>
 #elif defined(__amd64__)
