@@ -29,8 +29,9 @@ namespace Syscall {
     SYSTEM_CALL int             execve(const char *, char *const[], char *const[]);
     SYSTEM_CALL long            clone(unsigned long, void *, void *, void *, void *);
     SYSTEM_CALL int             prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
-    SYSTEM_CALL unsigned int    alarm(unsigned int);
+    #if SYSCALL_EXISTS(setitimer)
     SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
+    #endif
     SYSTEM_CALL int             kill(pid_t, int);
     NO_RETURN SYSTEM_CALL void  exit_thread(int);
     NO_RETURN SYSTEM_CALL void  exit_process(int);

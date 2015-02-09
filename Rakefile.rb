@@ -21,7 +21,7 @@ end
 
 CC = "g++"
 OUTPUT_DIR = "bins"
-INCLUDE_DIRS = %w{include include/sysdeps/generic include/ports}
+INCLUDE_DIRS = %w{include}
 CFLAGS = %w{-std=c++1y
             -Wall
             -Wextra

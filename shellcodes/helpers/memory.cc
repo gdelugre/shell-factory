@@ -24,7 +24,9 @@ namespace Syscall {
 
     SYSTEM_CALL int     mprotect(void *, size_t, int);
     SYSTEM_CALL void *  mmap(void *, size_t, int, int, int, off_t);
+    #if SYSCALL_EXISTS(mmap2)
     SYSTEM_CALL void *  mmap2(void *, size_t, int, int, int, off_t);
+    #endif
     SYSTEM_CALL void *  mremap(void *, size_t, size_t, int);
     SYSTEM_CALL int     munmap(void *, size_t);
 

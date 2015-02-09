@@ -38,7 +38,9 @@ namespace Syscall {
     SYSTEM_CALL int     open(const char *, int);
     SYSTEM_CALL int     create(const char *, int, mode_t);
     SYSTEM_CALL int     dup2(int, int);
+    #if SYSCALL_EXISTS(dup3)
     SYSTEM_CALL int     dup3(int, int, int);
+    #endif
     SYSTEM_CALL off_t   lseek(int, off_t, int);
     SYSTEM_CALL ssize_t read(int, void *, size_t);
     SYSTEM_CALL ssize_t write(int, const void *, size_t);
