@@ -30,6 +30,7 @@ CFLAGS = %w{-std=c++1y
             -fomit-frame-pointer
             -nostdlib
             -Wl,-e_start
+            -Wl,--gc-sections
          }
 
 COMPILER_CFLAGS =
