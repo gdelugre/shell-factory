@@ -266,7 +266,7 @@ int sock_stream_bind_server(int listen_sock,
     {
         while ( true ) 
         {
-            client_sock = Syscall::accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
+            client_sock = Syscall::accept(listen_sock, client_addr, &client_len);
             if ( Syscall::fork() == 0 )
                 break;
             else
@@ -274,7 +274,7 @@ int sock_stream_bind_server(int listen_sock,
         }
     }
     else
-        client_sock = Syscall::accept(listen_sock, (struct sockaddr *) &client_addr, &client_len);
+        client_sock = Syscall::accept(listen_sock, client_addr, &client_len);
 
     Syscall::close(listen_sock);
     return client_sock;
