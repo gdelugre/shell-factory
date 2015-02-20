@@ -137,8 +137,40 @@ task :shellexec do
     build(:shellexec, "COMMAND", "SET_ARGV0")
 end
 
+task :help do
+    STDERR.puts <<-USAGE
+
+ Shellcode generation:
+
+    rake <shellcode> [OPTION1=VALUE1] [OPTION2=VALUE2] ...
+
+ Compilation options:
+
+    CC:             Let you choose the compiler. Only supported are g++ and clang++.  
+    TRIPLE:         Cross compilation target. For example: "aarch64-linux-gnu".
+    CFLAGS:         Add custom flags to the compiler. For example "-m32".
+    NO_BUILTIN:     Does not use the compiler builtins for common memory operations. 
+    OUTPUT_LIB:     Compiles to a shared library instead of a standard executable.
+    OUTPUT_DEBUG:   Instructs the compiler to emit an assembly file.
+
+ Shellcode customization options:
+
+    CHANNEL:        Shellcode communication channel.
+                    Supported options: NO_CHANNEL, TCP_CONNECT, TCP_LISTEN, TCP6_CONNECT, TCP6_LISTEN, SCTP_CONNECT, SCTP_LISTEN, SCTP6_CONNECT, SCTP6_LISTEN, USE_STDOUT, USE_STDERR
+    HOST:           Remote host or local address for socket bind.
+    PORT:           Remote port or local port for socket bind.
+    FORK_ON_ACCEPT: Keeps listening when accepting connections.
+    REUSE_ADDR:     Bind sockets with SO_REUSEADDR.
+
+    USAGE
+end
+
+task :default => :help
+
 rule '' do |task|
-    build(task.name)
+    if task.name != 'default'
+        build(task.name)
+    end
 end
 
 CLEAN.include("bins/*.{elf,bin}")
