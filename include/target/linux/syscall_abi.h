@@ -1,9 +1,6 @@
 #ifndef _LINUX_SYSCALL_ABI_H
 #define _LINUX_SYSCALL_ABI_H
 
-/* Syscall definitions */
-#include <sys/syscall.h>
-
 #define SYSCALL_NAME_TO_NUM(name) __NR_##name
 #define SYSCALL_EXISTS(name) defined(__NR_##name)
 
@@ -20,5 +17,8 @@
 #else
 #error "No syscall ABI defined for this architecture."
 #endif
+
+/* Syscall definitions */
+#include <sys/syscall.h>
 
 #endif
