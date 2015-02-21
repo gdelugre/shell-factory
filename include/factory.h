@@ -17,6 +17,7 @@
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
 
+/*
 #define SHELLCODE_ENTRY extern "C" {                            \
                             NO_RETURN void _start(void) {       \
                                 do {
@@ -25,6 +26,21 @@
                                 for(;;);                        \
                             }                                   \
                         }
+*/
+
+#define SHELLCODE_ENTRY NO_RETURN static void Shellcode::entry()
+
+namespace Shellcode {
+    NO_RETURN inline static void entry();
+}
+
+extern "C" {
+    NO_RETURN void _start(void)
+    {
+        Shellcode::entry();
+        for (;;);
+    }
+}
 
 // XXX: Move to CPU definition header.
 #define PAGE_SIZE 4096

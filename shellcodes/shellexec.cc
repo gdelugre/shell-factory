@@ -7,8 +7,8 @@
 #define COMMAND /bin/sh
 #endif
 
-SHELLCODE_ENTRY {
-
+SHELLCODE_ENTRY
+{
     /* Command to execute. */
     const char *cmd = TO_STRING(COMMAND);
 
@@ -23,5 +23,4 @@ SHELLCODE_ENTRY {
 
     Channel channel;
     execute(cmd, argv, envp, channel);
-
-} SHELLCODE_END
+}

