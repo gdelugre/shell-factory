@@ -1,5 +1,5 @@
-#ifndef _CPU_REGS_H
-#define _CPU_REGS_H
+#ifndef CPU_REGS_H_
+#define CPU_REGS_H_
 
 #define SP_REGISTER "esp"
 

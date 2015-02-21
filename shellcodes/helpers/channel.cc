@@ -1,5 +1,5 @@
-#ifndef _CHANNEL_HELPER_H
-#define _CHANNEL_HELPER_H
+#ifndef CHANNEL_HELPER_H_
+#define CHANNEL_HELPER_H_
 
 /*
  * Channel parameter defaults to NO_CHANNEL.

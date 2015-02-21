@@ -1,5 +1,5 @@
-#ifndef _PROCESS_HELPER_H
-#define _PROCESS_HELPER_H
+#ifndef PROCESS_HELPER_H_
+#define PROCESS_HELPER_H_
 
 #include <factory.h>
 

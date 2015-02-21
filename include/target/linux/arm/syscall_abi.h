@@ -1,5 +1,5 @@
-#ifndef _SYSCALL_ABI_H
-#define _SYSCALL_ABI_H
+#ifndef SYSCALL_ABI_H_
+#define SYSCALL_ABI_H_
 
 /*
  * Calling convention for ARM EABI: 

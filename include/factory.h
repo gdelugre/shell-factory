@@ -1,5 +1,5 @@
-#ifndef _SYSTEM_H
-#define _SYSTEM_H
+#ifndef FACTORY_H_
+#define FACTORY_H_
 
 #include <stddef.h>
 
@@ -16,17 +16,6 @@
 
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
-
-/*
-#define SHELLCODE_ENTRY extern "C" {                            \
-                            NO_RETURN void _start(void) {       \
-                                do {
-
-#define SHELLCODE_END           } while(0);                     \
-                                for(;;);                        \
-                            }                                   \
-                        }
-*/
 
 #define SHELLCODE_ENTRY NO_RETURN static void Shellcode::entry()
 

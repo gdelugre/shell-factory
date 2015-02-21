@@ -1,5 +1,5 @@
-#ifndef _CPU_HELPER_H
-#define _CPU_HELPER_H
+#ifndef CPU_HELPER_H_
+#define CPU_HELPER_H_
 
 #include <stdint.h>
 

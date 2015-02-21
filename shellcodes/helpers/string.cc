@@ -1,5 +1,5 @@
-#ifndef _STRING_HELPER_H
-#define _STRING_HELPER_H
+#ifndef STRING_HELPER_H_
+#define STRING_HELPER_H_
 
 #include <cstdarg>
 

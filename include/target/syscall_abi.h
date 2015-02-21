@@ -1,5 +1,5 @@
-#ifndef _GENERIC_SYSCALL_ABI_H
-#define _GENERIC_SYSCALL_ABI_H
+#ifndef GENERIC_SYSCALL_ABI_H_
+#define GENERIC_SYSCALL_ABI_H_
 
 #if defined(__linux__)
 #include <target/linux/syscall_abi.h>

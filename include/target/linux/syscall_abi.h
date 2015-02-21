@@ -1,5 +1,5 @@
-#ifndef _LINUX_SYSCALL_ABI_H
-#define _LINUX_SYSCALL_ABI_H
+#ifndef LINUX_SYSCALL_ABI_H_
+#define LINUX_SYSCALL_ABI_H_
 
 #define SYSCALL_NAME_TO_NUM(name) __NR_##name
 #define SYSCALL_EXISTS(name) defined(__NR_##name)

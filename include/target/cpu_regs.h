@@ -1,5 +1,5 @@
-#ifndef _GENERIC_CPU_REGS_H
-#define _GENERIC_CPU_REGS_H
+#ifndef GENERIC_CPU_REGS_H_
+#define GENERIC_CPU_REGS_H_
 
 #if defined(__i386__)
 #include <target/cpu/i386/cpu_regs.h>

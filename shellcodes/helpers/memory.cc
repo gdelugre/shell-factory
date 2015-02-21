@@ -1,5 +1,5 @@
-#ifndef _MEMORY_HELPER_H
-#define _MEMORY_HELPER_H
+#ifndef MEMORY_HELPER_H_
+#define MEMORY_HELPER_H_
 
 #ifndef __USE_GNU
 #define __USE_GNU 1

@@ -1,5 +1,5 @@
-#ifndef _SOCKET_HELPER_H
-#define _SOCKET_HELPER_H
+#ifndef SOCKET_HELPER_H_
+#define SOCKET_HELPER_H_
 
 #include <factory.h>
 
