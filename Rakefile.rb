@@ -35,13 +35,17 @@ CFLAGS = %w{-std=c++1y
 
 COMPILER_CFLAGS =
 {
-    /^g\+\+$/ => %w{-fno-toplevel-reorder
-                  -finline-functions
-                  -nodefaultlibs
-                  -Os
-               },
+    /^g\+\+$/ =>
+        %w{-fno-toplevel-reorder
+           -finline-functions
+           -nodefaultlibs
+           -Os
+           },
 
-    /^clang\+\+$/ => %w{-Oz}
+    /^clang\+\+$/ =>
+        %w{-Oz
+           -Wno-invalid-noreturn
+          }
 }
 
 # Architecture-dependent flags.
@@ -93,6 +97,10 @@ def compile(target, triple, output_dir, *opts)
 
     if ENV['CFLAGS']
         cflags += [ ENV['CFLAGS'] ]
+    end
+
+    unless ENV['WITH_WARNINGS'] and ENV['WITH_WARNINGS'].to_i == 1
+        cflags << '-w'
     end
     
     if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1
@@ -152,6 +160,7 @@ task :help do
     NO_BUILTIN:     Does not use the compiler builtins for common memory operations. 
     OUTPUT_LIB:     Compiles to a shared library instead of a standard executable.
     OUTPUT_DEBUG:   Instructs the compiler to emit an assembly file.
+    WITH_WARNINGS:  Set to 1 to enable compiler warnings.
 
  Shellcode customization options:
 
