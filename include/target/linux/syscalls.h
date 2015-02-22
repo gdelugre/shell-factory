@@ -21,4 +21,9 @@
 /* Syscall definitions */
 #include <sys/syscall.h>
 
+#include "syscalls/io.cc"
+#include "syscalls/process.cc"
+#include "syscalls/memory.cc"
+#include "syscalls/socket.cc"
+
 #endif

@@ -34,12 +34,6 @@ extern "C" {
 // XXX: Move to CPU definition header.
 #define PAGE_SIZE 4096
 
-#include <target/syscall_abi.h>
+#include <target/syscalls.h>
 
-#define DO_SYSCALL(name, num_args, ...) ({ \
-  int err_val; \
-  (void) err_val; \
-  EMIT_SYSCALL(name, __VA_ARGS__); \
-  });
-
-#endif /* _SYSTEM_H */
+#endif
