@@ -76,9 +76,9 @@ def compile(target, triple, output_dir, *opts)
     cflags = CFLAGS.dup
 
     puts "[*] Generating shellcode '#{target}'"
-    puts "    |\\ Compiler: #{cc}"
-    puts "    |\\ Target architecture: #{triple.empty? ? `uname -m` : triple}"
-    puts "     \\ Options: #{defines}"
+    puts "    ├ Compiler: #{cc}"
+    puts "    ├ Target architecture: #{triple.empty? ? `uname -m` : triple}"
+    puts "    └ Options: #{defines}"
     puts
 
     ARCH_CFLAGS.each_pair { |arch, flags|
