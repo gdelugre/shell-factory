@@ -60,7 +60,8 @@ enum channel_mode
 #include "socket.cc"
 #include "io.cc"
 
-METHOD
+/* XXX: Cannot declare it as METHOD, gcc 5.2 complains about section mismatch ? */
+inline
 Channel::Channel()
 {
     const ip_addr_t host = { .ip6 = HOST };
