@@ -1,7 +1,7 @@
 #include <factory.h>
 
-#include "lib/pico/channel.cc"
-#include "lib/pico/process.cc"
+#include "pico/channel.cc"
+#include "pico/process.cc"
 
 #ifndef COMMAND
 #define COMMAND /bin/sh

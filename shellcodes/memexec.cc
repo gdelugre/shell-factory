@@ -1,7 +1,7 @@
 #include <factory.h>
 
-#include "lib/pico/channel.cc"
-#include "lib/pico/memory.cc"
+#include "pico/channel.cc"
+#include "pico/memory.cc"
 
 typedef __attribute__((noreturn)) void (* shellcode)(void);
 

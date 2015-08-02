@@ -1,9 +1,9 @@
 #include <factory.h>
 
-#include "lib/pico/channel.cc"
-#include "lib/pico/io.cc"
-#include "lib/pico/memory.cc"
-#include "lib/pico/process.cc"
+#include "pico/channel.cc"
+#include "pico/io.cc"
+#include "pico/memory.cc"
+#include "pico/process.cc"
 
 SHELLCODE_ENTRY
 {
