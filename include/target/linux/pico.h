@@ -5,6 +5,7 @@
 #include <target/linux/syscalls.h>
 
 #include "pico/memory.cc"
+#include "pico/stream.cc"
 #include "pico/fs.cc"
 
 #endif

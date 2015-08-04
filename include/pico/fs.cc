@@ -16,17 +16,7 @@ namespace Pico {
 
     namespace Filesystem {
 
-        class Node
-        {
-            public:
-                METHOD int close();
-                METHOD int file_desc() const { return fd; }
-
-            protected:
-                int fd;
-        };
-
-        class File : Node
+        class File : Stream
         {
             public:
                 constexpr static int READ       = (1 << 0);
@@ -34,25 +24,21 @@ namespace Pico {
                 constexpr static int APPEND     = (1 << 2);
                 constexpr static int TRUNCATE   = (1 << 3);
 
-                FUNCTION File open(const char *path, int flags);
-                FUNCTION File create(const char *path, int flags, mode_t mode);
+                FUNCTION File&& open(const char *path, int flags);
+                FUNCTION File&& create(const char *path, int flags, mode_t mode);
 
                 CONSTRUCTOR File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
-                METHOD int read(void *buffer, size_t size);
-                METHOD int read(Memory::Buffer& buffer);
-
-                METHOD int write(void *buffer, size_t size);
-                METHOD int write(Memory::Buffer& buffer);
         };
 
-        class Directory : Node
+        class Directory
         {
             public:
-                FUNCTION Directory open(const char * path);
-                FUNCTION Directory create(const char *path, mode_t mode);
-                FUNCTION Directory each(const char *path, void (*)(const char *));
+                FUNCTION Directory&& open(const char * path);
+                FUNCTION Directory&& create(const char *path, mode_t mode);
+                FUNCTION int each(const char *path, void (*)(const char *));
 
                 CONSTRUCTOR Directory(const char *path);
+                METHOD int close();
 
             private:
                 int fd;

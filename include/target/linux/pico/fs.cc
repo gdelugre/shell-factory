@@ -27,19 +27,13 @@ namespace Pico {
         }
 
         METHOD
-        int Node::close()
-        {
-            Syscall::close(fd);
-        }
-
-        METHOD
-        File File::open(const char *path, int flags)
+        File&& File::open(const char *path, int flags)
         {
             return File(path, flags, false);
         }
 
         METHOD
-        File File::create(const char *path, int flags, mode_t mode)
+        File&& File::create(const char *path, int flags, mode_t mode)
         {
             return File(path, flags, true, mode);
         }
