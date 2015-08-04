@@ -1,7 +1,8 @@
 #include <factory.h>
 
-#include "pico/channel.cc"
-#include "pico/memory.cc"
+//#include "pico/channel.cc"
+//#include "pico/memory.cc"
+#include <pico.h>
 
 using namespace Pico;
 
