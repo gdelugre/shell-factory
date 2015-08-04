@@ -33,6 +33,4 @@ namespace Pico {
     }
 }
 
-#include <target/pico.h>
-
 #endif

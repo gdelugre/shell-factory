@@ -22,19 +22,22 @@ namespace Pico {
                 METHOD int close();
                 METHOD int file_desc() const { return fd; }
 
-            private:
+            protected:
                 int fd;
         };
 
         class File : Node
         {
             public:
-                FUNCTION File open(const char *path);
-                FUNCTION File create(const char *path, mode_t mode);
+                constexpr static int READ       = (1 << 0);
+                constexpr static int WRITE      = (1 << 1);
+                constexpr static int APPEND     = (1 << 2);
+                constexpr static int TRUNCATE   = (1 << 3);
 
-                CONSTRUCTOR File(const char *path);
-                METHOD int close();
+                FUNCTION File open(const char *path, int flags);
+                FUNCTION File create(const char *path, int flags, mode_t mode);
 
+                CONSTRUCTOR File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
                 METHOD int read(void *buffer, size_t size);
                 METHOD int read(Memory::Buffer& buffer);
 
@@ -50,7 +53,6 @@ namespace Pico {
                 FUNCTION Directory each(const char *path, void (*)(const char *));
 
                 CONSTRUCTOR Directory(const char *path);
-                METHOD int close();
 
             private:
                 int fd;
