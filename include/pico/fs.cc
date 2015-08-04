@@ -16,7 +16,7 @@ namespace Pico {
 
     namespace Filesystem {
 
-        class File : Stream
+        class File : public Stream
         {
             public:
                 constexpr static int READ       = (1 << 0);

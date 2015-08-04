@@ -15,9 +15,26 @@ namespace Pico {
                 return write(buffer.pointer(), buffer.size());
             }
 
-            METHOD Stream& operator <<(Memory::Buffer const& buffer) {
-                write(buffer);
-                return *this;
+            METHOD friend Stream& operator <<(Stream &stm, Memory::Buffer const& buffer)
+            {
+                stm.write(buffer);
+                return stm;
+            }
+
+            METHOD friend Stream& operator >>(Stream &stm, Memory::Buffer const& buffer)
+            {
+                stm.read(buffer);
+                return stm;
+            }
+
+            METHOD friend Stream& operator <<(Memory::Buffer const& buffer, Stream &stm)
+            {
+                return stm >> buffer;
+            }
+
+            METHOD friend Stream& operator >>(Memory::Buffer const& buffer, Stream &stm)
+            {
+                return stm << buffer;
             }
 
             METHOD int close();
@@ -25,6 +42,7 @@ namespace Pico {
         protected:
             int fd;
     };
+
 }
 
 #endif
