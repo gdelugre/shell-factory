@@ -36,9 +36,9 @@ struct Channel
     int tx;
     bool dupable_to_stdout = true;
 
-    Channel();
-    int recv(void *buf, size_t count);
-    int send(void *buf, size_t count);
+    CONSTRUCTOR Channel();
+    METHOD int recv(void *buf, size_t count);
+    METHOD int send(void *buf, size_t count);
 };
 
 enum channel_mode
@@ -60,8 +60,7 @@ enum channel_mode
 #include "socket.cc"
 #include "io.cc"
 
-/* XXX: Cannot declare it as METHOD, gcc 5.2 complains about section mismatch ? */
-inline
+CONSTRUCTOR
 Channel::Channel()
 {
     const ip_addr_t host = { .ip6 = HOST };
