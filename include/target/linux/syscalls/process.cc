@@ -26,6 +26,7 @@ namespace Syscall {
     #if SYSCALL_EXISTS(setitimer)
     SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
     #endif
+    SYSTEM_CALL long            ptrace(enum __ptrace_request, pid_t, void *, void *);
     SYSTEM_CALL int             kill(pid_t, int);
     NO_RETURN SYSTEM_CALL void  exit_thread(int);
     NO_RETURN SYSTEM_CALL void  exit_process(int);
@@ -79,6 +80,12 @@ namespace Syscall {
     int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
     {
         return DO_SYSCALL(rt_sigaction, 4, signum, act, oldact, 8);
+    }
+
+    SYSTEM_CALL
+    long ptrace(enum __ptrace_request request, pid_t pid, void *addr, void *data)
+    {
+        return DO_SYSCALL(ptrace, 4, request, pid, addr, data);
     }
 
     SYSTEM_CALL
