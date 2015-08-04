@@ -22,6 +22,8 @@ namespace Pico {
 
             if ( pico_flags & File::TRUNCATE )
                 flags |= O_TRUNC;
+
+            return flags;
         }
 
         METHOD
