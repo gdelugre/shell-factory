@@ -3,6 +3,28 @@
 
 namespace Pico {
 
+    constexpr int STDIN_FD  = 0;
+    constexpr int STDOUT_FD = 1;
+    constexpr int STDERR_FD = 2;
+
+    METHOD
+    Stream&& Stream::standard_input()
+    {
+        return Stream(STDIN_FD);
+    }
+
+    METHOD
+    Stream&& Stream::standard_output()
+    {
+        return Stream(STDOUT_FD);
+    }
+
+    METHOD
+    Stream&& Stream::standard_error()
+    {
+        return Stream(STDERR_FD);
+    }
+
     METHOD
     int Stream::read(void *ptr, size_t count)
     {
