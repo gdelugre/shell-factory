@@ -43,6 +43,11 @@ namespace Syscall {
     SYSTEM_CALL int     fstat(int, struct stat *);
     SYSTEM_CALL int     stat(int, struct stat *);
     SYSTEM_CALL int     close(int);
+    SYSTEM_CALL int     mkdir(const char *, mode_t);
+    SYSTEM_CALL int     rmdir(const char *);
+    SYSTEM_CALL int     chdir(const char *);
+    SYSTEM_CALL int     fchdir(int fd);
+    SYSTEM_CALL int     chroot(const char *);
 
     SYSTEM_CALL
     int open(const char *path, int flags)
@@ -143,6 +148,36 @@ namespace Syscall {
     int close(int fd)
     {
         return DO_SYSCALL(close, 1, fd);
+    }
+
+    SYSTEM_CALL
+    int mkdir(const char *path, mode_t mode)
+    {
+        return DO_SYSCALL(mkdir, 2, path, mode);
+    }
+
+    SYSTEM_CALL
+    int rmdir(const char *path)
+    {
+        return DO_SYSCALL(rmdir, 1, path);
+    }
+
+    SYSTEM_CALL
+    int chdir(const char *path)
+    {
+        return DO_SYSCALL(chdir, 1, path);
+    }
+
+    SYSTEM_CALL
+    int fchdir(int fd)
+    {
+        return DO_SYSCALL(fchdir, 1, fd);
+    }
+
+    SYSTEM_CALL
+    int chroot(const char *path)
+    {
+        return DO_SYSCALL(chroot, 1, path);
     }
 }
 
