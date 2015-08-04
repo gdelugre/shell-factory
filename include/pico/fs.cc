@@ -84,12 +84,4 @@ int read_directory(const char *pathname, Memory::Buffer& p_dirents, size_t *dsiz
     return 0;
 }
 
-FUNCTION
-void drop_file(const char *filename, mode_t mode, void *data, size_t size)
-{
-    int fd = Syscall::create(filename, O_TRUNC | O_WRONLY, mode);
-    Syscall::write(fd, data, size);
-    Syscall::close(fd);
-}
-
 #endif

