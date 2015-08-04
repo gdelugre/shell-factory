@@ -7,6 +7,7 @@
 #include "fs.cc"
 
 using namespace Pico;
+using namespace Pico::Filesystem;
 
 typedef void (* sighandler_t)(int);
 typedef int (* thread_routine)(void *);
@@ -37,74 +38,60 @@ void set_current_thread_name(const char *comm)
 FUNCTION
 pid_t find_process_by_name(const char *proc_name)
 {
-    size_t dsize, off, n;
-    Memory::Buffer buffer;
-    pid_t pid;
-    char comm_path[PATH_MAX]; 
-    char comm[COMM_MAX + 1];
-    int fd;
+    pid_t result = 0;
 
-    read_directory("/proc", buffer, &dsize);
-    struct linux_dirent *dirents = buffer.as<struct linux_dirent *>(), *current;
+    Directory::each("/proc", [proc_name,&result](const char *filename) -> int {
+        char comm_path[PATH_MAX];
+        char comm[COMM_MAX + 1];
 
-    foreach_dirent(dirents, current, off, dsize)
-    {
-        pid = _atoi(dirent_name(current));
+        pid_t pid = _atoi(filename);
         if ( pid == 0 )
-            continue;
+            return 0;
 
-        _sprintf(comm_path, "/proc/%s/comm", dirent_name(current));
-        fd = Syscall::open(comm_path, O_RDONLY); 
-        n = Syscall::read(fd, comm, sizeof(comm));
+        _sprintf(comm_path, "/proc/%s/comm", filename);
+        int fd = Syscall::open(comm_path, O_RDONLY);
+        ssize_t n = Syscall::read(fd, comm, sizeof(comm));
         comm[n - 1] = '\0';
 
         Syscall::close(fd);
 
         if ( _strcmp(proc_name, comm) == 0 )
         {
-            buffer.free();
-            return pid;
+            result = pid;
+            return 1;
         }
-    }
+    });
 
-    buffer.free();
-    return 0;
+    return result;
 }
 
 FUNCTION
 pid_t find_process_by_path(const char *exe_path)
 {
-    size_t dsize, off;
-    ssize_t n;
-    Memory::Buffer buffer;
-    pid_t pid;
-    char link_path[PATH_MAX]; 
-    char exe[PATH_MAX + 1];
+    pid_t result = 0;
 
-    read_directory("/proc", buffer, &dsize);
-    struct linux_dirent *dirents = buffer.as<struct linux_dirent *>(), *current;
+    Directory::each("/proc", [exe_path,&result](const char *filename) {
+        char link_path[PATH_MAX];
+        char exe[PATH_MAX + 1];
+        pid_t pid = _atoi(filename);
 
-    foreach_dirent(dirents, current, off, dsize)
-    {
-        pid = _atoi(dirent_name(current));
         if ( pid == 0 )
-            continue;
+            return 0;
 
-        _sprintf(link_path, "/proc/%s/exe", dirent_name(current));
-        n = Syscall::readlink(link_path, exe, sizeof(exe));
+        _sprintf(link_path, "/proc/%s/exe", filename);
+        ssize_t n = Syscall::readlink(link_path, exe, sizeof(exe));
         if ( n < 0 )
-            continue;
+            return 0;
 
         exe[n] = '\0';
         if ( _strcmp(exe_path, exe) == 0 )
         {
-            buffer.free();
-            return pid;
+            result = pid;
+            return 1;
         }
-    }
+    });
 
-    buffer.free();
-    return 0;
+    return result;
 }
 
 FUNCTION

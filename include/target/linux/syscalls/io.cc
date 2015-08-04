@@ -45,6 +45,7 @@ namespace Syscall {
     SYSTEM_CALL int     close(int);
     SYSTEM_CALL int     mkdir(const char *, mode_t);
     SYSTEM_CALL int     rmdir(const char *);
+    SYSTEM_CALL int     getcwd(char *, size_t);
     SYSTEM_CALL int     chdir(const char *);
     SYSTEM_CALL int     fchdir(int fd);
     SYSTEM_CALL int     chroot(const char *);
@@ -160,6 +161,12 @@ namespace Syscall {
     int rmdir(const char *path)
     {
         return DO_SYSCALL(rmdir, 1, path);
+    }
+
+    SYSTEM_CALL
+    int getcwd(char *buf, size_t size)
+    {
+        return DO_SYSCALL(getcwd, 2, buf, size);
     }
 
     SYSTEM_CALL

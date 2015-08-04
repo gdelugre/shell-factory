@@ -1,15 +1,6 @@
 #ifndef PICOLIB_IO_H_
 #define PICOLIB_IO_H_
 
-#include "memory.cc"
-
-#define foreach_dirent(dirents, dirent, off, dsize) \
-    for (off = 0, dirent = dirents; \
-            dirent && off < dsize; \
-            off += dirent->d_reclen, dirent = static_cast<struct linux_dirent *>((void *)(((char *) dirent) + dirent->d_reclen)))
-
-#define dirent_name(dirent) dirent->d_name
-
 using namespace Pico;
 
 namespace Pico {
@@ -26,62 +17,37 @@ namespace Pico {
 
                 FUNCTION File&& open(const char *path, int flags);
                 FUNCTION File&& create(const char *path, int flags, mode_t mode);
+                FUNCTION int remove(const char *path);
 
                 CONSTRUCTOR File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
+                METHOD int file_desc() const { return fd; }
         };
 
         class Directory
         {
             public:
-                FUNCTION Directory&& open(const char * path);
-                FUNCTION Directory&& create(const char *path, mode_t mode);
-                FUNCTION int each(const char *path, void (*)(const char *));
+                FUNCTION Directory&& open(const char *path);
+                FUNCTION int create(const char *path, mode_t mode);
+                FUNCTION int remove(const char *path);
+
+                template <typename Func>
+                FUNCTION int each(const char *path, Func);
+                FUNCTION int set_current(const char *path);
+                FUNCTION int get_current(char *path, size_t size);
+                FUNCTION int change_root(const char *path);
 
                 CONSTRUCTOR Directory(const char *path);
+
+                template <typename Func>
+                METHOD int list(Func);
+                METHOD int set_current();
                 METHOD int close();
+                METHOD int file_desc() const { return fd; }
 
             private:
-                int fd;
+                int fd = -1;
         };
     }
-}
-
-FUNCTION
-int read_directory(const char *pathname, Memory::Buffer& p_dirents, size_t *dsize)
-{
-    int                 ret;
-    int                 dirfd = Syscall::open(pathname, O_DIRECTORY | O_RDONLY);
-    size_t              buffer_sz = PAGE_SIZE;
-    size_t              read_size = 0;
-    Memory::Buffer      buffer(buffer_sz);
-    struct linux_dirent *dirents = static_cast<linux_dirent *>(buffer.pointer());
-
-    if ( dirfd < 0 )
-        return dirfd;
-
-    while ( true )
-    {
-        ret = Syscall::getdents(dirfd, dirents, buffer.size());
-        if ( ret == 0 )
-            break;
-     
-        if ( ret < 0 )
-        {
-            buffer.free();
-            Syscall::close(dirfd);
-            return ret;
-        }
-
-        read_size += ret;
-        buffer.resize(buffer.size() * 2);
-        dirents = static_cast<struct linux_dirent *>((void *)((char *) buffer.pointer() + read_size));
-    }
-
-    p_dirents = buffer;
-    *dsize = read_size;
-
-    Syscall::close(dirfd);
-    return 0;
 }
 
 #endif

@@ -5,6 +5,13 @@ namespace Pico {
 
     class Stream {
         public:
+            FUNCTION Stream&& standard_input();
+            FUNCTION Stream&& standard_output();
+            FUNCTION Stream&& standard_error();
+
+            CONSTRUCTOR Stream() = default;
+            CONSTRUCTOR Stream(int fd) : fd(fd) {}
+
             METHOD int read(void *ptr, size_t count);
             METHOD int read(Memory::Buffer const& buffer) {
                 return read(buffer.pointer(), buffer.size());
@@ -40,7 +47,7 @@ namespace Pico {
             METHOD int close();
 
         protected:
-            int fd;
+            int fd = -1;
     };
 
 }
