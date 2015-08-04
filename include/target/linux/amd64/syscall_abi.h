@@ -8,7 +8,7 @@
  * arg1          : rdi
  * arg2          : rsi
  * arg3          : rdx
- * arg4          : rcx
+ * arg4          : r10
  * arg5          : r8
  * arg6          : r9
  *
@@ -25,7 +25,7 @@
     SYSCALL_ARG_BIND_REGISTER(0, "rdi", __VA_ARGS__); \
     SYSCALL_ARG_BIND_REGISTER(1, "rsi", __VA_ARGS__); \
     SYSCALL_ARG_BIND_REGISTER(2, "rdx", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(3, "rcx", __VA_ARGS__); \
+    SYSCALL_ARG_BIND_REGISTER(3, "r10", __VA_ARGS__); \
     SYSCALL_ARG_BIND_REGISTER(4, "r8", __VA_ARGS__);  \
     SYSCALL_ARG_BIND_REGISTER(5, "r9", __VA_ARGS__);
 
