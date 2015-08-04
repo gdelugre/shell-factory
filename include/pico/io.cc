@@ -10,39 +10,40 @@
 
 #define dirent_name(dirent) dirent->d_name
 
+using namespace Pico;
+
 FUNCTION
-int read_directory(const char *pathname, struct linux_dirent **p_dirents, size_t *dsize)
+int read_directory(const char *pathname, Memory::Buffer& p_dirents, size_t *dsize)
 {
     int                 ret;
     int                 dirfd = Syscall::open(pathname, O_DIRECTORY | O_RDONLY);
     size_t              buffer_sz = PAGE_SIZE;
     size_t              read_size = 0;
-    void                *buffer = _malloc(buffer_sz);
-    struct linux_dirent *dirents = static_cast<linux_dirent *>(buffer);
+    Memory::Buffer      buffer(buffer_sz);
+    struct linux_dirent *dirents = static_cast<linux_dirent *>(buffer.pointer());
 
     if ( dirfd < 0 )
         return dirfd;
 
     while ( true )
     {
-        ret = Syscall::getdents(dirfd, dirents, buffer_sz);
+        ret = Syscall::getdents(dirfd, dirents, buffer.size());
         if ( ret == 0 )
             break;
      
         if ( ret < 0 )
         {
-            _free(buffer);
+            buffer.free();
             Syscall::close(dirfd);
             return ret;
         }
 
         read_size += ret;
-        buffer_sz *= 2;
-        buffer = _realloc(buffer, buffer_sz);
-        dirents = static_cast<struct linux_dirent *>((void *)((char *) buffer + read_size));
+        buffer.resize(buffer.size() * 2);
+        dirents = static_cast<struct linux_dirent *>((void *)((char *) buffer.pointer() + read_size));
     }
 
-    *p_dirents = (struct linux_dirent *) buffer;
+    p_dirents = buffer;
     *dsize = read_size;
 
     Syscall::close(dirfd);

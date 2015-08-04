@@ -6,6 +6,8 @@
 #include "memory.cc"
 #include "io.cc"
 
+using namespace Pico;
+
 typedef void (* sighandler_t)(int);
 typedef int (* thread_routine)(void *);
 
@@ -36,13 +38,14 @@ FUNCTION
 pid_t find_process_by_name(const char *proc_name)
 {
     size_t dsize, off, n;
-    struct linux_dirent *dirents, *current;
+    Memory::Buffer buffer;
     pid_t pid;
     char comm_path[PATH_MAX]; 
     char comm[COMM_MAX + 1];
     int fd;
 
-    read_directory("/proc", &dirents, &dsize);
+    read_directory("/proc", buffer, &dsize);
+    struct linux_dirent *dirents = buffer.as<struct linux_dirent *>(), *current;
 
     foreach_dirent(dirents, current, off, dsize)
     {
@@ -59,12 +62,12 @@ pid_t find_process_by_name(const char *proc_name)
 
         if ( _strcmp(proc_name, comm) == 0 )
         {
-            _free(dirents);
+            buffer.free();
             return pid;
         }
     }
 
-    _free(dirents);
+    buffer.free();
     return 0;
 }
 
@@ -73,12 +76,13 @@ pid_t find_process_by_path(const char *exe_path)
 {
     size_t dsize, off;
     ssize_t n;
-    struct linux_dirent *dirents, *current;
+    Memory::Buffer buffer;
     pid_t pid;
     char link_path[PATH_MAX]; 
     char exe[PATH_MAX + 1];
 
-    read_directory("/proc", &dirents, &dsize);
+    read_directory("/proc", buffer, &dsize);
+    struct linux_dirent *dirents = buffer.as<struct linux_dirent *>(), *current;
 
     foreach_dirent(dirents, current, off, dsize)
     {
@@ -94,12 +98,12 @@ pid_t find_process_by_path(const char *exe_path)
         exe[n] = '\0';
         if ( _strcmp(exe_path, exe) == 0 )
         {
-            _free(dirents);
+            buffer.free();
             return pid;
         }
     }
 
-    _free(dirents);
+    buffer.free();
     return 0;
 }
 
@@ -123,7 +127,7 @@ pid_t create_thread(thread_routine thread_entry, void *arg)
     size_t stack_size = THREAD_STACK_SIZE;
     pid_t tid;
 
-    child_stack = allocate_memory(stack_size, PROT_READ|PROT_WRITE);
+    child_stack = Memory::allocate(stack_size, PROT_READ|PROT_WRITE);
 
     tid = Syscall::clone(
         CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM,
