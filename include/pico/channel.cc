@@ -58,7 +58,7 @@ enum channel_mode
 };
 
 #include "socket.cc"
-#include "io.cc"
+#include "fs.cc"
 
 CONSTRUCTOR
 Channel::Channel()

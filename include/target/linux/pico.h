@@ -5,5 +5,6 @@
 #include <target/linux/syscalls.h>
 
 #include "pico/memory.cc"
+#include "pico/fs.cc"
 
 #endif

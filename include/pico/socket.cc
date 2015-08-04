@@ -3,7 +3,7 @@
 
 #include "cpu.cc"
 #include "string.cc"
-#include "io.cc"
+#include "fs.cc"
 #include "process.cc"
 
 typedef union {

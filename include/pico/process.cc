@@ -4,7 +4,7 @@
 #include "channel.cc"
 #include "string.cc"
 #include "memory.cc"
-#include "io.cc"
+#include "fs.cc"
 
 using namespace Pico;
 
