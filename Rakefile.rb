@@ -68,7 +68,7 @@ def cc_invoke(cc, triple)
 end
 
 def compile(target, triple, output_dir, *opts)
-    common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR}
+    common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
@@ -161,6 +161,7 @@ task :help do
     OUTPUT_LIB:     Compiles to a shared library instead of a standard executable.
     OUTPUT_DEBUG:   Instructs the compiler to emit an assembly file.
     WITH_WARNINGS:  Set to 1 to enable compiler warnings.
+    RELAX_INLINE:   Set to 1 to let the compiler uninline some functions.
 
  Shellcode customization options:
 
