@@ -17,32 +17,32 @@ namespace Pico {
 
                 FUNCTION File&& open(const char *path, int flags);
                 FUNCTION File&& create(const char *path, int flags, mode_t mode);
-                FUNCTION int remove(const char *path);
+                FUNCTION int    remove(const char *path);
 
-                CONSTRUCTOR File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
-                METHOD int file_desc() const { return fd; }
+                CONSTRUCTOR     File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
+                METHOD int      file_desc() const { return fd; }
         };
 
         class Directory
         {
             public:
-                FUNCTION Directory&& open(const char *path);
-                FUNCTION int create(const char *path, mode_t mode);
-                FUNCTION int remove(const char *path);
+                FUNCTION        Directory&& open(const char *path);
+                FUNCTION int    create(const char *path, mode_t mode);
+                FUNCTION int    remove(const char *path);
 
                 template <typename Func>
-                FUNCTION int each(const char *path, Func);
-                FUNCTION int set_current(const char *path);
-                FUNCTION int get_current(char *path, size_t size);
-                FUNCTION int change_root(const char *path);
+                FUNCTION int    each(const char *path, Func);
+                FUNCTION int    set_current(const char *path);
+                FUNCTION int    get_current(char *path, size_t size);
+                FUNCTION int    change_root(const char *path);
 
                 CONSTRUCTOR Directory(const char *path);
 
                 template <typename Func>
-                METHOD int list(Func);
-                METHOD int set_current();
-                METHOD int close();
-                METHOD int file_desc() const { return fd; }
+                METHOD int      list(Func);
+                METHOD int      set_current();
+                METHOD int      close();
+                METHOD int      file_desc() const { return fd; }
 
             private:
                 int fd = -1;
