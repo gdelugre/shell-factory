@@ -10,15 +10,12 @@ SHELLCODE_ENTRY
     /* Command to execute. */
     const char *cmd = TO_STRING(COMMAND);
 
-    /* No environment defined. */
-    char **const envp = NULL;
-
 #if (SET_ARGV0 == 1)
     char *const argv[] = { (char *) cmd, NULL };
 #else
-    char **const argv = envp;
+    char **const argv = nullptr;
 #endif
 
     Channel channel;
-    execute(cmd, argv, envp, channel);
+    Process::execute(cmd, argv, channel);
 }

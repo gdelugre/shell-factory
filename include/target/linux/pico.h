@@ -7,5 +7,6 @@
 #include "pico/memory.cc"
 #include "pico/stream.cc"
 #include "pico/fs.cc"
+#include "pico/process.cc"
 
 #endif
