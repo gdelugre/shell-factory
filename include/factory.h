@@ -39,9 +39,10 @@ extern "C" {
     }
 }
 
-// XXX: Move to CPU definition header.
+// TODO: Move to CPU definition header.
 #define PAGE_SIZE 4096
 
+#include <factory-options.h>
 #include <target/syscalls.h>
 
 #endif

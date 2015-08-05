@@ -1,11 +1,6 @@
 #ifndef PICOLIB_SOCKET_H_
 #define PICOLIB_SOCKET_H_
 
-#include "cpu.cc"
-#include "string.cc"
-#include "fs.cc"
-//#include "process.cc"
-
 typedef union {
     uint8_t bytes[4];
     uint32_t value;
@@ -21,14 +16,6 @@ typedef uint16_t ip_port_t;
 #define IPV4(a,b,c,d) (ipv4_addr_t) { a,b,c,d }
 #define IPV6(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
     (ipv6_addr_t) { a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p }
-
-#ifndef FORK_ON_ACCEPT
-    #define FORK_ON_ACCEPT  0
-#endif
-
-#ifndef REUSE_ADDR
-    #define REUSE_ADDR      0
-#endif
 
 static inline
 in_addr_t _inet_addr(const ip_addr_t addr)
@@ -141,7 +128,7 @@ int sock_stream_bind_server(int listen_sock,
     socklen_t   client_len = addr_len;
     int         client_sock;
 
-    if ( REUSE_ADDR )
+    if ( g_opt_reuse_addr )
     {
         int option = 1;
         Syscall::setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
@@ -152,7 +139,7 @@ int sock_stream_bind_server(int listen_sock,
 
     Syscall::listen(listen_sock, 1);
 
-    if ( FORK_ON_ACCEPT )
+    if ( g_opt_fork_on_accept )
     {
         while ( true ) 
         {
