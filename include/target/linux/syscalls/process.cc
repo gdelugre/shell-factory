@@ -20,7 +20,7 @@
 namespace Syscall {
 
     SYSTEM_CALL pid_t           fork(void);
-    SYSTEM_CALL int             execve(const char *, char *const[], char *const[]);
+    NO_RETURN SYSTEM_CALL int   execve(const char *, char *const[], char *const[]);
     SYSTEM_CALL long            clone(unsigned long, void *, void *, void *, void *);
     SYSTEM_CALL int             prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
     #if SYSCALL_EXISTS(setitimer)
@@ -38,10 +38,10 @@ namespace Syscall {
         return DO_SYSCALL(fork, 0);
     }
 
-    SYSTEM_CALL
+    NO_RETURN SYSTEM_CALL
     int execve(const char *filename, char *const argv[], char *const envp[])
     {
-        return DO_SYSCALL(execve, 3, filename, argv, envp);
+        DO_SYSCALL(execve, 3, filename, argv, envp);
     }
 
     SYSTEM_CALL
