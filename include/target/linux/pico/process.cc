@@ -13,7 +13,7 @@ namespace Pico {
     } 
 
     METHOD
-    Process&& Process::find_process_by_name(const char *proc_name)
+    Process Process::find_process_by_name(const char *proc_name)
     {
         pid_t result = 0;
 
@@ -42,7 +42,7 @@ namespace Pico {
     }
 
     METHOD
-    Process&& Process::find_process_by_path(const char *exe_path)
+    Process Process::find_process_by_path(const char *exe_path)
     {
         pid_t result = 0;
 
@@ -83,7 +83,7 @@ namespace Pico {
     }
     
     METHOD
-    Process&& Process::create_thread(thread_routine thread_entry, void *arg)
+    Process Process::create_thread(thread_routine thread_entry, void *arg)
     {
         void *child_stack;
         size_t stack_size = Process::THREAD_STACK_SIZE;
@@ -123,7 +123,7 @@ namespace Pico {
     }
 
     METHOD
-    Process&& Process::spawn(const char *filename, char *const argv[], char *const envp[])
+    Process Process::spawn(const char *filename, char *const argv[], char *const envp[])
     {
         pid_t pid = Syscall::fork();
         if ( pid == 0 )
@@ -133,7 +133,7 @@ namespace Pico {
     }
 
     METHOD
-    Process&& Process::spawn(const char *filename, char *const argv[], char *const envp[], Channel channel)
+    Process Process::spawn(const char *filename, char *const argv[], char *const envp[], Channel channel)
     {
         pid_t pid = Syscall::fork();
         if ( pid == 0 )

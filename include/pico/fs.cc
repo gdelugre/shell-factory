@@ -15,8 +15,8 @@ namespace Pico {
                 constexpr static int APPEND     = (1 << 2);
                 constexpr static int TRUNCATE   = (1 << 3);
 
-                FUNCTION File&& open(const char *path, int flags);
-                FUNCTION File&& create(const char *path, int flags, mode_t mode);
+                FUNCTION File   open(const char *path, int flags);
+                FUNCTION File   create(const char *path, int flags, mode_t mode);
                 FUNCTION int    remove(const char *path);
 
                 CONSTRUCTOR     File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);

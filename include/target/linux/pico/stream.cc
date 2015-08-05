@@ -8,37 +8,39 @@ namespace Pico {
     constexpr int STDERR_FD = 2;
 
     METHOD
-    Stream&& Stream::standard_input()
+    Stream Stream::standard_input()
     {
         return Stream(STDIN_FD);
     }
 
     METHOD
-    Stream&& Stream::standard_output()
+    Stream Stream::standard_output()
     {
         return Stream(STDOUT_FD);
     }
 
     METHOD
-    Stream&& Stream::standard_error()
+    Stream Stream::standard_error()
     {
         return Stream(STDERR_FD);
     }
 
     METHOD
-    int Stream::read(void *ptr, size_t count)
+    Stream& Stream::read(void *ptr, size_t count)
     {
         Syscall::read(fd, ptr, count);
+        return *this;
     }
 
     METHOD
-    int Stream::write(void *ptr, size_t count)
+    Stream& Stream::write(void *ptr, size_t count)
     {
         Syscall::write(fd, ptr, count);
+        return *this;
     }
 
     METHOD
-    Stream&& Stream::duplicate()
+    Stream Stream::duplicate()
     {
         return Stream( Syscall::dup(fd) );
     }
@@ -52,7 +54,7 @@ namespace Pico {
     METHOD
     int Stream::close()
     {
-        Syscall::close(fd);
+        return Syscall::close(fd);
     }
 }
 

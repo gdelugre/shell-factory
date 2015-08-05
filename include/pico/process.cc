@@ -10,9 +10,9 @@ namespace Pico {
 
         public:
             FUNCTION void           set_current_thread_name(const char *comm);
-            FUNCTION Process&&      find_process_by_name(const char *proc_name);
-            FUNCTION Process&&      find_process_by_path(const char *exe_path);
-            FUNCTION Process&&      create_thread(thread_routine thread_entry, void *arg);
+            FUNCTION Process        find_process_by_name(const char *proc_name);
+            FUNCTION Process        find_process_by_path(const char *exe_path);
+            FUNCTION Process        create_thread(thread_routine thread_entry, void *arg);
             FUNCTION sighandler_t   set_signal_handler(int signal, sighandler_t handler);
 
             NO_RETURN FUNCTION void execute(const char *filename, char *const argv[], char *const envp[]);
@@ -30,18 +30,18 @@ namespace Pico {
                 execute(filename, nullptr, channel);
             }
 
-            FUNCTION Process&&      spawn(const char *filename, char *const argv[], char *const envp[]);
-            FUNCTION Process&&      spawn(const char *filename, char *const argv[], char *const envp[], Channel channel);
-            FUNCTION Process&&      spawn(const char *filename, char *const argv[]) {
+            FUNCTION Process        spawn(const char *filename, char *const argv[], char *const envp[]);
+            FUNCTION Process        spawn(const char *filename, char *const argv[], char *const envp[], Channel channel);
+            FUNCTION Process        spawn(const char *filename, char *const argv[]) {
                 return spawn(filename, argv, nullptr);
             }
-            FUNCTION Process&&      spawn(const char *filename, char *const argv[], Channel channel) {
+            FUNCTION Process        spawn(const char *filename, char *const argv[], Channel channel) {
                 return spawn(filename, argv, nullptr, channel);
             }
-            FUNCTION Process&&      spawn(const char *filename) {
+            FUNCTION Process        spawn(const char *filename) {
                 return spawn(filename, nullptr);
             }
-            FUNCTION Process&&      spawn(const char *filename, Channel channel) {
+            FUNCTION Process        spawn(const char *filename, Channel channel) {
                 return spawn(filename, nullptr, channel);
             }
 
