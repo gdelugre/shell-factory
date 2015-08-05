@@ -12,25 +12,15 @@ namespace Pico {
 
     namespace Filesystem {
 
+        // TODO: would be better with a nicely formatted constexpr, but keep it that way for gcc <= 4.9 compatibility.
         constexpr int open_flags(int pico_flags)
         {
-            int flags = O_NONBLOCK;
-
-            // TODO: add assert if not read and not write
-            if ( pico_flags & File::READ && !(pico_flags & File::WRITE) )
-                flags |= O_RDONLY;
-            else if ( pico_flags & File::WRITE && !(pico_flags & File::READ) )
-                flags |= O_WRONLY;
-            else
-                flags |= O_RDWR;
-
-            if ( pico_flags & File::APPEND )
-                flags |= O_APPEND;
-
-            if ( pico_flags & File::TRUNCATE )
-                flags |= O_TRUNC;
-
-            return flags;
+            return (pico_flags & File::TRUNCATE ? O_TRUNC : 0) |
+                   (pico_flags & File::APPEND ? O_APPEND : 0) |
+                   (((pico_flags & File::READ) && !(pico_flags & File::WRITE)) ? O_RDONLY : 0) |
+                   (((pico_flags & File::WRITE && !(pico_flags & File::READ))) ? O_WRONLY : 0) |
+                   (((pico_flags & File::READ) && (pico_flags & File::WRITE)) ? O_RDWR : 0) |
+                   O_NONBLOCK;
         }
 
         METHOD

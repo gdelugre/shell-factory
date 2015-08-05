@@ -6,18 +6,12 @@ namespace Pico {
     namespace Memory {
 
         // Converts pico memory protection to target protection.
+        // TODO: would be better with a nicely formatted constexpr, but keep it as a single return for gcc <=4.9 for now.
         constexpr int mmap_prot(int pico_prot)
         {
-            unsigned int prot = 0;
-
-            if ( pico_prot & Memory::READ )
-                prot |= PROT_READ;
-            if ( pico_prot & Memory::WRITE )
-                prot |= PROT_WRITE;
-            if ( pico_prot & Memory::EXEC )
-                prot |= PROT_EXEC;
-
-            return prot;
+            return (pico_prot & Memory::READ ? PROT_READ : 0) |
+                   (pico_prot & Memory::WRITE ? PROT_WRITE : 0) |
+                   (pico_prot & Memory::EXEC ? PROT_EXEC : 0);
         }
 
         METHOD
