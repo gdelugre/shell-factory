@@ -28,6 +28,7 @@ namespace Syscall {
 
     SYSTEM_CALL int     open(const char *, int);
     SYSTEM_CALL int     create(const char *, int, mode_t);
+    SYSTEM_CALL int     dup(int);
     SYSTEM_CALL int     dup2(int, int);
     #if SYSCALL_EXISTS(dup3)
     SYSTEM_CALL int     dup3(int, int, int);
@@ -60,6 +61,12 @@ namespace Syscall {
     int create(const char *path, int flags, mode_t mode)
     {
         return DO_SYSCALL(openat, 4, AT_FDCWD, path, flags | O_CREAT, mode);
+    }
+
+    SYSTEM_CALL
+    int dup(int oldfd)
+    {
+        return DO_SYSCALL(dup, 1, oldfd);
     }
 
     /* Some architectures deprecated dup2 in favor of dup3. */

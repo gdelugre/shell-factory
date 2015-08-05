@@ -20,7 +20,6 @@ namespace Pico {
                 FUNCTION int    remove(const char *path);
 
                 CONSTRUCTOR     File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
-                METHOD int      file_desc() const { return fd; }
         };
 
         class Directory

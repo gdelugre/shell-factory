@@ -44,6 +44,9 @@ namespace Pico {
                 return stm << buffer;
             }
 
+            METHOD Stream&& duplicate();
+            METHOD void replace(Stream const&);
+            METHOD int file_desc() const { return fd; }
             METHOD int close();
 
         protected:

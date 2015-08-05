@@ -36,6 +36,18 @@ namespace Pico {
     {
         Syscall::write(fd, ptr, count);
     }
+
+    METHOD
+    Stream&& Stream::duplicate()
+    {
+        return Stream( Syscall::dup(fd) );
+    }
+
+    METHOD
+    void Stream::replace(Stream const& stm)
+    {
+        Syscall::dup2(stm.file_desc(), fd);
+    }
     
     METHOD
     int Stream::close()
