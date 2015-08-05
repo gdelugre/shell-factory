@@ -1,6 +1,59 @@
 #ifndef PICOLIB_SOCKET_H_
 #define PICOLIB_SOCKET_H_
 
+namespace Pico {
+
+    namespace Network {
+
+        template <int N>
+        struct IpAddress;
+
+        template<>
+        struct IpAddress<4>
+        {
+            union {
+                uint8_t bytes[4];
+                uint32_t value;
+            };
+        };
+
+        template<>
+        struct IpAddress<6>
+        {
+            uint8_t bytes[16];
+        };
+
+        class Socket : public Stream 
+        {
+            public:
+                CONSTRUCTOR Socket(int domain, int type, int protocol);
+                METHOD int set(int level, int optname, void *val, size_t len);
+        };
+
+        class StreamSocket : public Socket
+        {
+            public:
+                CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
+                METHOD int connect(IpAddress<4> ip, uint16_t port);
+                METHOD int connect(IpAddress<6> ip, uint16_t port);
+                METHOD int listen(IpAddress<4> ip, uint16_t port, bool reuse_addr = false);
+                METHOD int listen(IpAddress<6> ip, uint16_t port, bool reuse_addr = false);
+        };
+
+        class TcpSocket : public StreamSocket
+        {
+            public:
+                CONSTRUCTOR TcpSocket() : StreamSocket(AF_INET, IPPROTO_IP) {}
+        };
+
+        class Tcp6Socket : public StreamSocket
+        {
+            public:
+                CONSTRUCTOR Tcp6Socket() : StreamSocket(AF_INET6, IPPROTO_IP) {}
+        };
+    }
+}
+
 typedef union {
     uint8_t bytes[4];
     uint32_t value;
@@ -12,10 +65,6 @@ typedef union {
     ipv6_addr_t ip6;
 } ip_addr_t;
 typedef uint16_t ip_port_t;
-
-#define IPV4(a,b,c,d) (ipv4_addr_t) { a,b,c,d }
-#define IPV6(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
-    (ipv6_addr_t) { a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p }
 
 static inline
 in_addr_t _inet_addr(const ip_addr_t addr)
@@ -33,21 +82,6 @@ static inline
 uint16_t _htons(ip_port_t hostport)
 {
     return cpu_to_be16(hostport);
-}
-
-FUNCTION
-int find_open_socket()
-{
-    for ( int fd = 0; fd != 0xFFFF; fd++ )
-    {
-        struct stat sb;
-
-        DO_SYSCALL(fstat, 2, fd, &sb);
-        if ( S_ISSOCK(sb.st_mode) )
-            return fd;
-    }
-
-    return -1;
 }
 
 FUNCTION

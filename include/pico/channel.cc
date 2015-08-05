@@ -44,7 +44,6 @@ struct Channel
 enum channel_mode
 {
     NO_CHANNEL,
-    REUSE_SOCKET,
     TCP_CONNECT,
     TCP_LISTEN,
     TCP6_CONNECT,
@@ -68,10 +67,6 @@ Channel::Channel()
 
     switch ( CHANNEL )
     {
-        case REUSE_SOCKET:
-            this->rx = this->tx = find_open_socket();
-            break;
-
         case TCP_CONNECT:
             this->rx = this->tx = tcp_connect(host, port);
             break;
