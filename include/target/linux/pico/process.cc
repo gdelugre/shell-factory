@@ -36,6 +36,8 @@ namespace Pico {
                 result = pid;
                 return 1;
             }
+
+            return 0;
         });
 
         return Process(result);
@@ -65,6 +67,8 @@ namespace Pico {
                 result = pid;
                 return 1;
             }
+
+            return 0;
         });
 
         return Process(result);

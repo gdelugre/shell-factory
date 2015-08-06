@@ -42,6 +42,7 @@ namespace Syscall {
     int execve(const char *filename, char *const argv[], char *const envp[])
     {
         DO_SYSCALL(execve, 3, filename, argv, envp);
+        __builtin_unreachable();
     }
 
     SYSTEM_CALL
@@ -105,14 +106,14 @@ namespace Syscall {
     void exit_thread(int status)
     {
         DO_SYSCALL(exit, 1, status);
-        while ( true );
+        __builtin_unreachable();
     }
 
     NO_RETURN SYSTEM_CALL
     void exit_process(int status)
     {
         DO_SYSCALL(exit_group, 1, status);
-        while ( true );
+        __builtin_unreachable();
     }
 }
 
