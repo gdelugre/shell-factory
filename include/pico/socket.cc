@@ -5,10 +5,10 @@ namespace Pico {
 
     namespace Network {
 
-        template <int N>
+        template <unsigned N>
         struct IpAddress;
 
-        template<>
+        template <>
         struct IpAddress<4>
         {
             union {
@@ -17,7 +17,7 @@ namespace Pico {
             };
         };
 
-        template<>
+        template <>
         struct IpAddress<6>
         {
             uint8_t bytes[16];
@@ -34,10 +34,9 @@ namespace Pico {
         {
             public:
                 CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
-                METHOD int connect(IpAddress<4> ip, uint16_t port);
-                METHOD int connect(IpAddress<6> ip, uint16_t port);
-                METHOD int listen(IpAddress<4> ip, uint16_t port, bool reuse_addr = false);
-                METHOD int listen(IpAddress<6> ip, uint16_t port, bool reuse_addr = false);
+
+                template <unsigned N>
+                METHOD int connect(IpAddress<N> ip, uint16_t port);
         };
 
         class TcpSocket : public StreamSocket
