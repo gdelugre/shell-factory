@@ -7,8 +7,8 @@
 #include <pico/string.cc>
 #include <pico/fs.cc>
 
-#include <pico/channel.cc>
 #include <pico/socket.cc>
+#include <pico/channel.cc>
 #include <pico/process.cc> 
 
 #include <target/pico.h>

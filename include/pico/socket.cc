@@ -149,8 +149,8 @@ int sock6_stream_connect(int protocol, const ip_addr_t host_addr, const ip_port_
 FUNCTION
 int tcp_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != TCP_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
-    static_assert(CHANNEL != TCP_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
+    //static_assert(CHANNEL != TCP_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
+    //static_assert(CHANNEL != TCP_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
     return sock_stream_connect(IPPROTO_IP, host_addr, host_port);
 }
@@ -158,8 +158,8 @@ int tcp_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 FUNCTION
 int tcp6_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != TCP6_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
-    static_assert(CHANNEL != TCP6_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
+    //static_assert(CHANNEL != TCP6_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
+    //static_assert(CHANNEL != TCP6_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
     return sock6_stream_connect(IPPROTO_IP, host_addr, host_port);    
 }
@@ -167,8 +167,8 @@ int tcp6_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 FUNCTION
 int sctp_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != SCTP_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
-    static_assert(CHANNEL != SCTP_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
+    //static_assert(CHANNEL != SCTP_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
+    //static_assert(CHANNEL != SCTP_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
     return sock_stream_connect(IPPROTO_SCTP, host_addr, host_port);
 }
@@ -176,8 +176,8 @@ int sctp_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 FUNCTION
 int sctp6_connect(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != SCTP6_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
-    static_assert(CHANNEL != SCTP6_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
+    //static_assert(CHANNEL != SCTP6_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
+    //static_assert(CHANNEL != SCTP6_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
     return sock6_stream_connect(IPPROTO_SCTP, host_addr, host_port);
 }
@@ -257,8 +257,8 @@ int sock6_stream_listen(int protocol, const ip_addr_t host_addr, const ip_port_t
 FUNCTION
 int tcp_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != TCP_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
-    static_assert(CHANNEL != TCP_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
+    //static_assert(CHANNEL != TCP_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
+    //static_assert(CHANNEL != TCP_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
 
     return sock_stream_listen(IPPROTO_IP, host_addr, host_port);
 }
@@ -266,8 +266,8 @@ int tcp_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 FUNCTION
 int tcp6_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != TCP6_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
-    static_assert(CHANNEL != TCP6_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
+    //static_assert(CHANNEL != TCP6_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
+    //static_assert(CHANNEL != TCP6_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
 
     return sock6_stream_listen(IPPROTO_IP, host_addr, host_port);
 }
@@ -275,8 +275,8 @@ int tcp6_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 FUNCTION
 int sctp_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != SCTP_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
-    static_assert(CHANNEL != SCTP_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
+    //static_assert(CHANNEL != SCTP_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
+    //static_assert(CHANNEL != SCTP_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
 
     return sock_stream_listen(IPPROTO_SCTP, host_addr, host_port);
 }
@@ -284,8 +284,8 @@ int sctp_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 FUNCTION 
 int sctp6_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 {
-    static_assert(CHANNEL != SCTP6_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
-    static_assert(CHANNEL != SCTP6_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
+    //static_assert(CHANNEL != SCTP6_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");
+    //static_assert(CHANNEL != SCTP6_LISTEN || !UNDEFINED_PORT, "Must specify a port to listen to.\n");
 
     return sock6_stream_listen(IPPROTO_SCTP, host_addr, host_port);
 }
