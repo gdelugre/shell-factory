@@ -31,9 +31,11 @@ namespace Pico {
         typedef Address<IPV4> IpAddress;
         typedef Address<IPV6> IpAddress6;
 
-        class Socket : public Stream 
+        class Socket : public Stream
         {
             public:
+                using Stream::Stream; // inherit Stream constructor.
+
                 CONSTRUCTOR Socket(int domain, int type, int protocol);
                 METHOD int get(int level, int optname, void *val, unsigned *len);
                 METHOD int set(int level, int optname, void *val, unsigned len);
@@ -42,6 +44,8 @@ namespace Pico {
         class StreamSocket : public Socket
         {
             public:
+                using Socket::Socket;
+
                 CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
 
                 template <enum AddressType T>
@@ -63,6 +67,18 @@ namespace Pico {
         {
             public:
                 CONSTRUCTOR Tcp6Socket() : StreamSocket(AF_INET6, IPPROTO_IP) {}
+        };
+
+        class SctpSocket : public StreamSocket
+        {
+            public:
+                CONSTRUCTOR SctpSocket() : StreamSocket(AF_INET, IPPROTO_SCTP) {}
+        };
+
+        class Sctp6Socket : public StreamSocket
+        {
+            public:
+                CONSTRUCTOR Sctp6Socket() : StreamSocket(AF_INET, IPPROTO_SCTP) {}
         };
     }
 }

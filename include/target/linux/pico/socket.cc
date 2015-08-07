@@ -101,6 +101,12 @@ namespace Pico {
             bind_socket(*this, reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr), reuse_addr);
             return Syscall::listen(fd, 1);
         }
+
+        METHOD
+        StreamSocket StreamSocket::accept()
+        {
+            return StreamSocket( Syscall::accept(fd, nullptr, 0) );
+        }
     }
 }
 
