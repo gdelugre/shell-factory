@@ -30,6 +30,64 @@
     #define UNDEFINED_PORT  0
 #endif
 
+namespace Pico {
+
+    enum channel_mode
+    {
+        NO_CHANNEL,
+        TCP_CONNECT,
+        TCP_LISTEN,
+        TCP6_CONNECT,
+        TCP6_LISTEN,
+        SCTP_CONNECT,
+        SCTP_LISTEN,
+        SCTP6_CONNECT,
+        SCTP6_LISTEN,
+        USE_STDOUT,
+        USE_STDERR,
+    };
+
+    template <enum channel_mode>
+    struct ChannelMode;
+
+    #define DEFINE_CHANNEL_MODE(mode, type, dupable)            \
+        template<>                                              \
+        struct ChannelMode<mode>                                \
+        {                                                       \
+            typedef type stream_type;                           \
+            static constexpr bool dupable_to_stdio = dupable;   \
+        };                                                      \
+
+    DEFINE_CHANNEL_MODE(NO_CHANNEL,     int,                    false);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     Stream,                 false);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     Stream,                 false);
+    DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
+    DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    true);
+    DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     true);
+    DEFINE_CHANNEL_MODE(TCP6_LISTEN,    Network::Tcp6Socket,    true);
+    DEFINE_CHANNEL_MODE(SCTP_CONNECT,   Network::SctpSocket,    true);
+    DEFINE_CHANNEL_MODE(SCTP6_CONNECT,  Network::Sctp6Socket,   true);
+    DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket,    true);
+    DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket,   true);
+
+    /* XXX: WIP
+    template <enum channel_mode M>
+    struct Channel
+    {
+        typename ChannelMode<M>::stream_type rx;
+        typename ChannelMode<M>::stream_type tx;
+        static constexpr bool dupable_to_stdio = ChannelMode<M>::dupable_to_stdio;
+        CONSTRUCTOR Channelng() = default;
+
+        METHOD int recv(void *buf, size_t count) {
+            return rx.read(buf, count);
+        }
+        METHOD int send(void *buf, size_t count) {
+            return rx.write(buf, count);
+        }
+    };*/
+}
+
 struct Channel
 {
     int rx;
@@ -41,20 +99,7 @@ struct Channel
     METHOD int send(void *buf, size_t count);
 };
 
-enum channel_mode
-{
-    NO_CHANNEL,
-    TCP_CONNECT,
-    TCP_LISTEN,
-    TCP6_CONNECT,
-    TCP6_LISTEN,
-    SCTP_CONNECT,
-    SCTP_LISTEN,
-    SCTP6_CONNECT,
-    SCTP6_LISTEN,
-    USE_STDOUT,
-    USE_STDERR,
-};
+
 
 #include "socket.cc"
 #include "fs.cc"
