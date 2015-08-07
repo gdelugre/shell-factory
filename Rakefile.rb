@@ -75,9 +75,15 @@ def compile(target, triple, output_dir, *opts)
     cc = ENV['CC'] || CC
     cflags = CFLAGS.dup
 
+    host_os = RbConfig::CONFIG['target_os']
+    host_arch = RbConfig::CONFIG['target_cpu']
+    host_vendor = RbConfig::CONFIG['target_vendor']
+    host_triple = [ host_arch, host_vendor, host_os ].join('-')
+
     puts "[*] Generating shellcode '#{target}'"
     puts "    ├ Compiler: #{cc}"
-    puts "    ├ Target architecture: #{triple.empty? ? `uname -m` : triple}"
+    puts "    ├ Host architecture: #{host_triple}"
+    puts "    ├ Target architecture: #{triple.empty? ? host_triple : triple}"
     puts "    └ Options: #{defines}"
     puts
 
