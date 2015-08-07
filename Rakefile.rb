@@ -132,7 +132,7 @@ end
 
 def generate_shellcode(target, triple, output_dir)
     triple += '-' unless triple.empty?
-    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata bins/#{target}.elf #{output_dir}/#{target}.bin" 
+    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target}.elf #{output_dir}/#{target}.bin" 
 
     puts
     puts "[*] Generated shellcode: #{File.size("#{output_dir}/#{target}.bin")} bytes."
@@ -143,8 +143,13 @@ def build(target, *opts)
     triple = ''
     triple = ENV['TRIPLE'] if ENV['TRIPLE']
 
+    make_directory(output_dir)
     compile(target, triple, output_dir, *opts)
     generate_shellcode(target, triple, output_dir)
+end
+
+def make_directory(path)
+    Dir.mkdir(path) unless Dir.exists?(path)
 end
 
 task :shellexec do
