@@ -5,11 +5,16 @@ namespace Pico {
 
     namespace Network {
 
-        template <unsigned N>
-        struct IpAddress;
+        enum AddressType {
+            IPV4,
+            IPV6,
+        };
+
+        template <enum AddressType>
+        struct Address;
 
         template <>
-        struct IpAddress<4>
+        struct Address<IPV4>
         {
             union {
                 uint8_t bytes[4];
@@ -18,16 +23,20 @@ namespace Pico {
         };
 
         template <>
-        struct IpAddress<6>
+        struct Address<IPV6>
         {
             uint8_t bytes[16];
         };
+
+        typedef Address<IPV4> IpAddress;
+        typedef Address<IPV6> IpAddress6;
 
         class Socket : public Stream 
         {
             public:
                 CONSTRUCTOR Socket(int domain, int type, int protocol);
-                METHOD int set(int level, int optname, void *val, size_t len);
+                METHOD int get(int level, int optname, void *val, unsigned *len);
+                METHOD int set(int level, int optname, void *val, unsigned len);
         };
 
         class StreamSocket : public Socket
@@ -35,8 +44,13 @@ namespace Pico {
             public:
                 CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
 
-                template <unsigned N>
-                METHOD int connect(IpAddress<N> ip, uint16_t port);
+                template <enum AddressType T>
+                METHOD int connect(Address<T> addr, uint16_t port);
+
+                template <enum AddressType T>
+                METHOD int listen(Address<T> addr, uint16_t port, bool reuse_addr = false);
+
+                METHOD StreamSocket accept();
         };
 
         class TcpSocket : public StreamSocket
