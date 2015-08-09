@@ -3,7 +3,51 @@
 
 namespace Pico {
 
-    class Stream {
+    class IO
+    {
+        public:
+            VIRTUAL_METHOD IO& in(void *, size_t) = 0;
+            VIRTUAL_METHOD IO& out(const void *, size_t) = 0;
+
+            METHOD IO& read(void *ptr, size_t count) {
+                return in(ptr, count);
+            }
+
+            METHOD IO& write(void *ptr, size_t count) {
+                return out(ptr, count);
+            }
+
+            METHOD IO& read(Memory::Buffer const& buffer) {
+                return read(buffer.pointer(), buffer.size());
+            }
+
+            METHOD IO& write(Memory::Buffer const& buffer) { 
+                return write(buffer.pointer(), buffer.size());
+            }
+
+            METHOD friend IO& operator <<(IO &io, Memory::Buffer const& buffer)
+            {
+                return io.write(buffer);
+            }
+
+            METHOD friend IO& operator >>(IO &io, Memory::Buffer const& buffer)
+            {
+                return io.read(buffer);
+            }
+
+            METHOD friend IO& operator <<(Memory::Buffer const& buffer, IO &io)
+            {
+                return io >> buffer;
+            }
+
+            METHOD friend IO& operator >>(Memory::Buffer const& buffer, IO &io)
+            {
+                return io << buffer;
+            }
+    };
+
+    class Stream : public IO
+    {
         public:
             FUNCTION Stream standard_input();
             FUNCTION Stream standard_output();
@@ -12,35 +56,8 @@ namespace Pico {
             CONSTRUCTOR Stream() = default;
             CONSTRUCTOR Stream(int fd) : fd(fd) {}
 
-            METHOD Stream& read(void *ptr, size_t count);
-            METHOD Stream& read(Memory::Buffer const& buffer) {
-                return read(buffer.pointer(), buffer.size());
-            }
-
-            METHOD Stream& write(void *ptr, size_t count);
-            METHOD Stream& write(Memory::Buffer const& buffer) { 
-                return write(buffer.pointer(), buffer.size());
-            }
-
-            METHOD friend Stream& operator <<(Stream &stm, Memory::Buffer const& buffer)
-            {
-                return stm.write(buffer);
-            }
-
-            METHOD friend Stream& operator >>(Stream &stm, Memory::Buffer const& buffer)
-            {
-                return stm.read(buffer);
-            }
-
-            METHOD friend Stream& operator <<(Memory::Buffer const& buffer, Stream &stm)
-            {
-                return stm >> buffer;
-            }
-
-            METHOD friend Stream& operator >>(Memory::Buffer const& buffer, Stream &stm)
-            {
-                return stm << buffer;
-            }
+            METHOD Stream& in(void *ptr, size_t count);
+            METHOD Stream& out(const void *ptr, size_t count);
 
             METHOD Stream duplicate();
             METHOD void replace(Stream const&);
@@ -51,6 +68,26 @@ namespace Pico {
             int fd = -1;
     };
 
+    template <class Rx, class Tx = Rx>
+    class BiStream : public IO
+    {
+        public:
+            CONSTRUCTOR BiStream() = default;
+            CONSTRUCTOR BiStream(Rx rx, Tx tx) : rx(rx), tx(tx) {}
+            CONSTRUCTOR BiStream(int rfd, int wfd) : rx(Stream(rfd)), tx(Stream(wfd)) {}
+
+            METHOD Stream& in(void *ptr, size_t count) {
+                return rx.read(ptr, count);
+            }
+
+            METHOD Stream& out(const void *ptr, size_t count) {
+                return tx.write(ptr, count);
+            }
+
+        protected:
+            Rx rx;
+            Tx tx;
+    };
 }
 
 #endif
