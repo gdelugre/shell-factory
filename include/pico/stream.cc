@@ -13,7 +13,7 @@ namespace Pico {
                 return in(ptr, count);
             }
 
-            METHOD IO& write(void *ptr, size_t count) {
+            METHOD IO& write(const void *ptr, size_t count) {
                 return out(ptr, count);
             }
 
@@ -76,12 +76,14 @@ namespace Pico {
             CONSTRUCTOR BiStream(Rx rx, Tx tx) : rx(rx), tx(tx) {}
             CONSTRUCTOR BiStream(int rfd, int wfd) : rx(Stream(rfd)), tx(Stream(wfd)) {}
 
-            METHOD Stream& in(void *ptr, size_t count) {
-                return rx.read(ptr, count);
+            METHOD BiStream& in(void *ptr, size_t count) {
+                rx.read(ptr, count);
+                return *this;
             }
 
-            METHOD Stream& out(const void *ptr, size_t count) {
-                return tx.write(ptr, count);
+            METHOD BiStream& out(const void *ptr, size_t count) {
+                tx.write(ptr, count);
+                return *this;
             }
 
         protected:
