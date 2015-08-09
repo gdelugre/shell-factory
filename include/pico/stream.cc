@@ -8,6 +8,7 @@ namespace Pico {
         public:
             VIRTUAL_METHOD IO& in(void *, size_t) = 0;
             VIRTUAL_METHOD IO& out(const void *, size_t) = 0;
+            VIRTUAL_METHOD int close() = 0;
 
             METHOD IO& read(void *ptr, size_t count) {
                 return in(ptr, count);
@@ -84,6 +85,10 @@ namespace Pico {
             METHOD BiStream& out(const void *ptr, size_t count) {
                 tx.write(ptr, count);
                 return *this;
+            }
+
+            METHOD int close() {
+                return rx.close() | tx.close();
             }
 
         protected:
