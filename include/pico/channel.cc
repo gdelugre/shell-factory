@@ -59,8 +59,8 @@ namespace Pico {
         };                                                      \
 
     DEFINE_CHANNEL_MODE(NO_CHANNEL,     int,                    false);
-    DEFINE_CHANNEL_MODE(USE_STDOUT,     Stream,                 false);
-    DEFINE_CHANNEL_MODE(USE_STDERR,     Stream,                 false);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<Stream>,       false);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<Stream>,       false);
     DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
     DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    true);
     DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     true);
@@ -74,18 +74,35 @@ namespace Pico {
     template <enum channel_mode M>
     struct Channel
     {
-        typename ChannelMode<M>::stream_type rx;
-        typename ChannelMode<M>::stream_type tx;
-        static constexpr bool dupable_to_stdio = ChannelMode<M>::dupable_to_stdio;
-        CONSTRUCTOR Channelng() = default;
+        typename ChannelMode<M>::stream_type stm;
 
-        METHOD int recv(void *buf, size_t count) {
-            return rx.read(buf, count);
+        static constexpr bool dupable_to_stdio = ChannelMode<M>::dupable_to_stdio;
+        CONSTRUCTOR Channel();
+
+        template <enum Network::AddressType T>
+        CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
+
+        METHOD Channel& recv(void *buf, size_t count) {
+            stm.read(buf, count);
+            return *this;
         }
-        METHOD int send(void *buf, size_t count) {
-            return rx.write(buf, count);
+        METHOD Channel& send(const void *buf, size_t count) {
+            stm.write(buf, count);
+            return *this;
         }
-    };*/
+    };
+
+    template<>
+    CONSTRUCTOR
+    Channel<USE_STDOUT>::Channel() :
+        stm(0, 1) {}
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channel<TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
+        stm.connect(addr, port); 
+    } */
 }
 
 struct Channel
