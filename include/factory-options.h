@@ -19,5 +19,8 @@ namespace Options {
     constexpr static bool reuse_addr = OPT_REUSE_ADDR;
 }
 
-
+#undef OPT_FORK_ON_ACCEPT
+#undef OPT_REUSE_ADDR
+#undef FORK_ON_ACCEPT
+#undef REUSE_ADDR
 #endif
