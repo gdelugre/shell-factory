@@ -13,7 +13,11 @@
 #define OPT_REUSE_ADDR true
 #endif
 
-constexpr static bool g_opt_fork_on_accept = OPT_FORK_ON_ACCEPT;
-constexpr static bool g_opt_reuse_addr = OPT_REUSE_ADDR;
+namespace Options {
+
+    constexpr static bool fork_on_accept = OPT_FORK_ON_ACCEPT;
+    constexpr static bool reuse_addr = OPT_REUSE_ADDR;
+}
+
 
 #endif

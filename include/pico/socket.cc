@@ -191,7 +191,7 @@ int sock_stream_bind_server(int listen_sock,
     socklen_t   client_len = addr_len;
     int         client_sock;
 
-    if ( g_opt_reuse_addr )
+    if ( Options::reuse_addr )
     {
         int option = 1;
         Syscall::setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
@@ -202,7 +202,7 @@ int sock_stream_bind_server(int listen_sock,
 
     Syscall::listen(listen_sock, 1);
 
-    if ( g_opt_fork_on_accept )
+    if ( Options::fork_on_accept )
     {
         while ( true ) 
         {
