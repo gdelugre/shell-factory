@@ -31,6 +31,33 @@ namespace Pico {
         typedef Address<IPV4> IpAddress;
         typedef Address<IPV6> IpAddress6;
 
+        template <size_t N>
+        struct ip_address_type;
+
+        template <>
+        struct ip_address_type<4>
+        {
+            typedef IpAddress type;
+        };
+
+        template <>
+        struct ip_address_type<16>
+        {
+            typedef IpAddress6 type;
+        };
+
+        // Generates an IP address structure out of a list of static arguments.
+        template <typename... V> static constexpr
+        auto ip_address_from_bytes(V... bytes)
+        {
+            constexpr size_t nr_bytes = sizeof...(bytes);
+            static_assert(nr_bytes == 4 || nr_bytes == 16, "Invalid number of bytes for IP address.");
+
+            using ip_address = typename ip_address_type<nr_bytes>::type;
+
+            return ip_address { static_cast<uint8_t>(bytes)... };
+        }
+
         class Socket : public Stream
         {
             public:
