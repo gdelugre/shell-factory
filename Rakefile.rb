@@ -3,6 +3,22 @@ require 'rake/clean'
 
 require 'ipaddr'
 
+class String
+    COLORS = {
+        red: 31, green: 32, brown: 33, blue: 34,  magenta: 35, cyan: 36, gray: 37,
+    }
+
+    def color(c)
+        colors = {
+        }
+        "\e[#{COLORS[c]}m#{self}\e[0m"
+    end
+
+    def bold
+        "\e[1m#{self}\e[21m"
+    end
+end
+
 class IPAddr
     def to_define
         if self.ipv4?
@@ -55,6 +71,12 @@ ARCH_CFLAGS =
     /.*/ => %w{-fPIC}
 }
 
+def show_info(str)
+    info = "[".bold + "*".bold.color(:green) + "] ".bold + str
+
+    puts info
+end
+
 def cc_invoke(cc, triple)
     return cc if triple.empty?
 
@@ -80,11 +102,11 @@ def compile(target, triple, output_dir, *opts)
     host_vendor = RbConfig::CONFIG['target_vendor']
     host_triple = [ host_arch, host_vendor, host_os ].join('-')
 
-    puts "[*] Generating shellcode '#{target}'"
-    puts "    ├ Compiler: #{cc}"
-    puts "    ├ Host architecture: #{host_triple}"
-    puts "    ├ Target architecture: #{triple.empty? ? host_triple : triple}"
-    puts "    └ Options: #{defines}"
+    show_info("#{'Generating shellcode'.color(:cyan)} '#{target.to_s.color(:red)}'")
+    puts "    #{'├'.bold} #{'Compiler:'.color(:green)} #{cc}"
+    puts "    #{'├'.bold} #{'Host architecture:'.color(:green)} #{host_triple}"
+    puts "    #{'├'.bold} #{'Target architecture:'.color(:green)} #{triple.empty? ? host_triple : triple}"
+    puts "    #{'└'.bold} #{'Options:'.color(:green)} #{defines}"
     puts
 
     ARCH_CFLAGS.each_pair { |arch, flags|
@@ -135,7 +157,7 @@ def generate_shellcode(target, triple, output_dir)
     sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target}.elf #{output_dir}/#{target}.bin" 
 
     puts
-    puts "[*] Generated shellcode: #{File.size("#{output_dir}/#{target}.bin")} bytes."
+    show_info "#{'Generated shellcode:'.color(:cyan)} #{File.size("#{output_dir}/#{target}.bin")} bytes."
 end
 
 def build(target, *opts)
