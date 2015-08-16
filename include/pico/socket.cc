@@ -75,10 +75,10 @@ namespace Pico {
 
                 CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
 
-                template <enum AddressType T>
+                template <AddressType T>
                 METHOD int connect(Address<T> addr, uint16_t port);
 
-                template <enum AddressType T>
+                template <AddressType T>
                 METHOD int listen(Address<T> addr, uint16_t port, bool reuse_addr = false);
 
                 METHOD StreamSocket accept();
@@ -87,25 +87,29 @@ namespace Pico {
         class TcpSocket : public StreamSocket
         {
             public:
+                using StreamSocket::StreamSocket;
                 CONSTRUCTOR TcpSocket() : StreamSocket(AF_INET, IPPROTO_IP) {}
         };
 
         class Tcp6Socket : public StreamSocket
         {
             public:
+                using StreamSocket::StreamSocket;
                 CONSTRUCTOR Tcp6Socket() : StreamSocket(AF_INET6, IPPROTO_IP) {}
         };
 
         class SctpSocket : public StreamSocket
         {
             public:
+                using StreamSocket::StreamSocket;
                 CONSTRUCTOR SctpSocket() : StreamSocket(AF_INET, IPPROTO_SCTP) {}
         };
 
         class Sctp6Socket : public StreamSocket
         {
             public:
-                CONSTRUCTOR Sctp6Socket() : StreamSocket(AF_INET, IPPROTO_SCTP) {}
+                using StreamSocket::StreamSocket;
+                CONSTRUCTOR Sctp6Socket() : StreamSocket(AF_INET6, IPPROTO_SCTP) {}
         };
     }
 }

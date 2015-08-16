@@ -1,34 +1,8 @@
 #ifndef CHANNEL_HELPER_H_
 #define CHANNEL_HELPER_H_
 
-/*
- * Channel parameter defaults to NO_CHANNEL.
- */
-#ifndef CHANNEL
-#define CHANNEL NO_CHANNEL
-#endif
-
-/*
- * HOST parameter.
- * Used for socket channels.
- */
-#ifndef HOST
-    #define HOST            {0}
-    #define UNDEFINED_HOST  1
-#else
-    #define UNDEFINED_HOST  0
-#endif
-
-/*
- * PORT parameter.
- * Used for socket channels.
- */
-#ifndef PORT
-    #define PORT            0
-    #define UNDEFINED_PORT  1
-#else
-    #define UNDEFINED_PORT  0
-#endif
+/* Type traits can be included since they rely exclusively on standard headers and no external linking. */
+#include <type_traits>
 
 namespace Pico {
 
@@ -70,23 +44,23 @@ namespace Pico {
     DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket,    true);
     DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket,   true);
 
-    /* XXX: WIP
     template <enum channel_mode M>
-    struct Channel
+    struct Channelng
     {
+        static_assert(M != NO_CHANNEL, "Cannot instanciate channel: no mode specified");
         typename ChannelMode<M>::stream_type stm;
 
         static constexpr bool dupable_to_stdio = ChannelMode<M>::dupable_to_stdio;
-        CONSTRUCTOR Channel();
+        CONSTRUCTOR Channelng();
 
         template <enum Network::AddressType T>
-        CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
+        CONSTRUCTOR Channelng(Network::Address<T> addr, uint16_t port);
 
-        METHOD Channel& recv(void *buf, size_t count) {
+        METHOD Channelng& recv(void *buf, size_t count) {
             stm.read(buf, count);
             return *this;
         }
-        METHOD Channel& send(const void *buf, size_t count) {
+        METHOD Channelng& send(const void *buf, size_t count) {
             stm.write(buf, count);
             return *this;
         }
@@ -94,15 +68,122 @@ namespace Pico {
 
     template<>
     CONSTRUCTOR
-    Channel<USE_STDOUT>::Channel() :
-        stm(0, 1) {}
+    Channelng<USE_STDOUT>::Channelng() :
+        stm(Stream::standard_input(), Stream::standard_output()) {}
+
+    template<>
+    CONSTRUCTOR
+    Channelng<USE_STDERR>::Channelng() :
+        stm(Stream::standard_input(), Stream::standard_error()) {}
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
+    Channelng<TCP_CONNECT>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV4, "TCP_CONNECT requires an IPV4 address.");
         stm.connect(addr, port); 
-    } */
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<TCP6_CONNECT>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV6, "TCP6_CONNECT requires an IPV6 address.");
+        stm.connect(addr, port); 
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<TCP_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV4, "TCP_LISTEN requires an IPV4 address.");
+        stm.listen(addr, port, Options::reuse_addr); 
+        stm = Network::TcpSocket(stm.accept().file_desc());
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<TCP6_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV6, "TCP6_LISTEN requires an IPV6 address.");
+        stm.listen(addr, port, Options::reuse_addr); 
+        stm = Network::Tcp6Socket(stm.accept().file_desc());
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<SCTP_CONNECT>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV4, "SCTP_CONNECT requires an IPV4 address.");
+        stm.connect(addr, port); 
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<SCTP6_CONNECT>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV6, "SCTP6_CONNECT requires an IPV6 address.");
+        stm.connect(addr, port); 
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<SCTP_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV4, "SCTP_LISTEN requires an IPV4 address.");
+        stm.listen(addr, port, Options::reuse_addr); 
+        stm = Network::SctpSocket(stm.accept().file_desc());
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channelng<SCTP6_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+        static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
+        stm.listen(addr, port, Options::reuse_addr); 
+        stm = Network::Sctp6Socket(stm.accept().file_desc());
+    }
+}
+
+namespace Options {
+
+    /*
+     * Channel parameter defaults to NO_CHANNEL.
+     */
+    #ifndef CHANNEL
+    #define CHANNEL NO_CHANNEL
+    #endif
+
+    /*
+     * HOST parameter.
+     * Used for socket channels.
+     */
+    #ifndef HOST
+    #define HOST            0,0,0,0
+    #endif
+
+    /*
+     * PORT parameter.
+     * Used for socket channels.
+     */
+    #ifndef PORT
+    #define PORT            0
+    #endif
+
+    FUNCTION auto channel()
+    {
+        using Mode = ChannelMode<CHANNEL>;
+
+        if ( std::is_base_of<Network::Socket, Mode::stream_type>::value )
+        {
+            uint16_t port = PORT;
+            auto address = Network::ip_address_from_bytes(HOST);
+
+            return Channelng<CHANNEL>(address, port); 
+        }
+        else
+            return Channelng<CHANNEL>();
+    }
 }
 
 struct Channel
@@ -116,15 +197,10 @@ struct Channel
     METHOD int send(void *buf, size_t count);
 };
 
-
-
-#include "socket.cc"
-#include "fs.cc"
-
 CONSTRUCTOR
 Channel::Channel()
 {
-    const ip_addr_t host = { .ip6 = HOST };
+    const ip_addr_t host = { .ip6 = { HOST } };
     const ip_port_t port = PORT;
 
     switch ( CHANNEL )

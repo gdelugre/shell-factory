@@ -6,15 +6,15 @@ require 'ipaddr'
 class IPAddr
     def to_define
         if self.ipv4?
-            "\\{#{self.to_string.gsub(".",",")}\\}"
+            "#{self.to_string.gsub(".",",")}"
         else
-            "\\{#{
+            "#{
             self.to_string.gsub(":","")
                 .split(/(..)/)
                 .delete_if{|x| x.empty?}
                 .map{|d| "0x" + d}
                 .join(',')
-            }\\}"
+            }"
         end
     end
 end
