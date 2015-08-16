@@ -37,6 +37,7 @@ end
 
 CC = "g++"
 OUTPUT_DIR = "bins"
+SHELLCODE_DIR = "shellcodes"
 INCLUDE_DIRS = %w{include}
 CFLAGS = %w{-std=c++1y
             -Wall
@@ -72,9 +73,11 @@ ARCH_CFLAGS =
 }
 
 def show_info(str)
-    info = "[".bold + "*".bold.color(:green) + "] ".bold + str
+    puts "[".bold + "*".bold.color(:green) + "] ".bold + str
+end
 
-    puts info
+def show_error(str)
+    puts "[".bold + "*".bold.color(:red) + "] ".bold + str
 end
 
 def cc_invoke(cc, triple)
@@ -146,10 +149,10 @@ def compile(target, triple, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} shellcodes/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
+        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
     end
 
-    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} shellcodes/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
 end
 
 def generate_shellcode(target, triple, output_dir)
@@ -164,6 +167,11 @@ def build(target, *opts)
     output_dir = OUTPUT_DIR
     triple = ''
     triple = ENV['TRIPLE'] if ENV['TRIPLE']
+
+    unless File.exists?("#{SHELLCODE_DIR}/#{target}.cc")
+        show_error("#{'Error:'.color(:cyan)} Cannot find source for target '#{target.to_s.color(:red)}'.")
+        return
+    end
 
     make_directory(output_dir)
     compile(target, triple, output_dir, *opts)
