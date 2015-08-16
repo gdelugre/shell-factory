@@ -56,6 +56,10 @@ namespace Pico {
 
             CONSTRUCTOR Stream() = default;
             CONSTRUCTOR Stream(int fd) : fd(fd) {}
+            CONSTRUCTOR Stream(Stream &stm) : fd( stm.file_desc() ) {}
+            CONSTRUCTOR Stream(Stream &&stm) = default;
+            METHOD Stream& operator =(Stream &stm) = default;
+            METHOD Stream& operator =(Stream &&stm) = default;
 
             METHOD Stream& in(void *ptr, size_t count);
             METHOD Stream& out(const void *ptr, size_t count);
