@@ -6,16 +6,18 @@ namespace Pico {
     class IO
     {
         public:
-            VIRTUAL_METHOD IO& in(void *, size_t) = 0;
-            VIRTUAL_METHOD IO& out(const void *, size_t) = 0;
+            VIRTUAL_METHOD ssize_t in(void *, size_t) = 0;
+            VIRTUAL_METHOD ssize_t out(const void *, size_t) = 0;
             VIRTUAL_METHOD int close() = 0;
 
             METHOD IO& read(void *ptr, size_t count) {
-                return in(ptr, count);
+                in(ptr, count);
+                return *this;
             }
 
             METHOD IO& write(const void *ptr, size_t count) {
-                return out(ptr, count);
+                out(ptr, count);
+                return *this;
             }
 
             METHOD IO& read(Memory::Buffer const& buffer) {
@@ -61,8 +63,8 @@ namespace Pico {
             METHOD Stream& operator =(Stream &stm) = default;
             METHOD Stream& operator =(Stream &&stm) = default;
 
-            METHOD Stream& in(void *ptr, size_t count);
-            METHOD Stream& out(const void *ptr, size_t count);
+            METHOD ssize_t in(void *ptr, size_t count);
+            METHOD ssize_t out(const void *ptr, size_t count);
 
             METHOD Stream duplicate();
             METHOD void replace(Stream const&);
@@ -81,14 +83,12 @@ namespace Pico {
             CONSTRUCTOR BiStream(Rx rx, Tx tx) : rx(rx), tx(tx) {}
             CONSTRUCTOR BiStream(int rfd, int wfd) : rx(Stream(rfd)), tx(Stream(wfd)) {}
 
-            METHOD BiStream& in(void *ptr, size_t count) {
-                rx.read(ptr, count);
-                return *this;
+            METHOD ssize_t in(void *ptr, size_t count) {
+                return rx.in(ptr, count);
             }
 
-            METHOD BiStream& out(const void *ptr, size_t count) {
-                tx.write(ptr, count);
-                return *this;
+            METHOD ssize_t out(const void *ptr, size_t count) {
+                return tx.out(ptr, count);
             }
 
             METHOD int close() {

@@ -26,17 +26,15 @@ namespace Pico {
     }
 
     METHOD
-    Stream& Stream::in(void *ptr, size_t count)
+    ssize_t Stream::in(void *ptr, size_t count)
     {
-        Syscall::read(fd, ptr, count);
-        return *this;
+        return Syscall::read(fd, ptr, count);
     }
 
     METHOD
-    Stream& Stream::out(const void *ptr, size_t count)
+    ssize_t Stream::out(const void *ptr, size_t count)
     {
-        Syscall::write(fd, ptr, count);
-        return *this;
+        return Syscall::write(fd, ptr, count);
     }
 
     METHOD
