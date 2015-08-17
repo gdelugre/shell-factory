@@ -95,19 +95,19 @@ namespace Pico {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channelng<TCP_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+    Channelng<TCP_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) :
+        stm(Network::SocketServer<Network::TcpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+    {
         static_assert(T == Network::IPV4, "TCP_LISTEN requires an IPV4 address.");
-        stm.listen(addr, port, Options::reuse_addr); 
-        stm = Network::TcpSocket(stm.accept().file_desc());
     }
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channelng<TCP6_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+    Channelng<TCP6_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) :
+        stm(Network::SocketServer<Network::Tcp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+    {
         static_assert(T == Network::IPV6, "TCP6_LISTEN requires an IPV6 address.");
-        stm.listen(addr, port, Options::reuse_addr); 
-        stm = Network::Tcp6Socket(stm.accept().file_desc());
     }
 
     template <>
@@ -129,19 +129,19 @@ namespace Pico {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channelng<SCTP_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+    Channelng<SCTP_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) :
+        stm(Network::SocketServer<Network::SctpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+    {
         static_assert(T == Network::IPV4, "SCTP_LISTEN requires an IPV4 address.");
-        stm.listen(addr, port, Options::reuse_addr); 
-        stm = Network::SctpSocket(stm.accept().file_desc());
     }
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channelng<SCTP6_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) {
+    Channelng<SCTP6_LISTEN>::Channelng(Network::Address<T> addr, uint16_t port) :
+        stm(Network::SocketServer<Network::Sctp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+    {
         static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
-        stm.listen(addr, port, Options::reuse_addr); 
-        stm = Network::Sctp6Socket(stm.accept().file_desc());
     }
 }
 

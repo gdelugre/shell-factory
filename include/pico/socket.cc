@@ -111,6 +111,23 @@ namespace Pico {
                 using StreamSocket::StreamSocket;
                 CONSTRUCTOR Sctp6Socket() : StreamSocket(AF_INET6, IPPROTO_SCTP) {}
         };
+
+        // TODO: consistency check between S and T.
+        // TODO: fork on accept.
+        template <class SockType>
+        class SocketServer
+        {
+            public:
+                template <AddressType T>
+                FUNCTION SockType start(Address<T> addr, uint16_t port, bool reuse_addr = false, bool fork = false)
+                {
+                    SockType server;
+                    server.listen(addr, port, reuse_addr);
+
+                    SockType client = SockType(server.accept().file_desc());
+                    return client;
+                }
+        };
     }
 }
 
