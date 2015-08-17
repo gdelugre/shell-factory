@@ -130,15 +130,15 @@ def compile(target, triple, output_dir, *opts)
         cflags += [ ENV['CFLAGS'] ]
     end
 
-    unless ENV['WITH_WARNINGS'] and ENV['WITH_WARNINGS'].to_i == 1
+    unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
     
-    if defines['NO_BUILTIN'] and defines['NO_BUILTIN'].to_i == 1
+    if defines['NO_BUILTIN'].to_i == 1
         cflags << "-fno-builtin"
     end
 
-    if ENV['OUTPUT_LIB'] and ENV['OUTPUT_LIB'].to_i == 1
+    if ENV['OUTPUT_LIB'].to_i == 1
         cflags << '-shared'
     end
 
@@ -148,7 +148,7 @@ def compile(target, triple, output_dir, *opts)
         "-D#{k}=#{v}"
     }
 
-    if ENV['OUTPUT_DEBUG'] and ENV['OUTPUT_DEBUG'].to_i == 1
+    if ENV['OUTPUT_DEBUG'].to_i == 1
         sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
     end
 
@@ -160,7 +160,9 @@ def generate_shellcode(target, triple, output_dir)
     sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target}.elf #{output_dir}/#{target}.bin" 
 
     puts
-    show_info "#{'Generated shellcode:'.color(:cyan)} #{File.size("#{output_dir}/#{target}.bin")} bytes."
+    data = File.binread("#{output_dir}/#{target}.bin")
+    show_info "#{'Generated shellcode:'.color(:cyan)} #{data.size} bytes."
+    puts "    #{'└'.bold} #{'Contents:'.color(:green)} \"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
 end
 
 def build(target, *opts)
@@ -201,6 +203,7 @@ task :help do
     NO_BUILTIN:     Does not use the compiler builtins for common memory operations. 
     OUTPUT_LIB:     Compiles to a shared library instead of a standard executable.
     OUTPUT_DEBUG:   Instructs the compiler to emit an assembly file.
+    OUTPUT_HEX:     Prints the resulting shellcode as an hexadecimal string.
     WITH_WARNINGS:  Set to 1 to enable compiler warnings.
     RELAX_INLINE:   Set to 1 to let the compiler uninline some functions.
 
