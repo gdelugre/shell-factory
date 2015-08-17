@@ -66,6 +66,9 @@ namespace Pico {
                 CONSTRUCTOR Socket(int domain, int type, int protocol);
                 METHOD int get(int level, int optname, void *val, unsigned *len);
                 METHOD int set(int level, int optname, void *val, unsigned len);
+
+                METHOD ssize_t in(void *buf, size_t count);
+                METHOD ssize_t out(const void *buf, size_t count);
         };
 
         class StreamSocket : public Socket
@@ -191,7 +194,7 @@ int sock6_stream_connect(int protocol, const ip_addr_t host_addr, const ip_port_
     if ( Syscall::connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0 )
        return -1;
 
-    return sock; 
+    return sock;
 }
 
 FUNCTION
@@ -209,7 +212,7 @@ int tcp6_connect(const ip_addr_t host_addr, const ip_port_t host_port)
     //static_assert(CHANNEL != TCP6_CONNECT || !UNDEFINED_HOST, "Must specify an address to connect to.\n");
     //static_assert(CHANNEL != TCP6_CONNECT || !UNDEFINED_PORT, "Must specify a port to connect to.\n");
 
-    return sock6_stream_connect(IPPROTO_IP, host_addr, host_port);    
+    return sock6_stream_connect(IPPROTO_IP, host_addr, host_port);
 }
 
 FUNCTION
@@ -252,7 +255,7 @@ int sock_stream_bind_server(int listen_sock,
 
     if ( Options::fork_on_accept )
     {
-        while ( true ) 
+        while ( true )
         {
             client_sock = Syscall::accept(listen_sock, client_addr, &client_len);
             if ( Syscall::fork() == 0 )
@@ -329,7 +332,7 @@ int sctp_listen(const ip_addr_t host_addr, const ip_port_t host_port)
     return sock_stream_listen(IPPROTO_SCTP, host_addr, host_port);
 }
 
-FUNCTION 
+FUNCTION
 int sctp6_listen(const ip_addr_t host_addr, const ip_port_t host_port)
 {
     //static_assert(CHANNEL != SCTP6_LISTEN || !UNDEFINED_HOST, "Must specify an address to listen to.\n");

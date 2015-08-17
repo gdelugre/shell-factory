@@ -71,12 +71,27 @@ namespace Pico {
             return Syscall::setsockopt(fd, level, optname, val, len);
         }
 
+        METHOD
+        ssize_t Socket::in(void *buf, size_t count)
+        {
+            return Syscall::recv(fd, buf, count, MSG_WAITALL);
+        }
+
+        METHOD
+        ssize_t Socket::out(const void *buf, size_t count)
+        {
+            // Use write(2) instead of send(2) since it takes 3 arguments instead of 4.
+            // This produces slightly smaller code.
+
+            return Syscall::write(fd, buf, count);
+        }
+
         template <enum AddressType T>
         METHOD
         int StreamSocket::connect(Address<T> addr, uint16_t port)
         {
             auto serv_addr = Sockaddr<T>::pack(addr, port);
-            
+
             return Syscall::connect(fd, reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr));
         }
 
