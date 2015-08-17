@@ -77,7 +77,8 @@ def show_info(str)
 end
 
 def show_error(str)
-    puts "[".bold + "*".bold.color(:red) + "] ".bold + str
+    puts "[".bold + "*".bold.color(:red) + "] ".bold + 'Error: '.color(:cyan) + str
+    abort
 end
 
 def cc_invoke(cc, triple)
@@ -149,15 +150,21 @@ def compile(target, triple, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}"
+        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}" do |ok, _|
+            (puts; show_error("Compilation failed.")) unless ok
+        end
     end
 
-    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}"
+    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}" do |ok, _|
+        (puts; show_error("Compilation failed.")) unless ok
+    end
 end
 
 def generate_shellcode(target, triple, output_dir)
     triple += '-' unless triple.empty?
-    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target}.elf #{output_dir}/#{target}.bin" 
+    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target}.elf #{output_dir}/#{target}.bin" do |ok, res|
+        (puts; show_error("Cannot extract shellcode from #{output_dir}/#{target}.elf")) unless ok
+    end
 
     puts
     data = File.binread("#{output_dir}/#{target}.bin")
@@ -171,8 +178,7 @@ def build(target, *opts)
     triple = ENV['TRIPLE'] if ENV['TRIPLE']
 
     unless File.exists?("#{SHELLCODE_DIR}/#{target}.cc")
-        show_error("#{'Error:'.color(:cyan)} Cannot find source for target '#{target.to_s.color(:red)}'.")
-        return
+        show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
     end
 
     make_directory(output_dir)
