@@ -1,4 +1,4 @@
-#ifndef SYSCALL_SOCKET_H_ 
+#ifndef SYSCALL_SOCKET_H_
 #define SYSCALL_SOCKET_H_
 
 #include <stdbool.h>
@@ -10,8 +10,8 @@
 #include <netdb.h>
 #include <linux/net.h>
 
-/* 
- * Syscalls defined in this file. 
+/*
+ * Syscalls defined in this file.
  */
 namespace Syscall {
 
@@ -22,6 +22,10 @@ namespace Syscall {
     SYSTEM_CALL int listen(int, int);
     SYSTEM_CALL int bind(int, const struct sockaddr *, socklen_t);
     SYSTEM_CALL int accept(int, struct sockaddr *, socklen_t *);
+    SYSTEM_CALL ssize_t recv(int, void *, size_t, int);
+    SYSTEM_CALL ssize_t recvfrom(int, void *, size_t, int, struct sockaddr *, socklen_t *);
+    SYSTEM_CALL ssize_t send(int, const void *, size_t, int);
+    SYSTEM_CALL ssize_t sendto(int, const void *, size_t, int, const struct sockaddr *, socklen_t);
 
     #if SYSCALL_EXISTS(socketcall)
     SYSTEM_CALL
@@ -105,6 +109,52 @@ namespace Syscall {
         #else
         long args[] = { sockfd, (long) addr, (long) addrlen };
         return socketcall(SYS_ACCEPT, args);
+        #endif
+    }
+
+    SYSTEM_CALL
+    ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+                     struct sockaddr *src_addr, socklen_t *addrlen)
+    {
+        #if SYSCALL_EXISTS(recvfrom)
+        return DO_SYSCALL(recvfrom, 6, sockfd, buf, len, flags, src_addr, addrlen);
+        #else
+        long args[] = { sockfd, (long) buf, (long) len, flags, (long) src_addr, (long) addrlen };
+        return socketcall(SYS_RECVFROM, args);
+        #endif
+    }
+
+    SYSTEM_CALL
+    ssize_t recv(int sockfd, void *buf, size_t len, int flags)
+    {
+        #if SYSCALL_EXISTS(recvfrom)
+        return recvfrom(sockfd, buf, len, flags, nullptr, 0);
+        #else
+        long args[] = { sockfd, (long) buf, (long) len, flags };
+        return socketcall(SYS_RECV, args);
+        #endif
+    }
+
+    SYSTEM_CALL
+    ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+                   const struct sockaddr *dest_addr, socklen_t addrlen)
+    {
+        #if SYSCALL_EXISTS(sendto)
+        return DO_SYSCALL(sendto, 6, sockfd, buf, len, flags, dest_addr, addrlen);
+        #else
+        long args[] = { sockfd, (long) buf, (long) len, flags, (long) dest_addr, (long) addrlen };
+        return socketcall(SYS_SENDTO, args);
+        #endif
+    }
+
+    SYSTEM_CALL
+    ssize_t send(int sockfd, const void *buf, size_t len, int flags)
+    {
+        #if SYSCALL_EXISTS(sendto)
+        return sendto(sockfd, buf, len, flags, nullptr, 0);
+        #else
+        long args[] = { sockfd, (long) buf, (long) len, flags };
+        return socketcall(SYS_SEND, args);
         #endif
     }
 }

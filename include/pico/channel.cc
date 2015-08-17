@@ -60,9 +60,18 @@ namespace Pico {
             stm.read(buf, count);
             return *this;
         }
+
+        METHOD Channelng& recv(Memory::Buffer const& buffer) {
+            return recv(buffer.pointer(), buffer.size());
+        }
+
         METHOD Channelng& send(const void *buf, size_t count) {
             stm.write(buf, count);
             return *this;
+        }
+
+        METHOD Channelng& send(Memory::Buffer const& buffer) {
+            return send(buffer.pointer(), buffer.size());
         }
     };
 
