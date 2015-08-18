@@ -48,6 +48,12 @@ namespace Pico {
     {
         Syscall::dup2(fd, stm.file_desc());
     }
+
+    METHOD
+    void Stream::flush()
+    {
+        Syscall::fsync(fd);
+    }
     
     METHOD
     int Stream::close()

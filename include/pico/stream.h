@@ -74,6 +74,7 @@ namespace Pico {
             }
 
             METHOD int file_desc() const { return fd; }
+            METHOD void flush();
             METHOD int close();
 
         protected:
