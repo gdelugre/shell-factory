@@ -9,6 +9,7 @@ namespace Pico {
         typedef void (* sighandler_t)(int);
 
         public:
+            FUNCTION Process        current();
             FUNCTION void           set_current_thread_name(const char *comm);
             FUNCTION Process        find_process_by_name(const char *proc_name);
             FUNCTION Process        find_process_by_path(const char *exe_path);

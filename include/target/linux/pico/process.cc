@@ -7,6 +7,12 @@ namespace Pico {
     constexpr int COMM_MAX = 16;
 
     METHOD
+    Process Process::current()
+    {
+        return Process( Syscall::getpid() );
+    }
+
+    METHOD
     void set_current_thread_name(const char *comm)
     {
         Syscall::prctl(PR_SET_NAME,  (unsigned long) comm, 0, 0, 0);
