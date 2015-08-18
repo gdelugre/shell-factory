@@ -44,9 +44,9 @@ namespace Pico {
     }
 
     METHOD
-    void Stream::replace(Stream const& stm)
+    void Stream::duplicate(Stream& stm)
     {
-        Syscall::dup2(stm.file_desc(), fd);
+        Syscall::dup2(fd, stm.file_desc());
     }
     
     METHOD

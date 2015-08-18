@@ -67,7 +67,12 @@ namespace Pico {
             METHOD ssize_t out(const void *ptr, size_t count);
 
             METHOD Stream duplicate();
-            METHOD void replace(Stream const&);
+            METHOD void duplicate(Stream&);
+            METHOD void duplicate(Stream& r, Stream& w) {
+                duplicate(r);
+                duplicate(w);
+            }
+
             METHOD int file_desc() const { return fd; }
             METHOD int close();
 
@@ -82,6 +87,11 @@ namespace Pico {
             CONSTRUCTOR BiStream() = default;
             CONSTRUCTOR BiStream(Rx rx, Tx tx) : rx(rx), tx(tx) {}
             CONSTRUCTOR BiStream(int rfd, int wfd) : rx(Stream(rfd)), tx(Stream(wfd)) {}
+
+            METHOD void duplicate(Stream& r, Stream &w) {
+                rx.duplicate(r);
+                tx.duplicate(w);
+            }
 
             METHOD ssize_t in(void *ptr, size_t count) {
                 return rx.in(ptr, count);

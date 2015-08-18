@@ -32,7 +32,7 @@ namespace Pico {
             static constexpr bool dupable_to_stdio = dupable;   \
         };                                                      \
 
-    DEFINE_CHANNEL_MODE(NO_CHANNEL,     int,                    false);
+    DEFINE_CHANNEL_MODE(NO_CHANNEL,     void,                   false);
     DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<Stream>,       false);
     DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<Stream>,       false);
     DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
@@ -50,7 +50,6 @@ namespace Pico {
         static_assert(M != NO_CHANNEL, "Cannot instanciate channel: no mode specified");
         typename ChannelMode<M>::stream_type stm;
 
-        static constexpr bool dupable_to_stdio = ChannelMode<M>::dupable_to_stdio;
         CONSTRUCTOR Channelng();
 
         template <enum Network::AddressType T>
@@ -72,6 +71,16 @@ namespace Pico {
 
         METHOD Channelng& send(Memory::Buffer const& buffer) {
             return send(buffer.pointer(), buffer.size());
+        }
+
+        METHOD void dup_to_stdio() {
+            if ( ChannelMode<M>::dupable_to_stdio )
+            {
+                Stream std_in = Stream::standard_input();
+                Stream std_out = Stream::standard_output();
+
+                stm.duplicate(std_in, std_out);
+            }
         }
     };
 
