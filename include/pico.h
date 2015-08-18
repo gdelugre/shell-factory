@@ -1,15 +1,14 @@
 #ifndef PICO_H_
 #define PICO_H_
 
-#include <pico/cpu.cc>
-#include <pico/memory.cc>
-#include <pico/stream.cc>
-#include <pico/string.cc>
-#include <pico/fs.cc>
-
-#include <pico/socket.cc>
-#include <pico/channel.cc>
-#include <pico/process.cc> 
+#include <pico/cpu.h>
+#include <pico/memory.h>
+#include <pico/stream.h>
+#include <pico/string.h>
+#include <pico/fs.h>
+#include <pico/socket.h>
+#include <pico/channel.h>
+#include <pico/process.h> 
 
 #include <target/pico.h>
 
