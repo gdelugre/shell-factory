@@ -10,8 +10,8 @@ typedef __attribute__((noreturn)) void (* shellcode)(void);
 
 SHELLCODE_ENTRY
 {
-    Channel channel;
-    unsigned short buffer_size = 0;
+    auto channel = Options::channel();
+    uint16_t buffer_size;
 
     /* Read the size of the input buffer (2 bytes). */
     channel.recv(&buffer_size, sizeof(buffer_size));

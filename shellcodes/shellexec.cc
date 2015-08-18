@@ -16,6 +16,6 @@ SHELLCODE_ENTRY
     char **const argv = nullptr;
 #endif
 
-    Channel channel;
+    auto channel = Options::channel();
     Process::execute(cmd, argv, channel);
 }

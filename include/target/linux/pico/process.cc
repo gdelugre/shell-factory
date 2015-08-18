@@ -113,19 +113,6 @@ namespace Pico {
         Syscall::execve(filename, argv, envp);
     }
 
-    NO_RETURN METHOD
-    void Process::execute(const char *filename, char *const argv[], char *const envp[], Channel channel)
-    {
-        if ( channel.dupable_to_stdout )
-        {
-            Syscall::dup2(channel.rx, stdin);
-            Syscall::dup2(channel.tx, stdout);
-            Syscall::dup2(channel.tx, stdout);
-        }
-
-        execute(filename, argv, envp);
-    }
-
     METHOD
     Process Process::spawn(const char *filename, char *const argv[], char *const envp[])
     {
@@ -136,17 +123,14 @@ namespace Pico {
             return Process(pid);
     }
 
+    template <enum channel_mode M>
     METHOD
-    Process Process::spawn(const char *filename, char *const argv[], char *const envp[], Channel channel)
+    Process Process::spawn(const char *filename, char *const argv[], char *const envp[], Channel<M> channel)
     {
         pid_t pid = Syscall::fork();
         if ( pid == 0 )
         {
-            Syscall::dup2(channel.rx, stdin);
-            Syscall::dup2(channel.tx, stdout);
-            Syscall::dup2(channel.tx, stdout);
-
-            execute(filename, argv, envp);
+            execute(filename, argv, envp, channel);
         }
         else
             return Process(pid);

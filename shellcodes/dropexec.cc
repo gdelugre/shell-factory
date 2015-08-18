@@ -6,7 +6,7 @@ using namespace Pico::Filesystem;
 
 SHELLCODE_ENTRY
 {
-    Channel channel;
+    auto channel = Options::channel();
     unsigned int file_sz;
     char file_path[256];
 
