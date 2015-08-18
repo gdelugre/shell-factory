@@ -14,8 +14,8 @@
 #include <sys/prctl.h>
 #include <sys/time.h>
 
-/* 
- * System calls defined in this file. 
+/*
+ * System calls defined in this file.
  */
 namespace Syscall {
 
@@ -35,33 +35,33 @@ namespace Syscall {
     SYSTEM_CALL
     pid_t fork(void)
     {
-        return DO_SYSCALL(fork, 0);
+        return DO_SYSCALL(fork);
     }
 
     NO_RETURN SYSTEM_CALL
     int execve(const char *filename, char *const argv[], char *const envp[])
     {
-        DO_SYSCALL(execve, 3, filename, argv, envp);
+        DO_SYSCALL(execve, filename, argv, envp);
         __builtin_unreachable();
     }
 
     SYSTEM_CALL
     long clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
     {
-        return DO_SYSCALL(clone, 5, flags, child_stack, ptid, tls, ctid);
+        return DO_SYSCALL(clone, flags, child_stack, ptid, tls, ctid);
     }
 
     SYSTEM_CALL
     int prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg4, unsigned long arg5)
     {
-        return DO_SYSCALL(prctl, 5, option, arg2, arg3, arg4, arg5);
+        return DO_SYSCALL(prctl, option, arg2, arg3, arg4, arg5);
     }
 
     #if SYSCALL_EXISTS(setitimer)
     SYSTEM_CALL
     int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
     {
-        return DO_SYSCALL(setitimer, 3, which, value, ovalue);
+        return DO_SYSCALL(setitimer, which, value, ovalue);
     }
     #endif
 
@@ -69,7 +69,7 @@ namespace Syscall {
     unsigned int alarm(unsigned int seconds)
     {
         #if SYSCALL_EXISTS(alarm)
-        return DO_SYSCALL(alarm, 1, seconds);
+        return DO_SYSCALL(alarm, seconds);
         #else
         struct itimerval itv = { {0,0}, {0,0} };
 
@@ -81,38 +81,38 @@ namespace Syscall {
     SYSTEM_CALL
     int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
     {
-        return DO_SYSCALL(rt_sigaction, 4, signum, act, oldact, 8);
+        return DO_SYSCALL(rt_sigaction, signum, act, oldact, 8);
     }
 
     SYSTEM_CALL
     long ptrace(enum __ptrace_request request, pid_t pid, void *addr, void *data)
     {
-        return DO_SYSCALL(ptrace, 4, request, pid, addr, data);
+        return DO_SYSCALL(ptrace, request, pid, addr, data);
     }
 
     SYSTEM_CALL
     pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage)
     {
-        return DO_SYSCALL(wait4, 4, pid, status, options, rusage);
+        return DO_SYSCALL(wait4, pid, status, options, rusage);
     }
 
     SYSTEM_CALL
     int kill(pid_t pid, int sig)
     {
-        return DO_SYSCALL(kill, 2, pid, sig);
+        return DO_SYSCALL(kill, pid, sig);
     }
 
     NO_RETURN SYSTEM_CALL
     void exit_thread(int status)
     {
-        DO_SYSCALL(exit, 1, status);
+        DO_SYSCALL(exit, status);
         __builtin_unreachable();
     }
 
     NO_RETURN SYSTEM_CALL
     void exit_process(int status)
     {
-        DO_SYSCALL(exit_group, 1, status);
+        DO_SYSCALL(exit_group, status);
         __builtin_unreachable();
     }
 }

@@ -81,7 +81,7 @@ auto GetArgumentByIndex(T ...args)
     __sys_result;                                                       \
 })
 
-#define DO_SYSCALL(name, num_args, ...) ({ \
+#define DO_SYSCALL(name, ...) ({ \
   int err_val; \
   (void) err_val; \
   EMIT_SYSCALL(name, __VA_ARGS__); \

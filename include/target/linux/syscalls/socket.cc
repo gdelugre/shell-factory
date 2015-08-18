@@ -31,7 +31,7 @@ namespace Syscall {
     SYSTEM_CALL
     int socketcall(int num, long *args)
     {
-        return DO_SYSCALL(socketcall, 2, num, args);
+        return DO_SYSCALL(socketcall, num, args);
     }
     #endif
 
@@ -39,7 +39,7 @@ namespace Syscall {
     int socket(int domain, int type, int protocol)
     {
         #if SYSCALL_EXISTS(socket)
-        return DO_SYSCALL(socket, 3, domain, type, protocol);
+        return DO_SYSCALL(socket, domain, type, protocol);
         #else
         long args[] = { domain, type, protocol };
         return socketcall(SYS_SOCKET, args);
@@ -50,7 +50,7 @@ namespace Syscall {
     int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen)
     {
         #if SYSCALL_EXISTS(getsockopt)
-        return DO_SYSCALL(getsockopt, 5, sockfd, level, optname, optval, optlen);
+        return DO_SYSCALL(getsockopt, sockfd, level, optname, optval, optlen);
         #else
         long args[] = { sockfd, level, optname, (long) optval, (long) optlen };
         return socketcall(SYS_GETSOCKOPT, args);
@@ -61,7 +61,7 @@ namespace Syscall {
     int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
     {
         #if SYSCALL_EXISTS(setsockopt)
-        return DO_SYSCALL(setsockopt, 5, sockfd, level, optname, optval, optlen);
+        return DO_SYSCALL(setsockopt, sockfd, level, optname, optval, optlen);
         #else
         long args[] = { sockfd, level, optname, (long) optval, (long) optlen };
         return socketcall(SYS_SETSOCKOPT, args);
@@ -72,7 +72,7 @@ namespace Syscall {
     int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     {
         #if SYSCALL_EXISTS(connect)
-        return DO_SYSCALL(connect, 3, sockfd, addr, addrlen);
+        return DO_SYSCALL(connect, sockfd, addr, addrlen);
         #else
         long args[] = { sockfd, (long) addr, (long) addrlen };
         return socketcall(SYS_CONNECT, args);
@@ -83,7 +83,7 @@ namespace Syscall {
     int listen(int socket, int backlog)
     {
         #if SYSCALL_EXISTS(listen)
-        return DO_SYSCALL(listen, 2, socket, backlog);
+        return DO_SYSCALL(listen, socket, backlog);
         #else
         long args[] = { socket, backlog };
         return socketcall(SYS_LISTEN, args);
@@ -94,7 +94,7 @@ namespace Syscall {
     int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     {
         #if SYSCALL_EXISTS(bind)
-        return DO_SYSCALL(bind, 3, sockfd, addr, addrlen);
+        return DO_SYSCALL(bind, sockfd, addr, addrlen);
         #else
         long args[] = { sockfd, (long) addr, (long) addrlen };
         return socketcall(SYS_BIND, args);
@@ -105,7 +105,7 @@ namespace Syscall {
     int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
     {
         #if SYSCALL_EXISTS(accept)
-        return DO_SYSCALL(accept, 3, sockfd, addr, addrlen);
+        return DO_SYSCALL(accept, sockfd, addr, addrlen);
         #else
         long args[] = { sockfd, (long) addr, (long) addrlen };
         return socketcall(SYS_ACCEPT, args);
@@ -117,7 +117,7 @@ namespace Syscall {
                      struct sockaddr *src_addr, socklen_t *addrlen)
     {
         #if SYSCALL_EXISTS(recvfrom)
-        return DO_SYSCALL(recvfrom, 6, sockfd, buf, len, flags, src_addr, addrlen);
+        return DO_SYSCALL(recvfrom, sockfd, buf, len, flags, src_addr, addrlen);
         #else
         long args[] = { sockfd, (long) buf, (long) len, flags, (long) src_addr, (long) addrlen };
         return socketcall(SYS_RECVFROM, args);
@@ -140,7 +140,7 @@ namespace Syscall {
                    const struct sockaddr *dest_addr, socklen_t addrlen)
     {
         #if SYSCALL_EXISTS(sendto)
-        return DO_SYSCALL(sendto, 6, sockfd, buf, len, flags, dest_addr, addrlen);
+        return DO_SYSCALL(sendto, sockfd, buf, len, flags, dest_addr, addrlen);
         #else
         long args[] = { sockfd, (long) buf, (long) len, flags, (long) dest_addr, (long) addrlen };
         return socketcall(SYS_SENDTO, args);
