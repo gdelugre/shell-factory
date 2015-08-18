@@ -47,7 +47,8 @@ namespace Pico {
         };
 
         // Generates an IP address structure out of a list of static arguments.
-        template <typename... V> static constexpr
+        template <typename... V> 
+        FUNCTION
         auto ip_address_from_bytes(V... bytes)
         {
             constexpr size_t nr_bytes = sizeof...(bytes);
