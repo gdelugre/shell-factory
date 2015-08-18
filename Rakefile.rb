@@ -194,6 +194,10 @@ task :shellexec do
     build(:shellexec, "COMMAND", "SET_ARGV0")
 end
 
+task :memexec do
+    build(:memexec, "PAYLOAD_SIZE")
+end
+
 task :help do
     STDERR.puts <<-USAGE
 
