@@ -20,6 +20,7 @@
 namespace Syscall {
 
     SYSTEM_CALL pid_t           getpid(void);
+    SYSTEM_CALL pid_t           getppid(void);
     SYSTEM_CALL pid_t           fork(void);
     NO_RETURN SYSTEM_CALL int   execve(const char *, char *const[], char *const[]);
     SYSTEM_CALL long            clone(unsigned long, void *, void *, void *, void *);
@@ -37,6 +38,12 @@ namespace Syscall {
     pid_t getpid(void)
     {
         return DO_SYSCALL(getpid);
+    }
+
+    SYSTEM_CALL
+    pid_t getppid(void)
+    {
+        return DO_SYSCALL(getppid);
     }
 
     SYSTEM_CALL
