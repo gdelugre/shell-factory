@@ -72,8 +72,14 @@ ARCH_CFLAGS =
     /.*/ => %w{-fPIC}
 }
 
-def show_info(str)
+def show_info(str, list = {})
     STDERR.puts "[".bold + "*".bold.color(:green) + "] ".bold + str
+
+    list.each_with_index do |item, i|
+        name, value = item
+        branch = (i == list.size - 1) ? '└' : '├'
+        STDERR.puts "    #{branch.bold} #{(name + ?:).color(:green)} #{value}"
+    end
 end
 
 def show_error(str)
@@ -127,11 +133,12 @@ def compile(target, triple, output_dir, *opts)
     host_vendor = RbConfig::CONFIG['target_vendor']
     host_triple = [ host_arch, host_vendor, host_os ].join('-')
 
-    show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'")
-    STDERR.puts "    #{'├'.bold} #{'Compiler:'.color(:green)} #{cc}"
-    STDERR.puts "    #{'├'.bold} #{'Host architecture:'.color(:green)} #{host_triple}"
-    STDERR.puts "    #{'├'.bold} #{'Target architecture:'.color(:green)} #{triple.empty? ? host_triple : triple}"
-    STDERR.puts "    #{'└'.bold} #{'Options:'.color(:green)} #{defines}"
+    show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'",
+        'Compiler' => cc,
+        'Host architecture' => host_triple,
+        'Target architecture' => triple.empty? ? host_triple : triple,
+        'Options' => defines 
+    )
     STDERR.puts
 
     ARCH_CFLAGS.each_pair { |arch, flags|
@@ -185,13 +192,16 @@ def generate_shellcode(target, triple, output_dir)
     _, target_name = target_to_source(target)
     triple += '-' unless triple.empty?
     sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target_name}.elf #{output_dir}/#{target_name}.bin" do |ok, res|
-        (STDERR.puts; show_error("Cannot extract shellcode from #{output_dir}/#{target_name}.elf")) unless ok
+        STDERR.puts
+        show_error("Cannot extract shellcode from #{output_dir}/#{target_name}.elf") unless ok
     end
 
-    STDERR.puts
+    # Read shellcode.
     data = File.binread("#{output_dir}/#{target_name}.bin")
-    show_info "#{'Generated target:'.color(:cyan)} #{data.size} bytes."
-    STDERR.puts "    #{'└'.bold} #{'Contents:'.color(:green)} \"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
+
+    output = {}
+    output['Contents'] = "\"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
+    show_info("#{'Generated target:'.color(:cyan)} #{data.size} bytes.", output)
 
     print data unless STDOUT.tty?
 end
