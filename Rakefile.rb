@@ -93,6 +93,21 @@ def cc_invoke(cc, triple)
     end
 end
 
+# Returns [ source_path, output_basename ]
+def target_to_source(target)
+    dirs = target.to_s.split('/').delete_if{|dir| dir.empty?}
+
+    if dirs.length == 1
+        source_dir = SHELLCODE_DIR
+        source_basename = dirs[0]
+    else
+        source_dir = dirs[0..-2].join('/')
+        source_basename = dirs[-1]
+    end
+
+    [ source_dir, source_basename ]
+end
+
 def compile(target, triple, output_dir, *opts)
     common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE}
     options = common_opts + opts
@@ -100,13 +115,19 @@ def compile(target, triple, output_dir, *opts)
     options = common_opts + opts
     cc = ENV['CC'] || CC
     cflags = CFLAGS.dup
+    source_dir, target_name = target_to_source(target)
+    source_file = File.join(source_dir, "#{target_name}.cc")
+
+    unless File.exists?(source_file)
+        show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
+    end
 
     host_os = RbConfig::CONFIG['target_os']
     host_arch = RbConfig::CONFIG['target_cpu']
     host_vendor = RbConfig::CONFIG['target_vendor']
     host_triple = [ host_arch, host_vendor, host_os ].join('-')
 
-    show_info("#{'Generating shellcode'.color(:cyan)} '#{target.to_s.color(:red)}'")
+    show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'")
     puts "    #{'├'.bold} #{'Compiler:'.color(:green)} #{cc}"
     puts "    #{'├'.bold} #{'Host architecture:'.color(:green)} #{host_triple}"
     puts "    #{'├'.bold} #{'Target architecture:'.color(:green)} #{triple.empty? ? host_triple : triple}"
@@ -150,25 +171,26 @@ def compile(target, triple, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'].to_i == 1
-        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.S #{defines.join(' ')}" do |ok, _|
+        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{source_file} -o #{output_dir}/#{target_name}.S #{defines.join(' ')}" do |ok, _|
             (puts; show_error("Compilation failed.")) unless ok
         end
     end
 
-    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{SHELLCODE_DIR}/#{target}.cc -o #{output_dir}/#{target}.elf #{defines.join(' ')}" do |ok, _|
+    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{source_file} -o #{output_dir}/#{target_name}.elf #{defines.join(' ')}" do |ok, _|
         (puts; show_error("Compilation failed.")) unless ok
     end
 end
 
 def generate_shellcode(target, triple, output_dir)
+    _, target_name = target_to_source(target)
     triple += '-' unless triple.empty?
-    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target}.elf #{output_dir}/#{target}.bin" do |ok, res|
-        (puts; show_error("Cannot extract shellcode from #{output_dir}/#{target}.elf")) unless ok
+    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target_name}.elf #{output_dir}/#{target_name}.bin" do |ok, res|
+        (puts; show_error("Cannot extract shellcode from #{output_dir}/#{target_name}.elf")) unless ok
     end
 
     puts
-    data = File.binread("#{output_dir}/#{target}.bin")
-    show_info "#{'Generated shellcode:'.color(:cyan)} #{data.size} bytes."
+    data = File.binread("#{output_dir}/#{target_name}.bin")
+    show_info "#{'Generated target:'.color(:cyan)} #{data.size} bytes."
     puts "    #{'└'.bold} #{'Contents:'.color(:green)} \"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
 end
 
@@ -176,10 +198,6 @@ def build(target, *opts)
     output_dir = OUTPUT_DIR
     triple = ''
     triple = ENV['TRIPLE'] if ENV['TRIPLE']
-
-    unless File.exists?("#{SHELLCODE_DIR}/#{target}.cc")
-        show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
-    end
 
     make_directory(output_dir)
     compile(target, triple, output_dir, *opts)
