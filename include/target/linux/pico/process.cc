@@ -1,7 +1,6 @@
 #ifndef PICOLIB_PROCESS_IMPL_H_
 #define PICOLIB_PROCESS_IMPL_H_
 
-
 namespace Pico {
 
     constexpr int COMM_MAX = 16;

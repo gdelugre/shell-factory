@@ -9,6 +9,7 @@
 #include "pico/stream.cc"
 #include "pico/fs.cc"
 #include "pico/process.cc"
+#include "pico/debug.cc"
 #include "pico/socket.cc"
 
 #endif

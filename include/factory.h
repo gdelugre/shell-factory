@@ -12,6 +12,7 @@
 #define NO_RETURN [[noreturn]]
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define CONSTRUCTOR INLINE
+#define DESTRUCTOR INLINE
 #define METHOD INLINE __attribute__((section(".funcs")))
 #define VIRTUAL_METHOD virtual METHOD
 #define FUNCTION static METHOD

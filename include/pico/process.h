@@ -73,7 +73,7 @@ namespace Pico {
             METHOD int              wait(int *status);
             METHOD int              kill();
 
-        private:
+        protected:
             pid_t pid;
     };
 }
