@@ -7,6 +7,8 @@
 #include <target/cpu/amd64/cpu_regs.h>
 #elif defined(__arm__)
 #include <target/cpu/arm/cpu_regs.h>
+#elif defined(__aarch64__)
+#include <target/cpu/aarch64/cpu_regs.h>
 #elif defined(__mips__)
 #include <target/cpu/mips/cpu_regs.h>
 #else
