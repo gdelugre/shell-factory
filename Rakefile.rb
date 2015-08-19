@@ -73,11 +73,11 @@ ARCH_CFLAGS =
 }
 
 def show_info(str)
-    puts "[".bold + "*".bold.color(:green) + "] ".bold + str
+    STDERR.puts "[".bold + "*".bold.color(:green) + "] ".bold + str
 end
 
 def show_error(str)
-    puts "[".bold + "*".bold.color(:red) + "] ".bold + 'Error: '.color(:cyan) + str
+    STDERR.puts "[".bold + "*".bold.color(:red) + "] ".bold + 'Error: '.color(:cyan) + str
     abort
 end
 
@@ -128,11 +128,11 @@ def compile(target, triple, output_dir, *opts)
     host_triple = [ host_arch, host_vendor, host_os ].join('-')
 
     show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'")
-    puts "    #{'├'.bold} #{'Compiler:'.color(:green)} #{cc}"
-    puts "    #{'├'.bold} #{'Host architecture:'.color(:green)} #{host_triple}"
-    puts "    #{'├'.bold} #{'Target architecture:'.color(:green)} #{triple.empty? ? host_triple : triple}"
-    puts "    #{'└'.bold} #{'Options:'.color(:green)} #{defines}"
-    puts
+    STDERR.puts "    #{'├'.bold} #{'Compiler:'.color(:green)} #{cc}"
+    STDERR.puts "    #{'├'.bold} #{'Host architecture:'.color(:green)} #{host_triple}"
+    STDERR.puts "    #{'├'.bold} #{'Target architecture:'.color(:green)} #{triple.empty? ? host_triple : triple}"
+    STDERR.puts "    #{'└'.bold} #{'Options:'.color(:green)} #{defines}"
+    STDERR.puts
 
     ARCH_CFLAGS.each_pair { |arch, flags|
         if triple =~ arch
@@ -172,12 +172,12 @@ def compile(target, triple, output_dir, *opts)
 
     if ENV['OUTPUT_DEBUG'].to_i == 1
         sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{source_file} -o #{output_dir}/#{target_name}.S #{defines.join(' ')}" do |ok, _|
-            (puts; show_error("Compilation failed.")) unless ok
+            (STDERR.puts; show_error("Compilation failed.")) unless ok
         end
     end
 
     sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{source_file} -o #{output_dir}/#{target_name}.elf #{defines.join(' ')}" do |ok, _|
-        (puts; show_error("Compilation failed.")) unless ok
+        (STDERR.puts; show_error("Compilation failed.")) unless ok
     end
 end
 
@@ -185,13 +185,15 @@ def generate_shellcode(target, triple, output_dir)
     _, target_name = target_to_source(target)
     triple += '-' unless triple.empty?
     sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target_name}.elf #{output_dir}/#{target_name}.bin" do |ok, res|
-        (puts; show_error("Cannot extract shellcode from #{output_dir}/#{target_name}.elf")) unless ok
+        (STDERR.puts; show_error("Cannot extract shellcode from #{output_dir}/#{target_name}.elf")) unless ok
     end
 
-    puts
+    STDERR.puts
     data = File.binread("#{output_dir}/#{target_name}.bin")
     show_info "#{'Generated target:'.color(:cyan)} #{data.size} bytes."
-    puts "    #{'└'.bold} #{'Contents:'.color(:green)} \"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
+    STDERR.puts "    #{'└'.bold} #{'Contents:'.color(:green)} \"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
+
+    print data unless STDOUT.tty?
 end
 
 def build(target, *opts)
