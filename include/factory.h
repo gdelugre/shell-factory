@@ -1,6 +1,7 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
+#include <stdint.h>
 #include <stddef.h>
 
 #if defined(RELAX_INLINE) && (RELAX_INLINE == 1)
@@ -44,6 +45,7 @@ extern "C" {
 #define PAGE_SIZE 4096
 
 #include <factory-options.h>
+#include <target/cpu_regs.h>
 #include <target/syscalls.h>
 
 #endif

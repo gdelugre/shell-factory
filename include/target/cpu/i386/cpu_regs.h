@@ -6,36 +6,36 @@
 enum cpu_registers
 {
     // General registers.
-    REG_EAX,
-    REG_EBX,
-    REG_ECX,
-    REG_EDX,
-    REG_ESI,
-    REG_EDI,
-    REG_EBP,
-    REG_ESP,
-    REG_EIP,
+    CPU_REG_EAX,
+    CPU_REG_EBX,
+    CPU_REG_ECX,
+    CPU_REG_EDX,
+    CPU_REG_ESI,
+    CPU_REG_EDI,
+    CPU_REG_EBP,
+    CPU_REG_ESP,
+    CPU_REG_EIP,
 
     // Flags.
-    REG_EFLAGS,
+    CPU_REG_EFLAGS,
 
     // Segment selectors.
-    REG_CS,
-    REG_DS,
-    REG_ES,
-    REG_FS,
-    REG_GS,
-    REG_SS,
+    CPU_REG_CS,
+    CPU_REG_DS,
+    CPU_REG_ES,
+    CPU_REG_FS,
+    CPU_REG_GS,
+    CPU_REG_SS,
 
     // Debug registers.
-    REG_DR0,
-    REG_DR1,
-    REG_DR2,
-    REG_DR3,
-    REG_DR4,
-    REG_DR5,
-    REG_DR6,
-    REG_DR7,
+    CPU_REG_DR0,
+    CPU_REG_DR1,
+    CPU_REG_DR2,
+    CPU_REG_DR3,
+    CPU_REG_DR4,
+    CPU_REG_DR5,
+    CPU_REG_DR6,
+    CPU_REG_DR7,
 };
 
 typedef uint32_t cpu_reg_t;
