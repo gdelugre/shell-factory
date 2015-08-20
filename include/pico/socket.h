@@ -56,7 +56,7 @@ namespace Pico {
 
             using ip_address = typename ip_address_type<nr_bytes>::type;
 
-            return ip_address { static_cast<uint8_t>(bytes)... };
+            return ip_address { { static_cast<uint8_t>(bytes)... } };
         }
 
         class Socket : public Stream
