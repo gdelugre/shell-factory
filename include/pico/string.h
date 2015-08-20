@@ -6,57 +6,6 @@
 namespace Pico {
 
     FUNCTION
-    void *memcpy(void *dest, const void *src, size_t n)
-    {
-        if ( NO_BUILTIN )
-        {
-            unsigned int i;
-            for ( i = 0; i < n; i++ )
-                ((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
-            return dest;
-        }
-        else
-            return BUILTIN(memcpy)(dest, src, n);
-    }
-
-    FUNCTION
-    void *memset(void *s, int c, size_t n)
-    {
-        if ( NO_BUILTIN )
-        {
-            unsigned int i;
-            for ( i = 0; i < n; i++ )
-                ((unsigned char *)s)[i] = c;
-            return s;
-        }
-        else
-            return BUILTIN(memset)(s, c, n);
-    }
-
-    FUNCTION
-    int memcmp(const void *s1, const void *s2, size_t n)
-    {
-        if ( NO_BUILTIN )
-        {
-            unsigned int i;
-            for ( i = 0; i < n; i++ )
-                if ( ((unsigned char *)s1)[i] < ((unsigned char *)s2)[i] )
-                    return -1;
-                else
-                    return +1;
-            return 0;
-        }
-        else
-            return BUILTIN(memcmp)(s1, s2, n);
-    }
-
-    FUNCTION
-    void bzero(void *s, size_t n)
-    {
-        memset(s, 0, n);
-    }
-
-    FUNCTION
     size_t strlen(const char *s)
     {
         size_t len = 0;
