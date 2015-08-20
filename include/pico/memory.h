@@ -57,6 +57,8 @@ namespace Pico {
 
         for ( size_t i = 0; i < n / sizeof(T); i++ )
             bdest[i] = bsrc[i];
+
+        return dest;
     }
 
     template <typename T>
@@ -68,6 +70,8 @@ namespace Pico {
 
         for ( size_t i = 0; i < n / sizeof(T); i++ )
             bdest[i] = word;
+
+        return dest;
     }
 
     template <typename T>
