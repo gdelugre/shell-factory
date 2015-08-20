@@ -47,7 +47,7 @@ namespace Pico {
                 addr.sin6_flowinfo      = 0;
                 addr.sin6_family        = AF_INET6;
                 addr.sin6_port          = _htons(port);
-                _memcpy(&addr.sin6_addr.s6_addr, &ip, sizeof(ip));
+                memcpy(&addr.sin6_addr.s6_addr, &ip, sizeof(ip));
 
                 return addr;
             }

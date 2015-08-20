@@ -1,11 +1,14 @@
 #ifndef PICOLIB_STREAM_H_
 #define PICOLIB_STREAM_H_
 
+#include <cstdarg>
+
 namespace Pico {
 
     class IO
     {
         public:
+
             VIRTUAL_METHOD ssize_t in(void *, size_t) = 0;
             VIRTUAL_METHOD ssize_t out(const void *, size_t) = 0;
             VIRTUAL_METHOD int close() = 0;
@@ -65,6 +68,8 @@ namespace Pico {
 
             METHOD ssize_t in(void *ptr, size_t count);
             METHOD ssize_t out(const void *ptr, size_t count);
+            METHOD_NOINLINE int printf(const char *format, ...);
+            METHOD int vprintf(const char *format, va_list ap);
 
             METHOD Stream duplicate();
             METHOD void duplicate(Stream&);

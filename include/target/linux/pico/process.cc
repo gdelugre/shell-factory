@@ -32,17 +32,17 @@ namespace Pico {
             char comm_path[PATH_MAX];
             char comm[COMM_MAX + 1];
 
-            pid_t pid = _atoi(filename);
+            pid_t pid = atoi(filename);
             if ( pid == 0 )
                 return 0;
 
-            _sprintf(comm_path, "/proc/%s/comm", filename);
+            sprintf(comm_path, "/proc/%s/comm", filename);
             int fd = Syscall::open(comm_path, O_RDONLY);
             ssize_t n = Syscall::read(fd, comm, sizeof(comm));
             comm[n - 1] = '\0';
             Syscall::close(fd);
 
-            if ( _strcmp(proc_name, comm) == 0 )
+            if ( strcmp(proc_name, comm) == 0 )
             {
                 result = pid;
                 return 1;
@@ -62,18 +62,18 @@ namespace Pico {
         Filesystem::Directory::each("/proc", [exe_path,&result](const char *filename) {
             char link_path[PATH_MAX];
             char exe[PATH_MAX + 1];
-            pid_t pid = _atoi(filename);
+            pid_t pid = atoi(filename);
 
             if ( pid == 0 )
                 return 0;
 
-            _sprintf(link_path, "/proc/%s/exe", filename);
+            sprintf(link_path, "/proc/%s/exe", filename);
             ssize_t n = Syscall::readlink(link_path, exe, sizeof(exe));
             if ( n < 0 )
                 return 0;
 
             exe[n] = '\0';
-            if ( _strcmp(exe_path, exe) == 0 )
+            if ( strcmp(exe_path, exe) == 0 )
             {
                 result = pid;
                 return 1;
@@ -153,7 +153,7 @@ namespace Pico {
         struct sigaction act, old_act;
 
         act.sa_handler = handler;
-        _memset(&act.sa_mask, 0, sizeof(sigset_t));
+        memset(&act.sa_mask, 0, sizeof(sigset_t));
         act.sa_flags = SA_RESETHAND;
 
         Syscall::sigaction(signal, &act, &old_act);
