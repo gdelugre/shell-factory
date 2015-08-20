@@ -165,11 +165,8 @@ namespace Pico {
 
 namespace Options {
 
-    /*
-     * Channel parameter defaults to NO_CHANNEL.
-     */
     #ifndef CHANNEL
-    #define CHANNEL NO_CHANNEL
+    #define CHANNEL USE_STDOUT
     #endif
 
     /*
