@@ -92,6 +92,15 @@ namespace Pico {
         if ( Options::use_builtins )
             return BUILTIN(memcpy)(dest, src, n);
 
+        if ( is_size_aligned<uint64_t>(n) )
+            return memcpy_block<uint64_t>(dest, src, n);
+
+        if ( is_size_aligned<uint32_t>(n) )
+            return memcpy_block<uint32_t>(dest, src, n);
+
+        if ( is_size_aligned<uint16_t>(n) )
+            return memcpy_block<uint16_t>(dest, src, n);
+
         return memcpy_block<uint8_t>(dest, src, n);
     }
 
@@ -101,7 +110,16 @@ namespace Pico {
         if ( Options::use_builtins )
             return BUILTIN(memset)(s, c, n);
 
-        return memset_block<uint32_t>(s, c, n);
+        if ( is_size_aligned<uint64_t>(n) )
+            return memset_block<uint64_t>(s, c, n);
+
+        if ( is_size_aligned<uint32_t>(n) )
+            return memset_block<uint32_t>(s, c, n);
+
+        if ( is_size_aligned<uint16_t>(n) )
+            return memset_block<uint16_t>(s, c, n);
+
+        return memset_block<uint8_t>(s, c, n);
     }
 
     FUNCTION
@@ -109,6 +127,15 @@ namespace Pico {
     {
         if ( Options::use_builtins )
             return BUILTIN(memcmp)(s1, s2, n);
+
+        if ( is_size_aligned<uint64_t>(n) )
+            return memcmp_block<uint64_t>(s1, s2, n);
+
+        if ( is_size_aligned<uint32_t>(n) )
+            return memcmp_block<uint32_t>(s1, s2, n);
+
+        if ( is_size_aligned<uint16_t>(n) )
+            return memcmp_block<uint16_t>(s1, s2, n);
 
         return memcmp_block<uint8_t>(s1, s2, n);
     }
