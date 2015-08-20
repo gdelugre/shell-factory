@@ -93,6 +93,24 @@ namespace Pico {
     }
 
     FUNCTION
+    int toupper(int c)
+    {
+        if ( c >= 'a' && c <= 'z' )
+            c -= ('a' - 'A');
+
+        return c;
+    }
+
+    FUNCTION
+    int tolower(int c)
+    {
+        if ( c >= 'A' && c <= 'Z' )
+            c += ('a' - 'A');
+
+        return c;
+    }
+
+    FUNCTION
     unsigned int atoi(const char *nptr)
     {
         char *ptr = (char *) nptr;
@@ -115,12 +133,13 @@ namespace Pico {
 
     template <typename T>
     FUNCTION
-    size_t format_word_to_hex(T& dest, unsigned long w, size_t (*output)(T&, void *, size_t))
+    size_t format_word_to_hex(T& dest, unsigned long w, bool upcase, size_t (*output)(T&, void *, size_t))
     {
         static char hex_chars[] = "0123456789abcdef";
         const size_t bitsize = sizeof(w) * 8;
         int off = bitsize - 4;
         size_t count = 0;
+        char c;
 
         while ( off != 0 && w >> off == 0 )
             off -= 4;
@@ -134,7 +153,11 @@ namespace Pico {
         {
             while ( off >= 0 )
             {
-                output(dest, &hex_chars[(w >> off) & 0xF], 1);
+                c = hex_chars[(w >> off) & 0xF];
+                if ( upcase )
+                    c = toupper(c);
+
+                output(dest, &c, 1);
                 off -= 4;
                 count++;
             }
@@ -181,8 +204,9 @@ namespace Pico {
 
                     case 'p':
                     case 'x':
+                    case 'X':
                         param_word = va_arg(ap, unsigned long);
-                        result += format_word_to_hex(dest, param_word, output);
+                        result += format_word_to_hex(dest, param_word, (c == 'X'), output);
                         break;
 
                     default:
