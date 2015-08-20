@@ -9,9 +9,9 @@ namespace Pico {
     {
         public:
             // Do not declare these methods as pure. Compiler will fail at link time.
-            METHOD ssize_t in(void *, size_t) {}
-            METHOD ssize_t out(const void *, size_t) {}
-            METHOD int close() {}
+            METHOD ssize_t in(void *, size_t) { return -1; }
+            METHOD ssize_t out(const void *, size_t) { return -1; }
+            METHOD int close() { return -1; }
 
             METHOD IO& read(void *ptr, size_t count) {
                 in(ptr, count);
