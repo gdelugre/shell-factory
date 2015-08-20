@@ -131,37 +131,29 @@ namespace Pico {
         return res;
     }
 
-    template <typename T>
+    template <int radix = 10, typename T>
     FUNCTION
-    size_t format_word_to_hex(T& dest, unsigned long w, bool upcase, size_t (*output)(T&, const void *, size_t))
+    size_t format_ltoa(T& dest, unsigned long value, bool upcase, size_t (*output)(T&, const void *, size_t))
     {
-        static char hex_chars[] = "0123456789abcdef";
-        const size_t bitsize = sizeof(w) * 8;
-        int off = bitsize - 4;
-        size_t count = 0;
-        char c;
+        static_assert(radix >= 2 && radix <= 36, "Invalid radix");
+        size_t count = 0, nr_digits = 0;
+        char str[sizeof(value) * 8] = { 0 }; // Worst case, radix = 2.
 
-        while ( off != 0 && w >> off == 0 )
-            off -= 4;
+        do {
+            static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-        if ( off == 0 )
-        {
-            output(dest, &hex_chars[0], 1);
-            count++;
-        }
-        else
-        {
-            while ( off >= 0 )
-            {
-                c = hex_chars[(w >> off) & 0xF];
-                if ( upcase )
-                    c = toupper(c);
+            long r = value % radix;
+            char digit = digits[r];
+            if ( upcase )
+                digit = toupper(digit);
 
-                output(dest, &c, 1);
-                off -= 4;
-                count++;
-            }
-        }
+            str[nr_digits++] = digit;
+            value = (value - r) / radix;
+
+        } while ( value != 0 );
+
+        for ( size_t i = 0; i < nr_digits; i++ )
+            count += output(dest, &str[nr_digits - i - 1], 1);
 
         return count;
     }
@@ -195,6 +187,11 @@ namespace Pico {
                     case '%':
                         result += output(dest, &c, 1); break;
 
+                    case 'd':
+                        param_word = va_arg(ap, unsigned long);
+                        result += format_ltoa(dest, param_word, false, output);
+                        break;
+
                     case 's':
                         param_str = va_arg(ap, char *);
                         param_str_sz = strlen(param_str);
@@ -209,7 +206,7 @@ namespace Pico {
                     case 'x':
                     case 'X':
                         param_word = va_arg(ap, unsigned long);
-                        result += format_word_to_hex(dest, param_word, (c == 'X'), output);
+                        result += format_ltoa<16>(dest, param_word, (c == 'X'), output);
                         break;
 
                     default:
