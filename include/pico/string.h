@@ -113,35 +113,9 @@ namespace Pico {
         return res;
     }
 
+    template <typename T>
     FUNCTION
-    size_t word_to_hex_str(char *str, unsigned long w)
-    {
-        static char hex_chars[] = "0123456789abcdef";
-        const size_t bitsize = sizeof(w) * 8;
-        int off = bitsize - 4;
-        char *out = str;
-
-        while ( off != 0 && w >> off == 0 )
-            off -= 4;
-
-        if ( off == 0 )
-        {
-            *out++ = '0';
-        }
-        else
-        {
-            while ( off >= 0 )
-            {
-                *out++ = hex_chars[(w >> off) & 0xF];
-                off -= 4;
-            }
-        }
-
-        return (out - str);
-    }
-
-    FUNCTION
-    size_t word_to_hex_fd(int fd, unsigned long w)
+    size_t format_word_to_hex(T& dest, unsigned long w, size_t (*output)(T&, void *, size_t))
     {
         static char hex_chars[] = "0123456789abcdef";
         const size_t bitsize = sizeof(w) * 8;
@@ -153,14 +127,14 @@ namespace Pico {
 
         if ( off == 0 )
         {
-            Syscall::write(fd, &hex_chars[0], 1);
+            output(dest, &hex_chars[0], 1);
             count++;
         }
         else
         {
             while ( off >= 0 )
             {
-                Syscall::write(fd, &hex_chars[(w >> off) & 0xF], 1);
+                output(dest, &hex_chars[(w >> off) & 0xF], 1);
                 off -= 4;
                 count++;
             }
@@ -169,22 +143,23 @@ namespace Pico {
         return count;
     }
 
+    template <typename T>
     FUNCTION
-    int vsprintf(char *str, const char *format, va_list ap)
+    int vformat(T& dest, const char *format, va_list ap, size_t (*output)(T&, void *, size_t))
     {
         int escape = 0;
         char c;
-        char *out = str;
         char *param_str;
         size_t param_str_sz;
         unsigned long param_word;
+        int result = 0;
 
         while ( *format )
         {
             c = *format++;
             if ( !escape && c != '%' )
             {
-                *out++ = c;
+                result += output(dest, &c, 1);
             }
             else if ( !escape && c == '%' )
             {
@@ -195,20 +170,19 @@ namespace Pico {
                 switch ( c )
                 {
                     case '%':
-                        *out++ = '%'; break;
+                        result += output(dest, &c, 1); break;
 
                     case 's':
                         param_str = va_arg(ap, char *);
                         param_str_sz = strlen(param_str);
-                        memcpy(out, param_str, param_str_sz);
-                        out += param_str_sz;
+                        result += output(dest, param_str, param_str_sz);
                         escape = 0;
                         break;
 
                     case 'p':
                     case 'x':
                         param_word = va_arg(ap, unsigned long);
-                        out += word_to_hex_str(out, param_word);
+                        result += format_word_to_hex(dest, param_word, output);
                         break;
 
                     default:
@@ -219,11 +193,28 @@ namespace Pico {
             }
         }
 
-        *out = '\0';
-        return (out - str);
+        return result;
     }
 
     FUNCTION
+    int vsprintf(char *str, const char *format, va_list ap)
+    {
+
+        size_t (*output_func)(char *&, void *, size_t) =
+            [](char *& ptr, void *buffer, size_t n) -> size_t {
+                memcpy(ptr, buffer, n);
+                ptr += n;
+
+                return n;
+            };
+        char *output = str;
+        int count = vformat(output, format, ap, output_func);
+
+        str[count] = '\0';
+        return count;
+    }
+
+    FUNCTION_NOINLINE
     int sprintf(char *str, const char *format, ...)
     {
         int cnt;
@@ -266,60 +257,15 @@ namespace Pico {
     METHOD
     int Stream::vprintf(const char *format, va_list ap)
     {
-        int escape = 0;
-        char c;
-        char *param_str;
-        size_t param_str_sz;
-        unsigned long param_word;
-        size_t count = 0;
+        size_t (*output_func)(Stream&, void *, size_t) =
+            [](Stream& s, void *buffer, size_t n) -> size_t {
+                return s.out(buffer, n);
+            };
 
-        while ( *format )
-        {
-            c = *format++;
-            if ( !escape && c != '%' )
-            {
-                Syscall::write(fd, &c, 1);
-                count++;
-            }
-            else if ( !escape && c == '%' )
-            {
-                escape = 1;
-            }
-            else
-            {
-                switch ( c )
-                {
-                    case '%':
-                        write(&c, 1);
-                        count++;
-                        break;
-
-                    case 's':
-                        param_str = va_arg(ap, char *);
-                        param_str_sz = strlen(param_str);
-                        write(param_str, param_str_sz);
-                        count += param_str_sz;
-                        escape = 0;
-                        break;
-
-                    case 'p':
-                    case 'x':
-                        param_word = va_arg(ap, unsigned long);
-                        count += word_to_hex_fd(fd, param_word);
-                        break;
-
-                    default:
-                        break;
-                }
-
-                escape = 0;
-            }
-        }
-
+        int count = vformat(*this, format, ap, output_func);
         flush();
         return count;
     }
-
 }
 
 #endif
