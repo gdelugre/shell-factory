@@ -133,7 +133,7 @@ namespace Pico {
 
     template <typename T>
     FUNCTION
-    size_t format_word_to_hex(T& dest, unsigned long w, bool upcase, size_t (*output)(T&, void *, size_t))
+    size_t format_word_to_hex(T& dest, unsigned long w, bool upcase, size_t (*output)(T&, const void *, size_t))
     {
         static char hex_chars[] = "0123456789abcdef";
         const size_t bitsize = sizeof(w) * 8;
@@ -168,7 +168,7 @@ namespace Pico {
 
     template <typename T>
     FUNCTION
-    int vformat(T& dest, const char *format, va_list ap, size_t (*output)(T&, void *, size_t))
+    int vformat(T& dest, const char *format, va_list ap, size_t (*output)(T&, const void *, size_t))
     {
         int escape = 0;
         char c;
@@ -203,6 +203,9 @@ namespace Pico {
                         break;
 
                     case 'p':
+                        static char hex_prefix[] = "0x";
+                        result += output(dest, hex_prefix, sizeof(hex_prefix));
+
                     case 'x':
                     case 'X':
                         param_word = va_arg(ap, unsigned long);
@@ -224,8 +227,8 @@ namespace Pico {
     int vsprintf(char *str, const char *format, va_list ap)
     {
 
-        size_t (*output_func)(char *&, void *, size_t) =
-            [](char *& ptr, void *buffer, size_t n) -> size_t {
+        size_t (*output_func)(char *&, const void *, size_t) =
+            [](char *& ptr, const void *buffer, size_t n) -> size_t {
                 memcpy(ptr, buffer, n);
                 ptr += n;
 
@@ -281,8 +284,8 @@ namespace Pico {
     METHOD
     int Stream::vprintf(const char *format, va_list ap)
     {
-        size_t (*output_func)(Stream&, void *, size_t) =
-            [](Stream& s, void *buffer, size_t n) -> size_t {
+        size_t (*output_func)(Stream&, const void *, size_t) =
+            [](Stream& s, const void *buffer, size_t n) -> size_t {
                 return s.out(buffer, n);
             };
 
