@@ -45,6 +45,8 @@ CFLAGS = %w{-std=c++1y
             -Wfatal-errors
             -fno-common
             -fomit-frame-pointer
+            -ffunction-sections
+            -fdata-sections
             -nostdlib
             -Wl,-e_start
             -Wl,--gc-sections

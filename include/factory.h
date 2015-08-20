@@ -14,10 +14,12 @@
 #define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define CONSTRUCTOR INLINE
 #define DESTRUCTOR INLINE
-#define METHOD INLINE __attribute__((section(".funcs")))
+#define METHOD_NOINLINE __attribute__((noinline))
+#define METHOD INLINE
 #define VIRTUAL_METHOD virtual METHOD
 #define FUNCTION static METHOD
-#define SYSTEM_CALL static INLINE __attribute__((section(".funcs")))
+#define FUNCTION_NOINLINE static METHOD_NOINLINE
+#define SYSTEM_CALL static INLINE
 #define BUILTIN(func) __builtin_ ## func
 
 #ifndef NO_BUILTIN
