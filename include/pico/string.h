@@ -164,7 +164,7 @@ namespace Pico {
     {
         int escape = 0;
         char c;
-        char *param_str;
+        char *param_str, param_chr;
         size_t param_str_sz;
         unsigned long param_word;
         int result = 0;
@@ -186,6 +186,11 @@ namespace Pico {
                 {
                     case '%':
                         result += output(dest, &c, 1); break;
+
+                    case 'c':
+                        param_chr = va_arg(ap, int);
+                        result += output(dest, &param_chr, sizeof(param_chr));
+                        break;
 
                     case 'd':
                         param_word = va_arg(ap, unsigned long);
