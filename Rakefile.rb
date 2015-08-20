@@ -228,35 +228,38 @@ task :memexec do
     build(:memexec, "PAYLOAD_SIZE")
 end
 
+desc 'Show help'
 task :help do
     STDERR.puts <<-USAGE
 
- Shellcode generation:
+ #{'Shellcode generation:'.color(:cyan)}
 
-    rake <shellcode> [OPTION1=VALUE1] [OPTION2=VALUE2] ...
+    #{'rake <shellcode> [OPTION1=VALUE1] [OPTION2=VALUE2] ...'.bold}
 
- Compilation options:
+ #{'Compilation options:'.color(:cyan)}
 
-    CC:             Let you choose the compiler. Only supported are g++ and clang++.  
-    TRIPLE:         Cross compilation target. For example: "aarch64-linux-gnu".
-    CFLAGS:         Add custom flags to the compiler. For example "-m32".
-    NO_BUILTIN:     Does not use the compiler builtins for common memory operations. 
-    OUTPUT_LIB:     Compiles to a shared library instead of a standard executable.
-    OUTPUT_DEBUG:   Instructs the compiler to emit an assembly file.
-    OUTPUT_HEX:     Prints the resulting shellcode as an hexadecimal string.
-    WITH_WARNINGS:  Set to 1 to enable compiler warnings.
-    RELAX_INLINE:   Set to 1 to let the compiler uninline some functions.
+    #{'CC:'.color(:green)}             Let you choose the compiler. Only supported are g++ and clang++.  
+    #{'TRIPLE:'.color(:green)}         Cross compilation target. For example: "aarch64-linux-gnu".
+    #{'CFLAGS:'.color(:green)}         Add custom flags to the compiler. For example "-m32".
+    #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations. 
+    #{'OUTPUT_LIB:'.color(:green)}     Compiles to a shared library instead of a standard executable.
+    #{'OUTPUT_DEBUG:'.color(:green)}   Instructs the compiler to emit an assembly file.
+    #{'OUTPUT_HEX:'.color(:green)}     Prints the resulting shellcode as an hexadecimal string.
+    #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
+    #{'RELAX_INLINE:'.color(:green)}   Set to 1 to let the compiler uninline some functions.
 
- Shellcode customization options:
+ #{'Shellcode customization options:'.color(:cyan)}
 
-    CHANNEL:        Shellcode communication channel.
+    #{'CHANNEL:'.color(:green)}        Shellcode communication channel.
                     Supported options: NO_CHANNEL, TCP_CONNECT, TCP_LISTEN, TCP6_CONNECT, TCP6_LISTEN, SCTP_CONNECT, SCTP_LISTEN, SCTP6_CONNECT, SCTP6_LISTEN, USE_STDOUT, USE_STDERR
-    HOST:           Remote host or local address for socket bind.
-    PORT:           Remote port or local port for socket bind.
-    FORK_ON_ACCEPT: Keeps listening when accepting connections.
-    REUSE_ADDR:     Bind sockets with SO_REUSEADDR.
+    #{'HOST:'.color(:green)}           Remote host or local address for socket bind.
+    #{'PORT:'.color(:green)}           Remote port or local port for socket bind.
+    #{'FORK_ON_ACCEPT:'.color(:green)} Keeps listening when accepting connections.
+    #{'REUSE_ADDR:'.color(:green)}     Bind sockets with SO_REUSEADDR.
 
     USAGE
+
+    exit
 end
 
 task :default => :help
