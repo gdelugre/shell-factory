@@ -8,10 +8,10 @@ namespace Pico {
     class IO
     {
         public:
-
-            VIRTUAL_METHOD ssize_t in(void *, size_t) = 0;
-            VIRTUAL_METHOD ssize_t out(const void *, size_t) = 0;
-            VIRTUAL_METHOD int close() = 0;
+            // Do not declare these methods as pure. Compiler will fail at link time.
+            METHOD ssize_t in(void *, size_t) {}
+            METHOD ssize_t out(const void *, size_t) {}
+            METHOD int close() {}
 
             METHOD IO& read(void *ptr, size_t count) {
                 in(ptr, count);
