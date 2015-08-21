@@ -5,106 +5,112 @@
 
 namespace Pico {
 
-    class IO
+    class BasicIO
     {
         public:
-            // Do not declare these methods as pure. Compiler will fail at link time.
-            METHOD ssize_t in(void *, size_t) { return -1; }
-            METHOD ssize_t out(const void *, size_t) { return -1; }
-            METHOD int close() { return -1; }
+            CONSTRUCTOR BasicIO() = default;
+            CONSTRUCTOR BasicIO(int fd) : fd(fd) {}
+            METHOD ssize_t in(void *, size_t);
+            METHOD ssize_t out(const void *, size_t);
+            METHOD int close();
+            METHOD int file_desc() const { return fd; }
 
-            METHOD IO& read(void *ptr, size_t count) {
-                in(ptr, count);
-                return *this;
+        private:
+            int fd;
+    };
+
+    template <typename Io>
+    class Stream
+    {
+        public:
+            CONSTRUCTOR Stream() = default;
+            CONSTRUCTOR Stream(int fd) : io(fd) {}
+
+            METHOD ssize_t read(void *ptr, size_t count) {
+                return io.in(ptr, count);
             }
 
-            METHOD IO& write(const void *ptr, size_t count) {
-                out(ptr, count);
-                return *this;
+            METHOD ssize_t write(const void *ptr, size_t count) {
+                return io.out(ptr, count);
             }
 
-            METHOD IO& read(Memory::Buffer const& buffer) {
+            METHOD ssize_t read(Memory::Buffer const& buffer) {
                 return read(buffer.pointer(), buffer.size());
             }
 
-            METHOD IO& write(Memory::Buffer const& buffer) { 
+            METHOD ssize_t write(Memory::Buffer const& buffer) {
                 return write(buffer.pointer(), buffer.size());
             }
 
-            METHOD friend IO& operator <<(IO &io, Memory::Buffer const& buffer)
+            METHOD friend Stream<Io>& operator <<(Stream<Io>& stm, Memory::Buffer const& buffer)
             {
-                return io.write(buffer);
+                stm.write(buffer);
+                return stm;
             }
 
-            METHOD friend IO& operator >>(IO &io, Memory::Buffer const& buffer)
+            METHOD friend Stream<Io>& operator >>(Stream<Io>& stm, Memory::Buffer const& buffer)
             {
-                return io.read(buffer);
+                stm.read(buffer);
+                return stm;
             }
 
-            METHOD friend IO& operator <<(Memory::Buffer const& buffer, IO &io)
+            METHOD friend Stream<Io>& operator <<(Memory::Buffer const& buffer, Stream<Io>& stm)
             {
-                return io >> buffer;
+                stm >> buffer;
+                return stm;
             }
 
-            METHOD friend IO& operator >>(Memory::Buffer const& buffer, IO &io)
+            METHOD friend Stream<Io>& operator >>(Memory::Buffer const& buffer, Stream<Io>& stm)
             {
-                return io << buffer;
+                stm << buffer;
+                return stm;
             }
-    };
 
-    class Stream : public IO
-    {
-        public:
-            FUNCTION Stream standard_input();
-            FUNCTION Stream standard_output();
-            FUNCTION Stream standard_error();
-
-            CONSTRUCTOR Stream() = default;
-            CONSTRUCTOR Stream(int fd) : fd(fd) {}
-            CONSTRUCTOR Stream(Stream &stm) : fd( stm.file_desc() ) {}
-            CONSTRUCTOR Stream(Stream &&stm) = default;
-            METHOD Stream& operator =(Stream &stm) = default;
-            METHOD Stream& operator =(Stream &&stm) = default;
-
-            METHOD ssize_t in(void *ptr, size_t count);
-            METHOD ssize_t out(const void *ptr, size_t count);
             METHOD_NOINLINE int printf(const char *format, ...);
             METHOD int vprintf(const char *format, va_list ap);
+            METHOD int file_desc() { return io.file_desc(); }
+            METHOD int close() { return io.close(); }
 
-            METHOD Stream duplicate();
-            METHOD void duplicate(Stream&);
-            METHOD void duplicate(Stream& r, Stream& w) {
+            template <typename T>
+            METHOD void duplicate(Stream<T>& s);
+
+            template <typename T>
+            METHOD void duplicate(Stream<T>& r, Stream<T> &w)
+            {
                 duplicate(r);
                 duplicate(w);
             }
 
-            METHOD int file_desc() const { return fd; }
-            METHOD void flush();
-            METHOD int close();
-
         protected:
-            int fd = -1;
+            Io io;
     };
 
+    typedef Stream<BasicIO> BasicStream;
+
+    namespace Stdio
+    {
+        FUNCTION BasicStream input();
+        FUNCTION BasicStream output();
+        FUNCTION BasicStream error();
+    }
+
     template <class Rx, class Tx = Rx>
-    class BiStream : public IO
+    class BiStream
     {
         public:
-            CONSTRUCTOR BiStream() = default;
             CONSTRUCTOR BiStream(Rx rx, Tx tx) : rx(rx), tx(tx) {}
-            CONSTRUCTOR BiStream(int rfd, int wfd) : rx(Stream(rfd)), tx(Stream(wfd)) {}
 
-            METHOD void duplicate(Stream& r, Stream &w) {
+            METHOD void duplicate(Rx& r, Tx& w) {
                 rx.duplicate(r);
                 tx.duplicate(w);
             }
 
-            METHOD ssize_t in(void *ptr, size_t count) {
-                return rx.in(ptr, count);
+            METHOD ssize_t read(void *ptr, size_t count) {
+                return rx.read(ptr, count);
             }
 
-            METHOD ssize_t out(const void *ptr, size_t count) {
-                return tx.out(ptr, count);
+            METHOD ssize_t write(const void *ptr, size_t count) {
+                return tx.write(ptr, count);
             }
 
             METHOD int close() {

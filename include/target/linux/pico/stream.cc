@@ -3,62 +3,54 @@
 
 namespace Pico {
 
-    constexpr int STDIN_FD  = 0;
-    constexpr int STDOUT_FD = 1;
-    constexpr int STDERR_FD = 2;
+    namespace Stdio {
+        constexpr int STDIN_FD  = 0;
+        constexpr int STDOUT_FD = 1;
+        constexpr int STDERR_FD = 2;
 
-    METHOD
-    Stream Stream::standard_input()
-    {
-        return Stream(STDIN_FD);
+        METHOD
+        BasicStream input()
+        {
+            return BasicStream(STDIN_FD);
+        }
+
+        METHOD
+        BasicStream output()
+        {
+            return BasicStream(STDOUT_FD);
+        }
+
+        METHOD
+        BasicStream error()
+        {
+            return BasicStream(STDERR_FD);
+        }
     }
 
     METHOD
-    Stream Stream::standard_output()
-    {
-        return Stream(STDOUT_FD);
-    }
-
-    METHOD
-    Stream Stream::standard_error()
-    {
-        return Stream(STDERR_FD);
-    }
-
-    METHOD
-    ssize_t Stream::in(void *ptr, size_t count)
+    ssize_t BasicIO::in(void *ptr, size_t count)
     {
         return Syscall::read(fd, ptr, count);
     }
 
     METHOD
-    ssize_t Stream::out(const void *ptr, size_t count)
+    ssize_t BasicIO::out(const void *ptr, size_t count)
     {
         return Syscall::write(fd, ptr, count);
     }
 
     METHOD
-    Stream Stream::duplicate()
-    {
-        return Stream( Syscall::dup(fd) );
-    }
-
-    METHOD
-    void Stream::duplicate(Stream& stm)
-    {
-        Syscall::dup2(fd, stm.file_desc());
-    }
-
-    METHOD
-    void Stream::flush()
-    {
-        Syscall::fsync(fd);
-    }
-    
-    METHOD
-    int Stream::close()
+    int BasicIO::close()
     {
         return Syscall::close(fd);
+    }
+
+    template <typename Io>
+    template <typename T>
+    METHOD
+    void Stream<Io>::duplicate(Stream<T>& stm)
+    {
+        Syscall::dup2(this->file_desc(), stm.file_desc());
     }
 }
 

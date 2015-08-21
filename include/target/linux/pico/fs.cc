@@ -38,10 +38,14 @@ namespace Pico {
         CONSTRUCTOR
         File::File(const char *path, int flags, bool create, mode_t mode)
         {
+            int fd;
+
             if ( create )
                 fd = Syscall::create(path, open_flags(flags), mode);
             else
                 fd = Syscall::open(path, open_flags(flags));
+
+            io = BasicIO(fd);
         }
 
         METHOD

@@ -132,13 +132,12 @@ namespace Pico {
     }
 
     template <int radix = 10, typename T>
-    FUNCTION
+    FUNCTION_NOINLINE
     size_t format_ltoa(T& dest, unsigned long value, bool upcase, size_t (*output)(T&, const void *, size_t))
     {
         static_assert(radix >= 2 && radix <= 36, "Invalid radix");
         size_t count = 0, nr_digits = 0;
-        char str[sizeof(value) * 8] = { 0 }; // Worst case, radix = 2.
-
+        char str[sizeof(value) * 8]; // Worst case, radix = 2.
         do {
             static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -205,7 +204,7 @@ namespace Pico {
                         break;
 
                     case 'p':
-                        static char hex_prefix[] = "0x";
+                        static char hex_prefix[] = { '0', 'x' };
                         result += output(dest, hex_prefix, sizeof(hex_prefix));
 
                     case 'x':
@@ -261,7 +260,7 @@ namespace Pico {
     {
         int cnt;
         va_list ap;
-        Stream io = Stream::standard_output();
+        BasicStream io = Stdio::output();
 
         va_start(ap, format);
         cnt = io.vprintf(format, ap);
@@ -270,8 +269,9 @@ namespace Pico {
         return cnt;
     }
 
+    template <typename Io>
     METHOD_NOINLINE __attribute__((format (printf, 2, 3)))
-    int Stream::printf(const char *format, ...)
+    int Stream<Io>::printf(const char *format, ...)
     {
         int cnt;
         va_list ap;
@@ -283,16 +283,16 @@ namespace Pico {
         return cnt;
     }
 
+    template <typename Io>
     METHOD
-    int Stream::vprintf(const char *format, va_list ap)
+    int Stream<Io>::vprintf(const char *format, va_list ap)
     {
-        size_t (*output_func)(Stream&, const void *, size_t) =
-            [](Stream& s, const void *buffer, size_t n) -> size_t {
-                return s.out(buffer, n);
+        size_t (*output_func)(Stream<Io>&, const void *, size_t) =
+            [](Stream<Io>& s, const void *buffer, size_t n) -> size_t {
+                return s.write(buffer, n);
             };
 
         int count = vformat(*this, format, ap, output_func);
-        flush();
         return count;
     }
 }

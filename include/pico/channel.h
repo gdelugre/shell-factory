@@ -33,8 +33,8 @@ namespace Pico {
         };                                                      \
 
     DEFINE_CHANNEL_MODE(NO_CHANNEL,     void,                   false);
-    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<Stream>,       false);
-    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<Stream>,       false);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>,  false);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>,  false);
     DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
     DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    true);
     DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     true);
@@ -76,8 +76,8 @@ namespace Pico {
         METHOD void dup_to_stdio() {
             if ( ChannelMode<M>::dupable_to_stdio )
             {
-                Stream std_in = Stream::standard_input();
-                Stream std_out = Stream::standard_output();
+                BasicStream std_in = Stdio::input();
+                BasicStream std_out = Stdio::output();
 
                 stm.duplicate(std_in, std_out);
             }
@@ -87,12 +87,12 @@ namespace Pico {
     template<>
     CONSTRUCTOR
     Channel<USE_STDOUT>::Channel() :
-        stm(Stream::standard_input(), Stream::standard_output()) {}
+        stm(Stdio::input(), Stdio::output()) {}
 
     template<>
     CONSTRUCTOR
     Channel<USE_STDERR>::Channel() :
-        stm(Stream::standard_input(), Stream::standard_error()) {}
+        stm(Stdio::input(), Stdio::error()) {}
 
     template <>
     template <enum Network::AddressType T>

@@ -59,17 +59,27 @@ namespace Pico {
             return ip_address { { static_cast<uint8_t>(bytes)... } };
         }
 
-        class Socket : public Stream
+        class SocketIO
         {
             public:
-                using Stream::Stream; // inherit Stream constructor.
+                CONSTRUCTOR SocketIO(int fd) : fd(fd) {}
+                METHOD ssize_t in(void *, size_t);
+                METHOD ssize_t out(const void *, size_t);
+                METHOD int close();
+                METHOD int file_desc() const { return fd; }
+
+            private:
+                int fd;
+        };
+
+        class Socket : public Stream<SocketIO>
+        {
+            public:
+                using Stream<SocketIO>::Stream; // inherit Stream constructor.
 
                 CONSTRUCTOR Socket(int domain, int type, int protocol);
                 METHOD int get(int level, int optname, void *val, unsigned *len);
                 METHOD int set(int level, int optname, void *val, unsigned len);
-
-                METHOD ssize_t in(void *buf, size_t count);
-                METHOD ssize_t out(const void *buf, size_t count);
         };
 
         class StreamSocket : public Socket
