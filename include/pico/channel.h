@@ -45,38 +45,14 @@ namespace Pico {
     DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket,   true);
 
     template <enum channel_mode M>
-    struct Channel
+    struct Channel : ChannelMode<M>::stream_type
     {
         static_assert(M != NO_CHANNEL, "Cannot instanciate channel: no mode specified");
-        typename ChannelMode<M>::stream_type stm;
 
         CONSTRUCTOR Channel();
 
         template <enum Network::AddressType T>
         CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
-
-        METHOD Channel& recv(void *buf, size_t count) {
-            stm.read(buf, count);
-            return *this;
-        }
-
-        METHOD Channel& recv(Memory::Buffer const& buffer) {
-            return recv(buffer.pointer(), buffer.size());
-        }
-
-        METHOD Channel& send(const void *buf, size_t count) {
-            stm.write(buf, count);
-            return *this;
-        }
-
-        METHOD Channel& send(Memory::Buffer const& buffer) {
-            return send(buffer.pointer(), buffer.size());
-        }
-
-        METHOD Channel& readline(char *buf, size_t count) {
-            stm.readline(buf, count);
-            return *this;
-        }
 
         METHOD void dup_to_stdio() {
             if ( ChannelMode<M>::dupable_to_stdio )
@@ -84,7 +60,7 @@ namespace Pico {
                 BasicStream std_in = Stdio::input();
                 BasicStream std_out = Stdio::output();
 
-                stm.duplicate2(std_in, std_out);
+                this->duplicate2(std_in, std_out);
             }
         }
     };
@@ -92,19 +68,19 @@ namespace Pico {
     template<>
     CONSTRUCTOR
     Channel<USE_STDOUT>::Channel() :
-        stm(Stdio::input(), Stdio::output()) {}
+        ChannelMode<USE_STDOUT>::stream_type(Stdio::input(), Stdio::output()) {}
 
     template<>
     CONSTRUCTOR
     Channel<USE_STDERR>::Channel() :
-        stm(Stdio::input(), Stdio::error()) {}
+        ChannelMode<USE_STDERR>::stream_type(Stdio::input(), Stdio::error()) {}
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV4, "TCP_CONNECT requires an IPV4 address.");
-        stm.connect(addr, port); 
+        connect(addr, port);
     }
 
     template <>
@@ -112,14 +88,14 @@ namespace Pico {
     CONSTRUCTOR
     Channel<TCP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV6, "TCP6_CONNECT requires an IPV6 address.");
-        stm.connect(addr, port); 
+        connect(addr, port);
     }
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<TCP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        stm(Network::SocketServer<Network::TcpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        TcpSocket(Network::SocketServer<Network::TcpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
     {
         static_assert(T == Network::IPV4, "TCP_LISTEN requires an IPV4 address.");
     }
@@ -128,7 +104,7 @@ namespace Pico {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<TCP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        stm(Network::SocketServer<Network::Tcp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        Tcp6Socket(Network::SocketServer<Network::Tcp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
     {
         static_assert(T == Network::IPV6, "TCP6_LISTEN requires an IPV6 address.");
     }
@@ -138,7 +114,7 @@ namespace Pico {
     CONSTRUCTOR
     Channel<SCTP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV4, "SCTP_CONNECT requires an IPV4 address.");
-        stm.connect(addr, port); 
+        connect(addr, port);
     }
 
     template <>
@@ -146,14 +122,14 @@ namespace Pico {
     CONSTRUCTOR
     Channel<SCTP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV6, "SCTP6_CONNECT requires an IPV6 address.");
-        stm.connect(addr, port); 
+        connect(addr, port);
     }
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<SCTP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        stm(Network::SocketServer<Network::SctpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        SctpSocket(Network::SocketServer<Network::SctpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
     {
         static_assert(T == Network::IPV4, "SCTP_LISTEN requires an IPV4 address.");
     }
@@ -162,7 +138,7 @@ namespace Pico {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<SCTP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        stm(Network::SocketServer<Network::Sctp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        Sctp6Socket(Network::SocketServer<Network::Sctp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
     {
         static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
     }
@@ -199,7 +175,7 @@ namespace Options {
             uint16_t port = PORT;
             auto address = Network::ip_address_from_bytes(HOST);
 
-            return Channel<CHANNEL>(address, port); 
+            return Channel<CHANNEL>(address, port);
         }
         else
             return Channel<CHANNEL>();

