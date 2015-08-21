@@ -243,7 +243,7 @@ namespace Pico {
         return count;
     }
 
-    FUNCTION_NOINLINE
+    FUNCTION_NOINLINE __attribute__((format (printf, 2, 3)))
     int sprintf(char *str, const char *format, ...)
     {
         int cnt;
@@ -256,7 +256,7 @@ namespace Pico {
         return cnt;
     }
 
-    FUNCTION_NOINLINE
+    FUNCTION_NOINLINE __attribute__((format (printf, 1, 2)))
     int printf(const char *format, ...)
     {
         int cnt;
@@ -270,7 +270,7 @@ namespace Pico {
         return cnt;
     }
 
-    METHOD_NOINLINE
+    METHOD_NOINLINE __attribute__((format (printf, 2, 3)))
     int Stream::printf(const char *format, ...)
     {
         int cnt;
