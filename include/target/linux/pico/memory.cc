@@ -17,9 +17,11 @@ namespace Pico {
         METHOD
         void *allocate(size_t size, int prot)
         {
-            return Syscall::mmap(NULL, size, mmap_prot(prot),
-                                 MAP_ANONYMOUS | MAP_PRIVATE,
-                                 0, 0);
+            int flags = MAP_ANONYMOUS | MAP_PRIVATE;
+            if ( prot & Memory::STACK )
+                flags |= MAP_GROWSDOWN;
+
+            return Syscall::mmap(NULL, size, mmap_prot(prot), flags, 0, 0);
         }
 
         METHOD

@@ -8,6 +8,7 @@ namespace Pico {
         constexpr int READ   = (1 << 0);
         constexpr int WRITE  = (1 << 1);
         constexpr int EXEC   = (1 << 2);
+        constexpr int STACK  = (1 << 3);
 
         METHOD void * allocate(size_t size, int prot);
         METHOD void   release(void *ptr, size_t size);
