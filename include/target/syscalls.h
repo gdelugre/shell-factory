@@ -22,7 +22,7 @@ template <int N, typename ...Args> struct GetArgumentByIndexHelper;
 template <typename ArgType, typename ...Rest>
 struct GetArgumentByIndexHelper<0, ArgType, Rest...>
 {
-    static auto value(ArgType arg, Rest ...args)
+    static constexpr auto value(ArgType arg, Rest ...args)
     {
         return arg;
     }
@@ -31,7 +31,7 @@ struct GetArgumentByIndexHelper<0, ArgType, Rest...>
 template <int N, typename ArgType, typename ...Rest>
 struct GetArgumentByIndexHelper<N, ArgType, Rest...>
 {
-    static auto value(ArgType arg, Rest ...args)
+    static constexpr auto value(ArgType arg, Rest ...args)
     {
         (void) arg;
         return GetArgumentByIndexHelper<N-1, Rest...>::value(args...);
@@ -41,14 +41,14 @@ struct GetArgumentByIndexHelper<N, ArgType, Rest...>
 template <int N>
 struct GetArgumentByIndexHelper<N>
 {
-    static auto value(void)
+    static constexpr auto value(void)
     {
         return -1;
     }
 };
 
 template <int N, typename ...T>
-auto GetArgumentByIndex(T ...args)
+static constexpr auto GetArgumentByIndex(T ...args)
 {
     return GetArgumentByIndexHelper<N, T...>::value(args...);
 }
