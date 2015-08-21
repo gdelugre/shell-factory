@@ -180,6 +180,7 @@ def compile(target, triple, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'].to_i == 1
+        cflags << '-g'
         sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{source_file} -o #{output_dir}/#{target_name}.S #{defines.join(' ')}" do |ok, _|
             (STDERR.puts; show_error("Compilation failed.")) unless ok
         end
