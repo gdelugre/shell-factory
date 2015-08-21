@@ -104,11 +104,11 @@ namespace Pico {
         size_t stack_size = Process::THREAD_STACK_SIZE;
         pid_t tid;
 
-        child_stack = Memory::allocate(stack_size, PROT_READ|PROT_WRITE);
+        child_stack = Memory::allocate(stack_size, Memory::READ | Memory::WRITE | Memory::STACK);
 
         tid = Syscall::clone(
             CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM,
-            (char *) child_stack + stack_size,
+            static_cast<char *>(child_stack) + stack_size,
             NULL, NULL, NULL
         );
 
