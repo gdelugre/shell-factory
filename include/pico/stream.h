@@ -1,11 +1,18 @@
 #ifndef PICOLIB_STREAM_H_
 #define PICOLIB_STREAM_H_
 
+#include <type_traits>
 #include <cstdarg>
 
 namespace Pico {
 
-    class BasicIO
+    class IO
+    {
+        protected:
+            IO() = default;
+    };
+
+    class BasicIO : IO
     {
         public:
             CONSTRUCTOR BasicIO() = default;
@@ -66,8 +73,20 @@ namespace Pico {
                 return stm;
             }
 
+            METHOD ssize_t readline(char *ptr, size_t n, char delim = '\n') {
+                size_t nr_read;
+
+                for ( nr_read = 0; n > 0 && nr_read < n - 1; nr_read++, ptr++ ) {
+                    if ( read(ptr, 1) < 0 || *ptr == delim )
+                        break;
+                }
+                *ptr = '\0';
+                return nr_read;
+            }
+
             METHOD_NOINLINE int printf(const char *format, ...);
             METHOD int vprintf(const char *format, va_list ap);
+            METHOD Io  io_port() const { return io; }
             METHOD int file_desc() { return io.file_desc(); }
             METHOD int close() { return io.close(); }
 
@@ -75,7 +94,7 @@ namespace Pico {
             METHOD void duplicate(Stream<T>& s);
 
             template <typename T>
-            METHOD void duplicate(Stream<T>& r, Stream<T> &w)
+            METHOD void duplicate2(Stream<T>& r, Stream<T> &w)
             {
                 duplicate(r);
                 duplicate(w);
@@ -94,32 +113,50 @@ namespace Pico {
         FUNCTION BasicStream error();
     }
 
-    template <class Rx, class Tx = Rx>
-    class BiStream
+    template <typename ReadIo, typename WriteIo>
+    class DuplexIO : IO
     {
+        static_assert(std::is_base_of<IO, ReadIo>::value, "DuplexIO requires an IO object");
+        static_assert(std::is_base_of<IO, WriteIo>::value, "DuplexIO requires an IO object");
+
         public:
-            CONSTRUCTOR BiStream(Rx rx, Tx tx) : rx(rx), tx(tx) {}
-
-            METHOD void duplicate(Rx& r, Tx& w) {
-                rx.duplicate(r);
-                tx.duplicate(w);
+            CONSTRUCTOR DuplexIO() = default;
+            CONSTRUCTOR DuplexIO(ReadIo rx, WriteIo tx) : rx(rx), tx(tx) {}
+            METHOD ssize_t in(void *ptr, size_t count) {
+                return rx.in(ptr, count);
             }
-
-            METHOD ssize_t read(void *ptr, size_t count) {
-                return rx.read(ptr, count);
+            METHOD ssize_t out(const void *ptr, size_t count) {
+                return tx.out(ptr, count);
             }
-
-            METHOD ssize_t write(const void *ptr, size_t count) {
-                return tx.write(ptr, count);
+            METHOD int read_file_desc() const {
+                return rx.file_desc();
             }
-
+            METHOD int write_file_desc() const {
+                return tx.file_desc();
+            }
             METHOD int close() {
                 return rx.close() | tx.close();
             }
 
-        protected:
-            Rx rx;
-            Tx tx;
+        private:
+            ReadIo rx;
+            WriteIo tx;
+    };
+
+    template <typename ReadIo, typename WriteIo = ReadIo>
+    class BiStream : public Stream<DuplexIO<ReadIo, WriteIo>>
+    {
+        public:
+            CONSTRUCTOR BiStream(Stream<ReadIo> r, Stream<WriteIo> w)
+            {
+                this->io = DuplexIO<ReadIo, WriteIo>(r.io_port(), w.io_port());
+            }
+
+            template <typename T>
+            METHOD void duplicate2(Stream<T>& r, Stream<T>& w) {
+                Stream<ReadIo>(this->io.read_file_desc()).duplicate(r);
+                Stream<WriteIo>(this->io.write_file_desc()).duplicate(w);
+            }
     };
 }
 

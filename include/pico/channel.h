@@ -33,8 +33,8 @@ namespace Pico {
         };                                                      \
 
     DEFINE_CHANNEL_MODE(NO_CHANNEL,     void,                   false);
-    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>,  false);
-    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>,  false);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicIO>,      false);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicIO>,      false);
     DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
     DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    true);
     DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     true);
@@ -73,13 +73,18 @@ namespace Pico {
             return send(buffer.pointer(), buffer.size());
         }
 
+        METHOD Channel& readline(char *buf, size_t count) {
+            stm.readline(buf, count);
+            return *this;
+        }
+
         METHOD void dup_to_stdio() {
             if ( ChannelMode<M>::dupable_to_stdio )
             {
                 BasicStream std_in = Stdio::input();
                 BasicStream std_out = Stdio::output();
 
-                stm.duplicate(std_in, std_out);
+                stm.duplicate2(std_in, std_out);
             }
         }
     };

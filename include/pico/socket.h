@@ -59,7 +59,7 @@ namespace Pico {
             return ip_address { { static_cast<uint8_t>(bytes)... } };
         }
 
-        class SocketIO
+        class SocketIO : IO
         {
             public:
                 CONSTRUCTOR SocketIO(int fd) : fd(fd) {}
