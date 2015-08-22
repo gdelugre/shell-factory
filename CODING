@@ -1,0 +1,56 @@
+### Coding practices
+
+This project is a hack by itself. It relies on compiler optimizations and embed
+its own standard library to generate small position-independent shellcodes.
+
+Produced files are raw binaries that should be able to run by executing the
+first byte from anywhere in memory.
+
+Here are some rules to follow to avoid messing everything up.
+
+
+#### Do not use standard library methods that will require external linking
+
+The project embed its own standard library called ``Pico``. The resulting file
+will only contains the functions from Pico that are actually used in the code.
+
+Some standard library helpers can be used as long as they don't require a
+symbol from an external object file (e.g. type traits).
+
+Compiler builtins are fine too if they just produce inline code.
+
+#### Avoid virtual methods at all cost
+
+Using virtual methods generates vtables that increase the size of the
+shellcode.  Moreover the compiler will add some ABI symbols that we won't be
+able to link against.
+
+In some cases, devirtualization optimizations can solve the problem
+automatically for us but we cannot count on it across different compilers.
+
+#### Do not use exceptions
+
+C++ exceptions are handled by the compiler by setting up complex structures for
+stack unwinding and type comparisons. Those cannot be linked.
+
+#### Do not use RTTIs
+
+Runtime types information **MUST NOT** be compiled with the target.  They rely
+on internal compiler tricks that won't be available in the resulting shellcode.
+
+The code must not contain:
+
+- dynamic_cast statements
+- try/catch statements
+
+#### Do not declare global objects with user-defined constructors.
+
+Those objects need to have their constructor called before main execution.
+Since we have no init section, we cannot have that.
+
+#### Do not use C++14 constexprs
+
+They require GCC 5 or later, which can be a pain to cross-compile for some
+architectures.
+
+All constexprs must be made of a single return statement or static_asserts.
