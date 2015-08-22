@@ -33,7 +33,6 @@ struct GetArgumentByIndexHelper<N, ArgType, Rest...>
 {
     static constexpr auto value(ArgType arg, Rest ...args)
     {
-        (void) arg;
         return GetArgumentByIndexHelper<N-1, Rest...>::value(args...);
     }
 };
