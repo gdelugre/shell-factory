@@ -35,6 +35,33 @@ class IPAddr
     end
 end
 
+class Triple
+    attr_accessor :arch, :vendor, :os, :abi
+
+    def initialize(arch, vendor, os, abi)
+        @arch, @vendor, @os, @abi = arch, vendor, os, abi
+    end
+
+    def to_s
+        [ @arch, @vendor, @os, @abi ].delete_if{|f| f.nil?}.join('-')
+    end
+
+    def self.parse(str)
+        fields = str.split('-')
+        case fields.size
+        when 2 then Triple.new(fields[0], nil, fields[1], nil)
+        when 3 then Triple.new(fields[0], nil, fields[1], fields[2])
+        when 4 then Triple.new(fields[0], fields[1], fields[2], fields[3])
+        else
+            fail "Cannot parse triple: #{str}"
+        end
+    end
+
+    def self.current
+        Triple.parse RbConfig::CONFIG['target']
+    end
+end
+
 CC = "g++"
 OUTPUT_DIR = "bins"
 SHELLCODE_DIR = "shellcodes"
@@ -130,10 +157,7 @@ def compile(target, triple, output_dir, *opts)
         show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
     end
 
-    host_os = RbConfig::CONFIG['target_os']
-    host_arch = RbConfig::CONFIG['target_cpu']
-    host_vendor = RbConfig::CONFIG['target_vendor']
-    host_triple = [ host_arch, host_vendor, host_os ].join('-')
+    host_triple = Triple.current
 
     show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'",
         'Compiler' => cc,
@@ -193,14 +217,20 @@ end
 
 def generate_shellcode(target, triple, output_dir)
     _, target_name = target_to_source(target)
+    triple_info = triple.empty? ? Triple.current : Triple.parse(triple)
+
+    input_file = File.join(output_dir, "#{target_name}.elf")
+    output_file = File.join(output_dir, "#{target_name}.#{triple_info.arch}-#{triple_info.os}.bin")
+
+    # Extract shellcode.
     triple += '-' unless triple.empty?
-    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{output_dir}/#{target_name}.elf #{output_dir}/#{target_name}.bin" do |ok, res|
+    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{input_file} #{output_file}" do |ok, res|
         STDERR.puts
-        show_error("Cannot extract shellcode from #{output_dir}/#{target_name}.elf") unless ok
+        show_error("Cannot extract shellcode from #{input_file}") unless ok
     end
 
     # Read shellcode.
-    data = File.binread("#{output_dir}/#{target_name}.bin")
+    data = File.binread(output_file)
 
     output = {}
     output['Contents'] = "\"#{data.unpack("C*").map{|b| "\\x%02x" % b}.join.color(:brown)}\"" if ENV['OUTPUT_HEX'].to_i == 1
