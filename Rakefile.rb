@@ -71,6 +71,9 @@ CFLAGS = %w{-std=c++1y
             -Wextra
             -Wfatal-errors
             -fno-common
+            -fno-rtti
+            -fno-exceptions
+            -fno-non-call-exceptions
             -fomit-frame-pointer
             -ffunction-sections
             -fdata-sections

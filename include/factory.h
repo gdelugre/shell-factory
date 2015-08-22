@@ -39,7 +39,7 @@ extern "C" {
     NO_RETURN void _start(void)
     {
         Shellcode::entry();
-        for (;;);
+        __builtin_unreachable();
     }
 }
 
