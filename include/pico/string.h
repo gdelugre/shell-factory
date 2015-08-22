@@ -127,31 +127,69 @@ namespace Pico {
     }
 
     FUNCTION
-    unsigned int atoi(const char *nptr)
+    long long int strtoll(const char *nptr, char **endptr, int radix = 10)
     {
-        char *ptr = (char *) nptr;
-        unsigned int num_digits = 0;
-        unsigned int res = 0;
-        unsigned int pow = 1;
-        unsigned int i;
+        static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+        long long int result = 0;
+        int sign = 1;
+        unsigned pow = 1;
+        unsigned nr_digits = 0;
+        auto digit_to_dec = [&digits] (char c) -> unsigned {
+            for ( size_t i = 0; i < sizeof(digits) - 1; i++ )
+                if ( digits[i] == c )
+                    return i;
+            return 0;
+        };
 
-        while ( isdigit(*ptr++) )
-            num_digits++;
+        while ( isspace(*nptr) )
+            nptr++;
 
-        for ( i = 0; i < num_digits; i++ )
+        if ( *nptr == '+' )
         {
-            res += (nptr[num_digits - i - 1] - '0') * pow;
-            pow *= 10;
+            nptr++;
+            sign = 1;
+        }
+        else if ( *nptr == '-' )
+        {
+            nptr++;
+            sign = -1;
         }
 
-        return res;
+        if ( radix == 16 && nptr[0] == '0' && nptr[1] == 'x' )
+            nptr += 2;
+
+        char *dptr = const_cast<char *>(nptr);
+        while ( tolower(*dptr) >= digits[0] && tolower(*dptr) <= digits[radix - 1] )
+        {
+            nr_digits++;
+            dptr++;
+        }
+
+        for ( size_t i = 0; i < nr_digits; i++ )
+        {
+            result += digit_to_dec(tolower(nptr[nr_digits - i - 1])) * pow;
+            pow *= radix;
+        }
+
+        if ( endptr )
+            *endptr = dptr;
+
+        return result * sign;
     }
 
-    template <int radix = 10, typename T>
-    FUNCTION_NOINLINE
-    size_t format_ltoa(T& dest, unsigned long value, bool upcase, size_t (*output)(T&, const void *, size_t))
+    FUNCTION
+    int atoi(const char *nptr)
     {
-        static_assert(radix >= 2 && radix <= 36, "Invalid radix");
+        return strtoll(nptr, nullptr);
+    }
+
+    template <typename T>
+    FUNCTION_NOINLINE
+    size_t format_ltoa(T& dest,
+                       unsigned long value, int radix,
+                       bool upcase,
+                       size_t (*output)(T&, const void *, size_t))
+    {
         size_t count = 0, nr_digits = 0;
         char str[sizeof(value) * 8]; // Worst case, radix = 2.
         do {
@@ -209,7 +247,7 @@ namespace Pico {
 
                     case 'd':
                         param_word = va_arg(ap, unsigned long);
-                        result += format_ltoa(dest, param_word, false, output);
+                        result += format_ltoa(dest, param_word, 10, false, output);
                         break;
 
                     case 's':
@@ -226,7 +264,7 @@ namespace Pico {
                     case 'x':
                     case 'X':
                         param_word = va_arg(ap, unsigned long);
-                        result += format_ltoa<16>(dest, param_word, (c == 'X'), output);
+                        result += format_ltoa(dest, param_word, 16, (c == 'X'), output);
                         break;
 
                     default:
