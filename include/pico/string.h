@@ -86,28 +86,44 @@ namespace Pico {
         return NULL;
     }
 
-    FUNCTION
-    int isdigit(int c)
+    static constexpr bool isdigit(char c)
     {
         return (c >= '0' && c <= '9');
     }
 
-    FUNCTION
-    int toupper(int c)
+    static constexpr bool isspace(char c)
     {
-        if ( c >= 'a' && c <= 'z' )
-            c -= ('a' - 'A');
-
-        return c;
+        return (c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v');
     }
 
-    FUNCTION
-    int tolower(int c)
+    static constexpr bool islower(char c)
     {
-        if ( c >= 'A' && c <= 'Z' )
-            c += ('a' - 'A');
+        return ( c >= 'a' && c <= 'z' );
+    }
 
-        return c;
+    static constexpr bool isupper(char c)
+    {
+        return ( c >= 'A' && c <= 'Z' );
+    }
+
+    static constexpr bool isalpha(char c)
+    {
+        return islower(c) || isupper(c);
+    }
+
+    static constexpr bool isalnum(char c)
+    {
+        return isalpha(c) || isdigit(c);
+    }
+
+    static constexpr char toupper(char c)
+    {
+        return islower(c) ? (c - ('a' - 'A')) : c;
+    }
+
+    static constexpr char tolower(char c)
+    {
+        return isupper(c) ? (c + ('a' - 'A')) : c;
     }
 
     FUNCTION
