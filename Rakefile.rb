@@ -161,17 +161,18 @@ def compile(target, triple, output_dir, *opts)
     end
 
     host_triple = Triple.current
+    target_triple = triple.empty? ? Triple.current : Triple.parse(triple)
 
     show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'",
         'Compiler' => cc,
         'Host architecture' => host_triple,
-        'Target architecture' => triple.empty? ? host_triple : triple,
+        'Target architecture' => target_triple,
         'Options' => defines 
     )
     STDERR.puts
 
     ARCH_CFLAGS.each_pair { |arch, flags|
-        if triple =~ arch
+        if target_triple.arch =~ arch
             cflags += flags
             break
         end
