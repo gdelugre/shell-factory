@@ -134,7 +134,7 @@ namespace Pico {
         int sign = 1;
         unsigned pow = 1;
         unsigned nr_digits = 0;
-        auto digit_to_dec = [&digits] (char c) -> unsigned {
+        auto digit_to_dec = [] (char c) -> unsigned {
             for ( size_t i = 0; i < sizeof(digits) - 1; i++ )
                 if ( digits[i] == c )
                     return i;
@@ -188,9 +188,11 @@ namespace Pico {
     size_t format_ltoa(T& dest,
                        unsigned long value, int radix,
                        bool upcase,
+                       char pad, int pad_sz,
                        size_t (*output)(T&, const void *, size_t))
     {
-        size_t count = 0, nr_digits = 0;
+        size_t count = 0;
+        int nr_digits = 0;
         char str[sizeof(value) * 8]; // Worst case, radix = 2.
         do {
             static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -205,7 +207,10 @@ namespace Pico {
 
         } while ( value != 0 );
 
-        for ( size_t i = 0; i < nr_digits; i++ )
+        for ( int i = 0; i < (pad_sz - nr_digits); i++ )
+            count += output(dest, &pad, sizeof(pad));
+
+        for ( int i = 0; i < nr_digits; i++ )
             count += output(dest, &str[nr_digits - i - 1], 1);
 
         return count;
@@ -215,16 +220,19 @@ namespace Pico {
     FUNCTION
     int vformat(T& dest, const char *format, va_list ap, size_t (*output)(T&, const void *, size_t))
     {
+        char *fmt = const_cast<char *>(format);
         int escape = 0;
         char c;
         char *param_str, param_chr;
         size_t param_str_sz;
         unsigned long param_word;
+        char pad = ' ';
+        long pad_sz = 0;
         int result = 0;
 
-        while ( *format )
+        while ( *fmt )
         {
-            c = *format++;
+            c = *fmt++;
             if ( !escape && c != '%' )
             {
                 result += output(dest, &c, 1);
@@ -235,6 +243,15 @@ namespace Pico {
             }
             else
             {
+                if ( isdigit(c) )
+                {
+                    if ( c == '0' )
+                        pad = '0';
+                    else
+                        pad_sz = strtoll(fmt-1, &fmt, 10);
+                    continue;
+                }
+
                 switch ( c )
                 {
                     case '%':
@@ -247,12 +264,14 @@ namespace Pico {
 
                     case 'd':
                         param_word = va_arg(ap, unsigned long);
-                        result += format_ltoa(dest, param_word, 10, false, output);
+                        result += format_ltoa(dest, param_word, 10, false, pad, pad_sz, output);
                         break;
 
                     case 's':
                         param_str = va_arg(ap, char *);
                         param_str_sz = strlen(param_str);
+                        for ( int i = 0; i < pad_sz - static_cast<int>(param_str_sz); i++ )
+                            result += output(dest, &pad, sizeof(pad));
                         result += output(dest, param_str, param_str_sz);
                         escape = 0;
                         break;
@@ -264,13 +283,15 @@ namespace Pico {
                     case 'x':
                     case 'X':
                         param_word = va_arg(ap, unsigned long);
-                        result += format_ltoa(dest, param_word, 16, (c == 'X'), output);
+                        result += format_ltoa(dest, param_word, 16, (c == 'X'), pad, pad_sz, output);
                         break;
 
                     default:
                         break;
                 }
 
+                pad = ' ';
+                pad_sz = 0;
                 escape = 0;
             }
         }
