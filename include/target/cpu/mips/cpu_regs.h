@@ -14,7 +14,7 @@ enum cpu_registers
     CPU_REG_A1,
     CPU_REG_A2,
     CPU_REG_A3,
-    CPU_REG_T0
+    CPU_REG_T0,
     CPU_REG_T1,
     CPU_REG_T2,
     CPU_REG_T3,
