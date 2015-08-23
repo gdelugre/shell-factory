@@ -15,7 +15,7 @@ class String
     end
 
     def bold
-        "\e[1m#{self}\e[21m"
+        "\e[1m#{self}\e[0m"
     end
 end
 
