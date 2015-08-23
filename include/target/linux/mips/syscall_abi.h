@@ -18,8 +18,6 @@
  * return value to v0
  */
 
-#error "Syscall ABI not supported for this CPU."
-
 #define SYSCALL_CLOBBERED_REGISTERS "at", "v1", "hi", "lo", \
     "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9"
 #define SYSCALL_NUMBER_REGISTER "v0"
@@ -35,7 +33,7 @@
     SYSCALL_ARG_BIND_REGISTER(2, "a2", __VA_ARGS__); \
     SYSCALL_ARG_BIND_REGISTER(3, "a3", __VA_ARGS__); \
     if ( nr_args > 4 ) \
-        stack_args[4] = reinterpret_cast<void *>(GetArgumentByIndex<4>(__VA_ARGS__)); \
+        stack_args[4] = const_cast<void *>(reinterpret_cast<const void *>(GetArgumentByIndex<4>(__VA_ARGS__))); \
 })
 
 #endif
