@@ -121,9 +121,21 @@ namespace Pico {
         }
 
         METHOD
-        StreamSocket StreamSocket::accept()
+        StreamSocket StreamSocket::accept(bool fork)
         {
-            return StreamSocket( Syscall::accept(this->file_desc(), nullptr, 0) );
+            do {
+                int client_fd = Syscall::accept(this->file_desc(), nullptr, 0);
+                if ( fork )
+                {
+                    if ( Syscall::fork() == 0 )
+                        return StreamSocket(client_fd);
+                    else
+                        Syscall::close(client_fd);
+                }
+                else
+                    return StreamSocket(client_fd);
+
+            } while ( fork );
         }
     }
 }

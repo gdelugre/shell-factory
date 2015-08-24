@@ -95,7 +95,7 @@ namespace Pico {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<TCP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        TcpSocket(Network::SocketServer<Network::TcpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        TcpSocket(Network::SocketServer<Network::TcpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV4, "TCP_LISTEN requires an IPV4 address.");
     }
@@ -104,7 +104,7 @@ namespace Pico {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<TCP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        Tcp6Socket(Network::SocketServer<Network::Tcp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        Tcp6Socket(Network::SocketServer<Network::Tcp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV6, "TCP6_LISTEN requires an IPV6 address.");
     }
@@ -129,7 +129,7 @@ namespace Pico {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<SCTP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        SctpSocket(Network::SocketServer<Network::SctpSocket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        SctpSocket(Network::SocketServer<Network::SctpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV4, "SCTP_LISTEN requires an IPV4 address.");
     }
@@ -138,7 +138,7 @@ namespace Pico {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<SCTP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
-        Sctp6Socket(Network::SocketServer<Network::Sctp6Socket>::start(addr, port, Options::reuse_addr, Options::fork_on_accept))
+        Sctp6Socket(Network::SocketServer<Network::Sctp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
     }

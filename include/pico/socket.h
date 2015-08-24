@@ -95,7 +95,7 @@ namespace Pico {
                 template <AddressType T>
                 METHOD int listen(Address<T> addr, uint16_t port, bool reuse_addr = false);
 
-                METHOD StreamSocket accept();
+                METHOD StreamSocket accept(bool fork = false);
         };
 
         class TcpSocket : public StreamSocket
@@ -128,17 +128,17 @@ namespace Pico {
 
         // TODO: consistency check between S and T.
         // TODO: fork on accept.
-        template <class SockType>
+        template <class SockType, bool Fork = false>
         class SocketServer
         {
             public:
                 template <AddressType T>
-                FUNCTION SockType start(Address<T> addr, uint16_t port, bool reuse_addr = false, bool fork = false)
+                FUNCTION SockType start(Address<T> addr, uint16_t port, bool reuse_addr = false)
                 {
                     SockType server;
                     server.listen(addr, port, reuse_addr);
 
-                    SockType client = SockType(server.accept().file_desc());
+                    SockType client = SockType(server.accept(Fork).file_desc());
                     return client;
                 }
         };

@@ -24,8 +24,6 @@ namespace Options {
     constexpr static bool fork_on_accept = OPT_FORK_ON_ACCEPT;
     constexpr static bool reuse_addr = OPT_REUSE_ADDR;
     constexpr static bool use_builtins = OPT_USE_BUILTINS;
-
-    static_assert(fork_on_accept == false, "Fork on accept is not supported yet.");
 }
 
 #undef OPT_FORK_ON_ACCEPT
