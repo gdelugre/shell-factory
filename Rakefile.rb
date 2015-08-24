@@ -189,6 +189,14 @@ def compile(target, triple, output_dir, *opts)
         cflags += [ ENV['CFLAGS'] ]
     end
 
+    if ENV['ARCH']
+        cflags << "-march=#{ENV['ARCH']}"
+    end
+
+    if ENV['CPU']
+        cflags << "-mcpu=#{ENV['CPU']}"
+    end
+
     unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
@@ -277,6 +285,8 @@ task :help do
 
     #{'CC:'.color(:green)}             Let you choose the compiler. Only supported are g++ and clang++.  
     #{'TRIPLE:'.color(:green)}         Cross compilation target. For example: "aarch64-linux-gnu".
+    #{'ARCH'.color(:green)}            Specify a specific architecture to compile to (e.g. armv7-r).
+    #{'CPU'.color(:green)}             Specify a specific CPU to compile to (e.g. cortex-a15). 
     #{'CFLAGS:'.color(:green)}         Add custom flags to the compiler. For example "-m32".
     #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations. 
     #{'OUTPUT_LIB:'.color(:green)}     Compiles to a shared library instead of a standard executable.
