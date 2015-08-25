@@ -91,6 +91,20 @@ namespace Pico {
 
         template <enum AddressType T>
         METHOD
+        int Socket::bind(Address<T> addr, uint16_t port, bool reuse_addr)
+        {
+            if ( reuse_addr )
+            {
+                int option = 1;
+                set(SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+            }
+
+            auto bind_addr = Sockaddr<T>::pack(addr, port);
+            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(bind_addr), sizeof(bind_addr));
+        }
+
+        template <enum AddressType T>
+        METHOD
         int StreamSocket::connect(Address<T> addr, uint16_t port)
         {
             auto serv_addr = Sockaddr<T>::pack(addr, port);
@@ -98,26 +112,10 @@ namespace Pico {
             return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr));
         }
 
-        FUNCTION
-        int bind_socket(Socket &sock, struct sockaddr *bind_addr, socklen_t addr_len, bool reuse_addr)
-        {
-            if ( reuse_addr )
-            {
-                int option = 1;
-                sock.set(SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
-            }
-
-            return Syscall::bind(sock.file_desc(), bind_addr, addr_len);
-        }
-
-        template <enum AddressType T>
         METHOD
-        int StreamSocket::listen(Address<T> addr, uint16_t port, bool reuse_addr)
+        int StreamSocket::listen(int backlog)
         {
-            auto serv_addr = Sockaddr<T>::pack(addr, port);
-
-            bind_socket(*this, reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr), reuse_addr);
-            return Syscall::listen(this->file_desc(), 1);
+            return Syscall::listen(this->file_desc(), backlog);
         }
 
         METHOD

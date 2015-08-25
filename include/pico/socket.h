@@ -80,6 +80,9 @@ namespace Pico {
                 CONSTRUCTOR Socket(int domain, int type, int protocol);
                 METHOD int get(int level, int optname, void *val, unsigned *len);
                 METHOD int set(int level, int optname, void *val, unsigned len);
+
+                template <enum AddressType T>
+                METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr);
         };
 
         class StreamSocket : public Socket
@@ -92,9 +95,7 @@ namespace Pico {
                 template <AddressType T>
                 METHOD int connect(Address<T> addr, uint16_t port);
 
-                template <AddressType T>
-                METHOD int listen(Address<T> addr, uint16_t port, bool reuse_addr = false);
-
+                METHOD int listen(int backlog);
                 METHOD StreamSocket accept(bool fork = false);
         };
 
@@ -136,7 +137,8 @@ namespace Pico {
                 FUNCTION SockType start(Address<T> addr, uint16_t port, bool reuse_addr = false)
                 {
                     SockType server;
-                    server.listen(addr, port, reuse_addr);
+                    server.bind(addr, port, reuse_addr);
+                    server.listen(1);
 
                     SockType client = SockType(server.accept(Fork).file_desc());
                     return client;
