@@ -96,7 +96,9 @@ namespace Pico {
                 METHOD int connect(Address<T> addr, uint16_t port);
 
                 METHOD int listen(int backlog);
-                METHOD StreamSocket accept(bool fork = false);
+
+                template <bool Fork = false>
+                METHOD StreamSocket accept();
         };
 
         class TcpSocket : public StreamSocket
@@ -140,7 +142,7 @@ namespace Pico {
                     server.bind(addr, port, reuse_addr);
                     server.listen(1);
 
-                    SockType client = SockType(server.accept(Fork).file_desc());
+                    SockType client = SockType(server.template accept<Fork>().file_desc());
                     return client;
                 }
         };

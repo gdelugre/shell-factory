@@ -100,7 +100,7 @@ namespace Pico {
             }
 
             auto bind_addr = Sockaddr<T>::pack(addr, port);
-            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(bind_addr), sizeof(bind_addr));
+            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), sizeof(bind_addr));
         }
 
         template <enum AddressType T>
@@ -118,8 +118,9 @@ namespace Pico {
             return Syscall::listen(this->file_desc(), backlog);
         }
 
+        template <bool Fork>
         METHOD
-        StreamSocket StreamSocket::accept(bool fork)
+        StreamSocket StreamSocket::accept()
         {
             do {
                 int client_fd = Syscall::accept(this->file_desc(), nullptr, 0);
