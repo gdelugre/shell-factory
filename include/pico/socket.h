@@ -85,6 +85,28 @@ namespace Pico {
                 METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr);
         };
 
+        // TODO: recvfrom / sendto
+        class DatagramSocket : public Socket
+        {
+            public:
+                using Socket::Socket;
+                CONSTRUCTOR DatagramSocket(int domain, int protocol) : Socket(domain, SOCK_DGRAM, protocol) {}
+        };
+
+        class UdpSocket : public DatagramSocket
+        {
+            public:
+                using DatagramSocket::DatagramSocket;
+                CONSTRUCTOR UdpSocket() : DatagramSocket(AF_INET, IPPROTO_IP) {}
+        };
+
+        class Udp6Socket : public DatagramSocket
+        {
+            public:
+                using DatagramSocket::DatagramSocket;
+                CONSTRUCTOR Udp6Socket() : DatagramSocket(AF_INET6, IPPROTO_IP) {}
+        };
+
         class StreamSocket : public Socket
         {
             public:
@@ -130,7 +152,6 @@ namespace Pico {
         };
 
         // TODO: consistency check between S and T.
-        // TODO: fork on accept.
         template <class SockType, bool Fork = false>
         class SocketServer
         {
