@@ -97,6 +97,11 @@ COMPILER_CFLAGS =
           }
 }
 
+OS_CFLAGS =
+{
+    /none/ => %w{-U__STDC_HOSTED__}
+}
+
 # Architecture-dependent flags.
 ARCH_CFLAGS =
 {
@@ -171,19 +176,26 @@ def compile(target, triple, output_dir, *opts)
     )
     STDERR.puts
 
-    ARCH_CFLAGS.each_pair { |arch, flags|
+    ARCH_CFLAGS.each_pair do |arch, flags|
         if target_triple.arch =~ arch
             cflags += flags
             break
         end
-    }
+    end
 
-    COMPILER_CFLAGS.each_pair { |comp, flags|
+    OS_CFLAGS.each_pair do |os, flags|
+        if target_triple.os =~ os
+            cflags += flags
+            break
+        end
+    end
+
+    COMPILER_CFLAGS.each_pair do |comp, flags|
         if cc =~ comp
             cflags += flags
             break
         end
-    }
+    end
 
     if ENV['CFLAGS']
         cflags += [ ENV['CFLAGS'] ]
