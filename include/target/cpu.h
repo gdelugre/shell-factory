@@ -6,6 +6,7 @@
 #elif defined(__amd64__)
 #include <target/cpu/amd64/cpu_regs.h>
 #elif defined(__arm__)
+#include <target/cpu/arm/softfloat.h>
 #include <target/cpu/arm/cpu_regs.h>
 #elif defined(__aarch64__)
 #include <target/cpu/aarch64/cpu_regs.h>
