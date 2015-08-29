@@ -47,7 +47,7 @@ extern "C" {
 #define PAGE_SIZE 4096
 
 #include <factory-options.h>
-#include <target/cpu_regs.h>
+#include <target/cpu.h>
 #include <target/syscalls.h>
 
 #endif
