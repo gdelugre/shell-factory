@@ -1,7 +1,7 @@
 #ifndef CPU_REGS_H_
 #define CPU_REGS_H_
 
-#define SP_REGISTER "sp"
+#define SP_REGISTER "$29"
 
 enum cpu_registers
 {
