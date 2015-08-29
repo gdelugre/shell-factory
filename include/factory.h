@@ -43,6 +43,13 @@ extern "C" {
     }
 }
 
+FUNCTION
+void assert(bool expr)
+{
+    if ( !expr )
+        __builtin_trap();
+}
+
 // TODO: Move to CPU definition header.
 #define PAGE_SIZE 4096
 
