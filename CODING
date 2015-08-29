@@ -54,3 +54,9 @@ They require GCC 5 or later, which can be a pain to cross-compile for some
 architectures.
 
 All constexprs must be made of a single return statement or static_asserts.
+
+#### Beware of integer divisions
+
+Some architectures don't handle them well, especially ARM. With some ARM
+processors, integer divisions must be emulated in software. This will result in
+a bigger code. Most architectures are fine though.
