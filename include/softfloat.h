@@ -5,11 +5,11 @@
 #include <type_traits>
 #include <stdint.h>
 
-namespace Math {
+namespace Bits {
 
     template <typename T>
     FUNCTION
-    unsigned clz(T w)
+    unsigned count_leading_zeros(T w)
     {
         static_assert(std::numeric_limits<T>::is_integer, "Cannot use clz with non-integer types.");
         static_assert(sizeof(T) <= sizeof(unsigned int) || 
@@ -23,6 +23,9 @@ namespace Math {
         else if ( sizeof(T) == sizeof(unsigned long long) )
             return __builtin_clzll(static_cast<unsigned long long>(w));
     }
+}
+
+namespace Math {
 
     //
     // Algorithm taken from LLVM arm softfloat implementation.
@@ -35,7 +38,8 @@ namespace Math {
         static_assert(!std::numeric_limits<T>::is_signed, "Cannot use soft_udiv with a signed integer type");
         assert(b != 0);
 
-        unsigned clz_a = clz(a), clz_b = clz(b);
+        unsigned clz_a = Bits::count_leading_zeros(a);
+        unsigned clz_b = Bits::count_leading_zeros(b);
 
         // If MSB of b is greater than MSB of a, then a / b = 0.
         if ( clz_a > clz_b )
