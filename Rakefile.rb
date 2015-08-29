@@ -248,7 +248,7 @@ def generate_shellcode(target, triple, output_dir)
 
     # Extract shellcode.
     triple += '-' unless triple.empty?
-    sh "#{triple}objcopy -O binary -j .text -j .funcs -j .rodata #{input_file} #{output_file}" do |ok, res|
+    sh "#{triple}objcopy -O binary -j .text -j .rodata #{input_file} #{output_file}" do |ok, res|
         STDERR.puts
         show_error("Cannot extract shellcode from #{input_file}") unless ok
     end
