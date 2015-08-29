@@ -1,6 +1,8 @@
 #include <factory.h>
 #include <pico.h>
 
+using namespace Pico;
+
 #ifndef COMMAND
 #define COMMAND /bin/sh
 #endif

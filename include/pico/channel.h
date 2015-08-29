@@ -145,6 +145,7 @@ namespace Pico {
 }
 
 namespace Options {
+    using namespace Pico;
 
     #ifndef CHANNEL
     #define CHANNEL USE_STDOUT

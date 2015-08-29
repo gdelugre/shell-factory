@@ -1,8 +1,6 @@
 #ifndef PICOLIB_IO_H_
 #define PICOLIB_IO_H_
 
-using namespace Pico;
-
 namespace Pico {
 
     namespace Filesystem {
