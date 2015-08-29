@@ -53,6 +53,7 @@ void assert(bool expr)
 // TODO: Move to CPU definition header.
 #define PAGE_SIZE 4096
 
+#include <softfloat.h>
 #include <factory-options.h>
 #include <target/cpu.h>
 #include <target/syscalls.h>
