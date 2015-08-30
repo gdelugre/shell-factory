@@ -1,10 +1,6 @@
 #ifndef GENERIC_SYSCALL_ABI_H_
 #define GENERIC_SYSCALL_ABI_H_
 
-#ifndef SYSCALL_CLOBBERED_REGISTERS
-#define SYSCALL_CLOBBERED_REGISTERS "memory"
-#endif
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
