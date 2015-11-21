@@ -153,7 +153,7 @@ namespace Pico {
         struct sigaction act, old_act;
 
         act.sa_handler = handler;
-        memset(&act.sa_mask, 0, sizeof(sigset_t));
+        Memory::zero(&act.sa_mask, sizeof(sigset_t));
         act.sa_flags = SA_RESETHAND;
 
         Syscall::sigaction(signal, &act, &old_act);

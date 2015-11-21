@@ -305,7 +305,7 @@ namespace Pico {
 
         size_t (*output_func)(char *&, const void *, size_t) =
             [](char *& ptr, const void *buffer, size_t n) -> size_t {
-                memcpy(ptr, buffer, n);
+                Memory::copy(ptr, buffer, n);
                 ptr += n;
 
                 return n;

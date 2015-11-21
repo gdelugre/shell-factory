@@ -1,6 +1,8 @@
 #ifndef PICOLIB_SOCKET_IMPL_H_
 #define PICOLIB_SOCKET_IMPL_H_
 
+#include <sys/un.h>
+
 namespace Pico {
 
     namespace Network {
@@ -47,7 +49,25 @@ namespace Pico {
                 addr.sin6_flowinfo      = 0;
                 addr.sin6_family        = AF_INET6;
                 addr.sin6_port          = _htons(port);
-                memcpy(&addr.sin6_addr.s6_addr, &ip, sizeof(ip));
+                Memory::copy(&addr.sin6_addr.s6_addr, &ip, sizeof(ip));
+
+                return addr;
+            }
+        };
+
+        template <>
+        struct Sockaddr<UNIX>
+        {
+            static constexpr int family = AF_UNIX;
+            typedef struct sockaddr_un type;
+
+            FUNCTION
+            struct sockaddr_un pack(UnixAddress const unixaddr)
+            {
+                struct sockaddr_un addr;
+
+                addr.sun_family = AF_UNIX;
+                strcpy(addr.sun_path, unixaddr.path);
 
                 return addr;
             }
@@ -91,6 +111,14 @@ namespace Pico {
 
         template <enum AddressType T>
         METHOD
+        int Socket::bind(Address<T> addr)
+        {
+            auto bind_addr = Sockaddr<T>::pack(addr);
+            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), sizeof(bind_addr));
+        }
+
+        template <enum AddressType T>
+        METHOD
         int Socket::bind(Address<T> addr, uint16_t port, bool reuse_addr)
         {
             if ( reuse_addr )
@@ -101,6 +129,16 @@ namespace Pico {
 
             auto bind_addr = Sockaddr<T>::pack(addr, port);
             return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), sizeof(bind_addr));
+        }
+
+        template <enum AddressType T>
+        METHOD 
+        int StreamSocket::connect(Address<T> addr)
+        {
+            static_assert(T == UNIX, "This method only supports UNIX address sockets.");
+            auto serv_addr = Sockaddr<T>::pack(addr);
+            
+            return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr));
         }
 
         template <enum AddressType T>

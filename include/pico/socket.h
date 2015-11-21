@@ -8,6 +8,7 @@ namespace Pico {
         enum AddressType {
             IPV4,
             IPV6,
+            UNIX,
         };
 
         template <enum AddressType>
@@ -28,8 +29,15 @@ namespace Pico {
             uint8_t bytes[16];
         };
 
+        template <>
+        struct Address<UNIX>
+        {
+            char *path;
+        };
+
         typedef Address<IPV4> IpAddress;
         typedef Address<IPV6> IpAddress6;
+        typedef Address<UNIX> UnixAddress;
 
         template <size_t N>
         struct ip_address_type;
@@ -82,6 +90,9 @@ namespace Pico {
                 METHOD int set(int level, int optname, void *val, unsigned len);
 
                 template <enum AddressType T>
+                METHOD int bind(Address<T> addr);
+
+                template <enum AddressType T>
                 METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr);
         };
 
@@ -113,6 +124,9 @@ namespace Pico {
                 using Socket::Socket;
 
                 CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
+
+                template <AddressType T>
+                METHOD int connect(Address<T> addr);
 
                 template <AddressType T>
                 METHOD int connect(Address<T> addr, uint16_t port);
@@ -149,6 +163,13 @@ namespace Pico {
             public:
                 using StreamSocket::StreamSocket;
                 CONSTRUCTOR Sctp6Socket() : StreamSocket(AF_INET6, IPPROTO_SCTP) {}
+        };
+
+        class UnixStreamSocket : public StreamSocket
+        {
+            public:
+                using StreamSocket::StreamSocket;
+                CONSTRUCTOR UnixStreamSocket() : StreamSocket(AF_UNIX, 0) {}
         };
 
         // TODO: consistency check between S and T.
