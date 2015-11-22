@@ -73,6 +73,25 @@ namespace Pico {
             }
         };
 
+        template <>
+        struct Sockaddr<UNIX_ABSTRACT>
+        {
+            static constexpr int family = AF_UNIX;
+            typedef struct sockaddr_un type;
+
+            FUNCTION
+            struct sockaddr_un pack(UnixAbstractAddress const unixaddr)
+            {
+                struct sockaddr_un addr;
+
+                addr.sun_family = AF_UNIX;
+                addr.sun_path[0] = '\0';
+                strcpy(addr.sun_path + 1, unixaddr.path);
+
+                return addr;
+            }
+        };
+
         METHOD
         ssize_t SocketIO::in(void *buf, size_t count)
         {
@@ -113,6 +132,8 @@ namespace Pico {
         METHOD
         int Socket::bind(Address<T> addr)
         {
+            static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
+
             auto bind_addr = Sockaddr<T>::pack(addr);
             return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), sizeof(bind_addr));
         }
@@ -135,7 +156,7 @@ namespace Pico {
         METHOD 
         int StreamSocket::connect(Address<T> addr)
         {
-            static_assert(T == UNIX, "This method only supports UNIX address sockets.");
+            static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
             auto serv_addr = Sockaddr<T>::pack(addr);
             
             return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr));

@@ -9,6 +9,7 @@ namespace Pico {
             IPV4,
             IPV6,
             UNIX,
+            UNIX_ABSTRACT,
         };
 
         template <enum AddressType>
@@ -35,9 +36,16 @@ namespace Pico {
             char *path;
         };
 
+        template <>
+        struct Address<UNIX_ABSTRACT>
+        {
+            char *path;
+        };
+
         typedef Address<IPV4> IpAddress;
         typedef Address<IPV6> IpAddress6;
         typedef Address<UNIX> UnixAddress;
+        typedef Address<UNIX_ABSTRACT> UnixAbstractAddress;
 
         template <size_t N>
         struct ip_address_type;
