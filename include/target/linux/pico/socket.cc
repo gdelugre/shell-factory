@@ -183,7 +183,7 @@ namespace Pico {
         {
             do {
                 int client_fd = Syscall::accept(this->file_desc(), nullptr, 0);
-                if ( fork )
+                if ( Fork )
                 {
                     if ( Syscall::fork() == 0 )
                         return StreamSocket(client_fd);
@@ -193,7 +193,7 @@ namespace Pico {
                 else
                     return StreamSocket(client_fd);
 
-            } while ( fork );
+            } while ( Fork );
         }
     }
 }
