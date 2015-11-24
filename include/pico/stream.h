@@ -1,13 +1,45 @@
 #ifndef PICOLIB_STREAM_H_
 #define PICOLIB_STREAM_H_
 
+#include <initializer_list>
 #include <type_traits>
 #include <cstdarg>
 
 namespace Pico {
 
+    template <typename Io>
+    class Stream;
+
     class IO
     {
+        public:
+            enum poll_event {
+                INPUT_READY,
+                OUTPUT_READY,
+                POLL_ERROR
+            };
+
+            template <typename Io, typename Callback>
+            FUNCTION int select(std::initializer_list<Stream<Io>>,
+                                std::initializer_list<Stream<Io>>,
+                                std::initializer_list<Stream<Io>>,
+                                long, Callback);
+
+            template <typename Io, typename Callback>
+            FUNCTION int select(std::initializer_list<Stream<Io>> r_ios,
+                                std::initializer_list<Stream<Io>> w_ios,
+                                long timeout, Callback cb)
+            {
+                return select(r_ios, w_ios, {}, timeout, cb);
+            }
+
+            template <typename Io, typename Callback>
+            FUNCTION int select(std::initializer_list<Stream<Io>> r_ios,
+                                long timeout, Callback cb)
+            {
+                return select(r_ios, {}, timeout, cb);
+            }
+
         protected:
             IO() = default;
     };
@@ -71,6 +103,10 @@ namespace Pico {
             {
                 stm << buffer;
                 return stm;
+            }
+
+            METHOD bool operator ==(Stream<Io> stm) {
+                return file_desc() == stm.file_desc();
             }
 
             METHOD ssize_t readline(char *ptr, size_t n, char delim = '\n') {
