@@ -23,7 +23,7 @@ namespace Pico {
             typedef struct sockaddr_in type;
 
             FUNCTION
-            struct sockaddr_in pack(IpAddress const ip, uint16_t port)
+            struct sockaddr_in pack(IpAddress const ip, uint16_t port, size_t& size)
             {
                 struct sockaddr_in addr;
 
@@ -31,6 +31,7 @@ namespace Pico {
                 addr.sin_port           = _htons(port);
                 addr.sin_addr.s_addr    = ip.value;
 
+                size = sizeof(addr);
                 return addr;
             }
         };
@@ -42,7 +43,7 @@ namespace Pico {
             typedef struct sockaddr_in6 type;
 
             FUNCTION
-            struct sockaddr_in6 pack(IpAddress6 const ip, uint16_t port)
+            struct sockaddr_in6 pack(IpAddress6 const ip, uint16_t port, size_t& size)
             {
                 struct sockaddr_in6 addr;
 
@@ -51,6 +52,7 @@ namespace Pico {
                 addr.sin6_port          = _htons(port);
                 Memory::copy(&addr.sin6_addr.s6_addr, &ip, sizeof(ip));
 
+                size = sizeof(addr);
                 return addr;
             }
         };
@@ -62,13 +64,14 @@ namespace Pico {
             typedef struct sockaddr_un type;
 
             FUNCTION
-            struct sockaddr_un pack(UnixAddress const unixaddr)
+            struct sockaddr_un pack(UnixAddress const unixaddr, size_t& size)
             {
                 struct sockaddr_un addr;
 
                 addr.sun_family = AF_UNIX;
                 strcpy(addr.sun_path, unixaddr.path);
 
+                size = sizeof(addr.sun_family) + strlen(unixaddr.path);
                 return addr;
             }
         };
@@ -80,7 +83,7 @@ namespace Pico {
             typedef struct sockaddr_un type;
 
             FUNCTION
-            struct sockaddr_un pack(UnixAbstractAddress const unixaddr)
+            struct sockaddr_un pack(UnixAbstractAddress const unixaddr, size_t& size)
             {
                 struct sockaddr_un addr;
 
@@ -88,6 +91,7 @@ namespace Pico {
                 addr.sun_path[0] = '\0';
                 strcpy(addr.sun_path + 1, unixaddr.path);
 
+                size = sizeof(addr.sun_family) + strlen(unixaddr.path) + 1;
                 return addr;
             }
         };
@@ -128,8 +132,9 @@ namespace Pico {
         {
             static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
 
-            auto bind_addr = Sockaddr<T>::pack(addr);
-            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), sizeof(bind_addr));
+            size_t addr_len;
+            auto bind_addr = Sockaddr<T>::pack(addr, addr_len);
+            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), addr_len);
         }
 
         template <enum AddressType T>
@@ -142,8 +147,9 @@ namespace Pico {
                 set(SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
             }
 
-            auto bind_addr = Sockaddr<T>::pack(addr, port);
-            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), sizeof(bind_addr));
+            size_t addr_len;
+            auto bind_addr = Sockaddr<T>::pack(addr, port, addr_len);
+            return Syscall::bind(this->file_desc(), reinterpret_cast<struct sockaddr *>(&bind_addr), addr_len);
         }
 
         template <enum AddressType T>
@@ -151,18 +157,20 @@ namespace Pico {
         int StreamSocket::connect(Address<T> addr)
         {
             static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
-            auto serv_addr = Sockaddr<T>::pack(addr);
+            size_t addr_len;
+            auto serv_addr = Sockaddr<T>::pack(addr, addr_len);
             
-            return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr));
+            return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), addr_len);
         }
 
         template <enum AddressType T>
         METHOD
         int StreamSocket::connect(Address<T> addr, uint16_t port)
         {
-            auto serv_addr = Sockaddr<T>::pack(addr, port);
+            size_t addr_len;
+            auto serv_addr = Sockaddr<T>::pack(addr, port, addr_len);
 
-            return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr));
+            return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), addr_len);
         }
 
         METHOD
