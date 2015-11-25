@@ -27,11 +27,17 @@ namespace Pico {
         }
     }
 
-    template <typename Io, typename Callback>
     METHOD
-    int IO::select(std::initializer_list<Stream<Io>> r_ios,
-                   std::initializer_list<Stream<Io>> w_ios,
-                   std::initializer_list<Stream<Io>> e_ios,
+    int SingleIO::close()
+    {
+        return Syscall::close(fd);
+    }
+
+    template <typename Callback>
+    METHOD
+    int IO::select(std::initializer_list<SingleIO> r_ios,
+                   std::initializer_list<SingleIO> w_ios,
+                   std::initializer_list<SingleIO> e_ios,
                    long timeout, Callback cb)
     {
         struct timeval to, *ptv = nullptr;
@@ -129,12 +135,6 @@ namespace Pico {
     ssize_t BasicIO::out(const void *ptr, size_t count)
     {
         return Syscall::write(fd, ptr, count);
-    }
-
-    METHOD
-    int BasicIO::close()
-    {
-        return Syscall::close(fd);
     }
 
     template <typename Io>

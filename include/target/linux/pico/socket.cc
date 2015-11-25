@@ -107,12 +107,6 @@ namespace Pico {
             return Syscall::write(fd, buf, count);
         }
 
-        METHOD
-        int SocketIO::close()
-        {
-            return Syscall::close(fd);
-        }
-
         CONSTRUCTOR
         Socket::Socket(int domain, int type, int protocol) : Socket( Syscall::socket(domain, type, protocol) ) {}
 

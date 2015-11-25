@@ -7,9 +7,7 @@
 
 namespace Pico {
 
-    template <typename Io>
-    class Stream;
-
+    class SingleIO;
     class IO
     {
         public:
@@ -19,22 +17,22 @@ namespace Pico {
                 POLL_ERROR
             };
 
-            template <typename Io, typename Callback>
-            FUNCTION int select(std::initializer_list<Stream<Io>>,
-                                std::initializer_list<Stream<Io>>,
-                                std::initializer_list<Stream<Io>>,
+            template <typename Callback>
+            FUNCTION int select(std::initializer_list<SingleIO>,
+                                std::initializer_list<SingleIO>,
+                                std::initializer_list<SingleIO>,
                                 long, Callback);
 
-            template <typename Io, typename Callback>
-            FUNCTION int select(std::initializer_list<Stream<Io>> r_ios,
-                                std::initializer_list<Stream<Io>> w_ios,
+            template <typename Callback>
+            FUNCTION int select(std::initializer_list<SingleIO> r_ios,
+                                std::initializer_list<SingleIO> w_ios,
                                 long timeout, Callback cb)
             {
                 return select(r_ios, w_ios, {}, timeout, cb);
             }
 
-            template <typename Io, typename Callback>
-            FUNCTION int select(std::initializer_list<Stream<Io>> r_ios,
+            template <typename Callback>
+            FUNCTION int select(std::initializer_list<SingleIO> r_ios,
                                 long timeout, Callback cb)
             {
                 return select(r_ios, {}, timeout, cb);
@@ -44,18 +42,29 @@ namespace Pico {
             IO() = default;
     };
 
-    class BasicIO : IO
+    class SingleIO : IO
     {
         public:
+            CONSTRUCTOR SingleIO() = default;
+            CONSTRUCTOR SingleIO(int fd) : fd(fd) {}
+            METHOD int file_desc() const { return fd; }
+            METHOD int close();
+            METHOD bool operator ==(SingleIO io) {
+                return file_desc() == io.file_desc();
+            }
+
+        protected:
+            int fd;
+    };
+
+    class BasicIO : public SingleIO
+    {
+        public:
+            using SingleIO::SingleIO;
             CONSTRUCTOR BasicIO() = default;
-            CONSTRUCTOR BasicIO(int fd) : fd(fd) {}
+
             METHOD ssize_t in(void *, size_t);
             METHOD ssize_t out(const void *, size_t);
-            METHOD int close();
-            METHOD int file_desc() const { return fd; }
-
-        private:
-            int fd;
     };
 
     template <typename Io>
@@ -105,9 +114,13 @@ namespace Pico {
                 return stm;
             }
 
+            // Streams are compared using their IO ports.
             METHOD bool operator ==(Stream<Io> stm) {
-                return file_desc() == stm.file_desc();
+                return io_port() == stm.io_port();
             }
+
+            // Stream can be implicitly casted to their IO port.
+            METHOD operator Io() const { return io_port(); }
 
             METHOD ssize_t readline(char *ptr, size_t n, char delim = '\n') {
                 size_t nr_read;
@@ -172,6 +185,9 @@ namespace Pico {
             }
             METHOD int close() {
                 return rx.close() | tx.close();
+            }
+            METHOD bool operator ==(DuplexIO io) {
+                return rx == io.read_file_desc() && tx == io.write_file_desc();
             }
 
         private:

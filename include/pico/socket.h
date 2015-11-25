@@ -75,17 +75,12 @@ namespace Pico {
             return ip_address { { static_cast<uint8_t>(bytes)... } };
         }
 
-        class SocketIO : IO
+        class SocketIO : public SingleIO
         {
             public:
-                CONSTRUCTOR SocketIO(int fd) : fd(fd) {}
+                using SingleIO::SingleIO;
                 METHOD ssize_t in(void *, size_t);
                 METHOD ssize_t out(const void *, size_t);
-                METHOD int close();
-                METHOD int file_desc() const { return fd; }
-
-            private:
-                int fd;
         };
 
         class Socket : public Stream<SocketIO>
