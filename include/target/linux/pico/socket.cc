@@ -67,11 +67,12 @@ namespace Pico {
             struct sockaddr_un pack(UnixAddress const unixaddr, size_t& size)
             {
                 struct sockaddr_un addr;
+                String sock_path(addr.sun_path);
 
                 addr.sun_family = AF_UNIX;
-                strcpy(addr.sun_path, unixaddr.path);
+                sock_path = unixaddr.path;
 
-                size = sizeof(addr.sun_family) + strlen(unixaddr.path);
+                size = sizeof(addr.sun_family) + String(unixaddr.path).length();
                 return addr;
             }
         };
@@ -86,12 +87,13 @@ namespace Pico {
             struct sockaddr_un pack(UnixAbstractAddress const unixaddr, size_t& size)
             {
                 struct sockaddr_un addr;
+                String sock_path(addr.sun_path + 1);
 
                 addr.sun_family = AF_UNIX;
                 addr.sun_path[0] = '\0';
-                strcpy(addr.sun_path + 1, unixaddr.path);
+                sock_path = unixaddr.path;
 
-                size = sizeof(addr.sun_family) + strlen(unixaddr.path) + 1;
+                size = sizeof(addr.sun_family) + String(unixaddr.path).length() + 1;
                 return addr;
             }
         };

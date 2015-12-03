@@ -5,85 +5,111 @@
 
 namespace Pico {
 
-    FUNCTION
-    size_t strlen(const char *s)
+    template <typename T = char>
+    class BasicString {
+        public:
+            CONSTRUCTOR BasicString(T *str) : chars(str) {}
+            METHOD size_t length();
+            METHOD BasicString<T>& copy(BasicString<T> const& src);
+            METHOD BasicString<T>& copy(BasicString<T> const& src, size_t max_size);
+            METHOD BasicString<T>& concat(BasicString<T> const& src);
+            METHOD BasicString<T>& concat(BasicString<T> const& src, size_t max_size);
+
+            METHOD T& operator[](unsigned index) const { return chars[index]; }
+            METHOD bool operator ==(BasicString<T> const& other);
+            METHOD T* pointer() const { return chars; }
+            METHOD BasicString<T>& operator =(BasicString<T> const& str) { return copy(str); }
+
+        private:
+            T *chars;
+    };
+
+    typedef BasicString<char> String;
+    typedef BasicString<wchar_t> WideString;
+
+    template <typename T>
+    METHOD
+    size_t BasicString<T>::length()
     {
+        #if defined(__i386__) || defined(__amd64__)
+        if ( Options::use_builtins ) {
+           return BUILTIN(strlen)(chars); // Optimize to repnz
+        }
+        #endif
+
         size_t len = 0;
-        while ( s[len] )
+        while ( chars[len] )
             len++;
         return len;
     }
 
-    FUNCTION
-    char *strcpy(char *dest, const char *src)
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::copy(BasicString<T> const& src)
     {
-        char c;
-        char *out = dest;
+        T c;
+        unsigned i = 0;
 
-        while ( (c = *src++) != '\0' )
-            *out++ = c;
+        while ( (c = src[i]) != 0 )
+            chars[i++] = c;
 
-        *out = '\0';
-        return dest;
+        chars[i] = 0;
+        return *this;
     }
 
-    FUNCTION
-    char *strcat(char *dest, const char *src)
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::copy(BasicString<T> const& src, size_t max_size)
     {
-        strcpy(&dest[strlen(dest)], src);
-        return dest;
+        T c;
+        unsigned i = 0;
+
+        while ( max_size-- && (c = src[i]) != 0 )
+            chars[i++] = c;
+
+        chars[i] = 0;
+        return *this;
     }
 
-    FUNCTION
-    char *strncpy(char *dest, const char *src, size_t n)
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::concat(BasicString<T> const& src)
     {
-        char c;
-        char *out = dest;
+        BasicString<T>(chars + length()).copy(src);
 
-        while ( n != 0 && (c = *src++) != '\0' )
-        {
-            *out++ = c;
-            n--;
-        }
-
-        if ( n > 0 )
-            *out = '\0';
-
-        return dest;
+        return *this;
     }
 
-    FUNCTION
-    int strcmp(const char *s1, const char *s2)
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::concat(BasicString<T> const& src, size_t max_size)
     {
-        char c1 = 0, c2 = 0;
+        size_t length = this->length();
+
+        if ( max_size > length )
+            BasicString<T>(chars + length).copy(src, max_size - length);
+
+        return *this;
+    }
+
+    template <typename T>
+    METHOD
+    bool BasicString<T>::operator ==(BasicString<T> const& other)
+    {
+        T c1, c2;
+        unsigned i = 0;
 
         do
         {
-            c1 = *s1++;
-            c2 = *s2++;
+            c1 = chars[i];
+            c2 = other[i];
+            i++;
 
             if ( c1 != c2 )
                 break;
         } while ( c1 && c2 );
 
-        if ( c1 == c2 )
-            return 0;
-        else
-            return (c1 < c2 ? -1 : +1);
-    }
-
-    FUNCTION
-    char *strstr(const char *haystack, const char *needle)
-    {
-        char *ptr = (char *) haystack;
-        while ( *ptr )
-        {
-            if ( strcmp(ptr, needle) == 0 )
-                return ptr;
-            ptr++;
-        }
-
-        return NULL;
+        return ( c1 == c2 );
     }
 
     static constexpr bool isdigit(char c)
@@ -223,9 +249,6 @@ namespace Pico {
         char *fmt = const_cast<char *>(format);
         int escape = 0;
         char c;
-        char *param_str, param_chr;
-        size_t param_str_sz;
-        unsigned long param_word;
         char pad = ' ';
         long pad_sz = 0;
         int result = 0;
@@ -258,23 +281,30 @@ namespace Pico {
                         result += output(dest, &c, 1); break;
 
                     case 'c':
-                        param_chr = va_arg(ap, int);
+                    {
+                        char param_chr = va_arg(ap, int);
                         result += output(dest, &param_chr, sizeof(param_chr));
                         break;
+                    }
 
                     case 'd':
-                        param_word = va_arg(ap, unsigned long);
+                    {
+                        unsigned long param_word = va_arg(ap, unsigned long);
                         result += format_ltoa(dest, param_word, 10, false, pad, pad_sz, output);
                         break;
+                    }
 
                     case 's':
-                        param_str = va_arg(ap, char *);
-                        param_str_sz = strlen(param_str);
+                    {
+                        String param_str = va_arg(ap, char *);
+                        size_t param_str_sz = param_str.length();
+
                         for ( int i = 0; i < pad_sz - static_cast<int>(param_str_sz); i++ )
                             result += output(dest, &pad, sizeof(pad));
-                        result += output(dest, param_str, param_str_sz);
+                        result += output(dest, param_str.pointer(), param_str_sz);
                         escape = 0;
                         break;
+                    }
 
                     case 'p':
                         static char hex_prefix[] = { '0', 'x' };
@@ -282,9 +312,11 @@ namespace Pico {
 
                     case 'x':
                     case 'X':
-                        param_word = va_arg(ap, unsigned long);
+                    {
+                        unsigned long param_word = va_arg(ap, unsigned long);
                         result += format_ltoa(dest, param_word, 16, (c == 'X'), pad, pad_sz, output);
                         break;
+                    }
 
                     default:
                         break;

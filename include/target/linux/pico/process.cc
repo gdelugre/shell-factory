@@ -24,7 +24,7 @@ namespace Pico {
     } 
 
     METHOD
-    Process Process::find_process_by_name(const char *proc_name)
+    Process Process::find_process_by_name(char *proc_name)
     {
         pid_t result = 0;
 
@@ -42,7 +42,7 @@ namespace Pico {
             comm[n - 1] = '\0';
             Syscall::close(fd);
 
-            if ( strcmp(proc_name, comm) == 0 )
+            if ( String(proc_name) == comm )
             {
                 result = pid;
                 return 1;
@@ -55,7 +55,7 @@ namespace Pico {
     }
 
     METHOD
-    Process Process::find_process_by_path(const char *exe_path)
+    Process Process::find_process_by_path(char *exe_path)
     {
         pid_t result = 0;
 
@@ -73,7 +73,7 @@ namespace Pico {
                 return 0;
 
             exe[n] = '\0';
-            if ( strcmp(exe_path, exe) == 0 )
+            if ( String(exe_path) == exe )
             {
                 result = pid;
                 return 1;

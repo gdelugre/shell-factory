@@ -12,8 +12,8 @@ namespace Pico {
             FUNCTION Process        current();
             FUNCTION Process        parent();
             FUNCTION void           set_current_thread_name(const char *comm);
-            FUNCTION Process        find_process_by_name(const char *proc_name);
-            FUNCTION Process        find_process_by_path(const char *exe_path);
+            FUNCTION Process        find_process_by_name(char *proc_name);
+            FUNCTION Process        find_process_by_path(char *exe_path);
             FUNCTION Process        create_thread(thread_routine thread_entry, void *arg);
             FUNCTION sighandler_t   set_signal_handler(int signal, sighandler_t handler);
 
