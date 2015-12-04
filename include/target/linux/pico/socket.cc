@@ -13,6 +13,28 @@ namespace Pico {
             return cpu_to_be16(port);
         }
 
+        // From glibc 2.19, sysdeps/unix/sysv/linux/cmsg_nxthdr.c
+        FUNCTION
+        struct cmsghdr *cmsg_nxthdr (struct msghdr *mhdr, struct cmsghdr *cmsg)
+        {
+            if ((size_t) cmsg->cmsg_len < sizeof (struct cmsghdr))
+            /* The kernel header does this so there may be a reason.  */
+                return NULL;
+
+            cmsg = (struct cmsghdr *) ((unsigned char *) cmsg
+                    + CMSG_ALIGN (cmsg->cmsg_len));
+
+            if ((unsigned char *) (cmsg + 1) > ((unsigned char *) mhdr->msg_control
+                                                + mhdr->msg_controllen)
+                || ((unsigned char *) cmsg + CMSG_ALIGN (cmsg->cmsg_len)
+                    > ((unsigned char *) mhdr->msg_control + mhdr->msg_controllen)))
+                /* No more entries.  */
+                return NULL;
+
+            return cmsg;
+        }
+
+
         template <enum AddressType>
         struct Sockaddr;
 
@@ -155,13 +177,13 @@ namespace Pico {
         }
 
         template <enum AddressType T>
-        METHOD 
+        METHOD
         int StreamSocket::connect(Address<T> addr)
         {
             static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
             size_t addr_len;
             auto serv_addr = Sockaddr<T>::pack(addr, addr_len);
-            
+
             return Syscall::connect(this->file_desc(), reinterpret_cast<struct sockaddr *>(&serv_addr), addr_len);
         }
 
@@ -198,6 +220,61 @@ namespace Pico {
                     return StreamSocket(client_fd);
 
             } while ( Fork );
+        }
+
+        METHOD
+        int UnixStreamSocket::send_io(SingleIO const& io)
+        {
+            char dummy                       = 0;
+            int fd                           = io.file_desc();
+            struct msghdr msg                = {0};
+            char buf[CMSG_SPACE(sizeof(fd))] = {0};
+            struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
+
+            msg.msg_iov = &iov;
+            msg.msg_iovlen = 1;
+            msg.msg_control = buf;
+            msg.msg_controllen = sizeof(buf);
+
+            struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+            cmsg->cmsg_level = SOL_SOCKET;
+            cmsg->cmsg_type = SCM_RIGHTS;
+            cmsg->cmsg_len = CMSG_LEN(sizeof(fd));
+
+            *((int *) CMSG_DATA(cmsg)) = fd;
+
+            return Syscall::sendmsg(this->file_desc(), &msg, 0);
+        }
+
+        METHOD
+        SingleIO UnixStreamSocket::recv_io()
+        {
+            char dummy;
+            int fd                           = -1;
+            struct msghdr msg                = {0};
+            char buf[CMSG_SPACE(sizeof(fd))] = {0};
+            struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
+
+            msg.msg_iov = &iov;
+            msg.msg_iovlen = 1;
+            msg.msg_control = buf;
+            msg.msg_controllen = sizeof(buf);
+
+            if ( Syscall::recvmsg(this->file_desc(), &msg, 0) == -1 )
+                return SingleIO(fd);
+
+            for ( struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+                  cmsg != nullptr;
+                  cmsg = cmsg_nxthdr(&msg, cmsg) )
+            {
+                if ( cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SCM_RIGHTS )
+                {
+                    fd = *((int *) CMSG_DATA(cmsg));
+                    break;
+                }
+            }
+
+            return SingleIO(fd);
         }
     }
 }

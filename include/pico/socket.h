@@ -173,6 +173,9 @@ namespace Pico {
             public:
                 using StreamSocket::StreamSocket;
                 CONSTRUCTOR UnixStreamSocket() : StreamSocket(AF_UNIX, 0) {}
+
+                METHOD int send_io(SingleIO const& io);
+                METHOD SingleIO recv_io();
         };
 
         // TODO: consistency check between S and T.
@@ -180,6 +183,17 @@ namespace Pico {
         class SocketServer
         {
             public:
+                template <AddressType T>
+                FUNCTION SockType start(Address<T> addr)
+                {
+                    SockType server;
+                    server.bind(addr);
+                    server.listen(1);
+
+                    SockType client = SockType(server.template accept<Fork>().file_desc());
+                    return client;
+                }
+
                 template <AddressType T>
                 FUNCTION SockType start(Address<T> addr, uint16_t port, bool reuse_addr = false)
                 {

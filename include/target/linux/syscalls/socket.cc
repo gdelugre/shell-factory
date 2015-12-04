@@ -24,8 +24,10 @@ namespace Syscall {
     SYSTEM_CALL int accept(int, struct sockaddr *, socklen_t *);
     SYSTEM_CALL ssize_t recv(int, void *, size_t, int);
     SYSTEM_CALL ssize_t recvfrom(int, void *, size_t, int, struct sockaddr *, socklen_t *);
+    SYSTEM_CALL ssize_t recvmsg(int, struct msghdr *, int);
     SYSTEM_CALL ssize_t send(int, const void *, size_t, int);
     SYSTEM_CALL ssize_t sendto(int, const void *, size_t, int, const struct sockaddr *, socklen_t);
+    SYSTEM_CALL ssize_t sendmsg(int, const struct msghdr *, int);
 
     #if SYSCALL_EXISTS(socketcall)
     SYSTEM_CALL
@@ -113,6 +115,17 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
+    ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)
+    {
+        #if SYSCALL_EXISTS(recvmsg)
+        return DO_SYSCALL(recvmsg, sockfd, msg, flags);
+        #else
+        long args[] = { sockfd, (long) msg, flags };
+        return socketcall(SYS_RECVMSG, args);
+        #endif
+    }
+
+    SYSTEM_CALL
     ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
                      struct sockaddr *src_addr, socklen_t *addrlen)
     {
@@ -132,6 +145,17 @@ namespace Syscall {
         #else
         long args[] = { sockfd, (long) buf, (long) len, flags };
         return socketcall(SYS_RECV, args);
+        #endif
+    }
+
+    SYSTEM_CALL
+    ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)
+    {
+        #if SYSCALL_EXISTS(sendmsg)
+        return DO_SYSCALL(sendmsg, sockfd, msg, flags);
+        #else
+        long args[] = { sockfd, (long) msg, flags };
+        return socketcall(SYS_SENDMSG, args);
         #endif
     }
 
