@@ -10,6 +10,7 @@
 #include <pico/channel.h>
 #include <pico/process.h> 
 #include <pico/debug.h>
+#include <pico/ipc.h>
 
 #include <target/pico.h>
 

@@ -11,5 +11,6 @@
 #include "pico/process.cc"
 #include "pico/debug.cc"
 #include "pico/socket.cc"
+#include "pico/ipc.cc"
 
 #endif

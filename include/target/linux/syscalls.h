@@ -25,5 +25,6 @@
 #include "syscalls/process.cc"
 #include "syscalls/memory.cc"
 #include "syscalls/socket.cc"
+#include "syscalls/ipc.cc"
 
 #endif

@@ -71,6 +71,8 @@ namespace Pico {
     class Stream
     {
         public:
+            typedef Io io_type;
+
             CONSTRUCTOR Stream() = default;
             CONSTRUCTOR Stream(int fd) : io(fd) {}
 
@@ -195,19 +197,25 @@ namespace Pico {
             WriteIo tx;
     };
 
-    template <typename ReadIo, typename WriteIo = ReadIo>
-    class BiStream : public Stream<DuplexIO<ReadIo, WriteIo>>
+    template <typename ReadStream, typename WriteStream = ReadStream>
+    class BiStream : public Stream<DuplexIO<typename ReadStream::io_type, typename WriteStream::io_type>>
     {
         public:
-            CONSTRUCTOR BiStream(Stream<ReadIo> r, Stream<WriteIo> w)
+            CONSTRUCTOR BiStream(ReadStream r, WriteStream w)
             {
-                this->io = DuplexIO<ReadIo, WriteIo>(r.io_port(), w.io_port());
+                using ReadIO = typename ReadStream::io_type;
+                using WriteIO = typename WriteStream::io_type;
+
+                this->io = DuplexIO<ReadIO, WriteIO>(r.io_port(), w.io_port());
             }
+
+            METHOD ReadStream read_stream() const { return ReadStream(this->io.read_file_desc()); }
+            METHOD WriteStream write_stream() const { return WriteStream(this->io.write_file_desc()); }
 
             template <typename T>
             METHOD void duplicate2(Stream<T>& r, Stream<T>& w) {
-                Stream<ReadIo>(this->io.read_file_desc()).duplicate(r);
-                Stream<WriteIo>(this->io.write_file_desc()).duplicate(w);
+                this->read_stream().duplicate(r);
+                this->write_stream().duplicate(w);
             }
     };
 }

@@ -33,8 +33,8 @@ namespace Pico {
         };                                                      \
 
     DEFINE_CHANNEL_MODE(NO_CHANNEL,     void,                   false);
-    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicIO>,      false);
-    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicIO>,      false);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>,  false);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>,  false);
     DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
     DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    true);
     DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     true);
