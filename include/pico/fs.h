@@ -23,6 +23,8 @@ namespace Pico {
         class Directory : public SingleIO
         {
             public:
+                using SingleIO::SingleIO;
+
                 FUNCTION        Directory open(const char *path);
                 FUNCTION int    create(const char *path, mode_t mode);
                 FUNCTION int    remove(const char *path);
