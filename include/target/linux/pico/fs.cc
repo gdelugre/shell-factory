@@ -85,15 +85,15 @@ namespace Pico {
         }
 
         METHOD
-        int Directory::set_current()
+        Directory Directory::open(const char *path)
         {
-            return Syscall::fchdir(fd);
+            return Directory(path);
         }
 
         METHOD
-        int Directory::close()
+        int Directory::set_current()
         {
-            return Syscall::close(fd);
+            return Syscall::fchdir(fd);
         }
 
         template <typename Func>

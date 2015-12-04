@@ -20,10 +20,10 @@ namespace Pico {
                 CONSTRUCTOR     File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
         };
 
-        class Directory
+        class Directory : public SingleIO
         {
             public:
-                FUNCTION        Directory&& open(const char *path);
+                FUNCTION        Directory open(const char *path);
                 FUNCTION int    create(const char *path, mode_t mode);
                 FUNCTION int    remove(const char *path);
 
@@ -38,11 +38,6 @@ namespace Pico {
                 template <typename Func>
                 METHOD int      list(Func);
                 METHOD int      set_current();
-                METHOD int      close();
-                METHOD int      file_desc() const { return fd; }
-
-            private:
-                int fd = -1;
         };
     }
 }
