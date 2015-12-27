@@ -1,6 +1,7 @@
 require 'rake'
 require 'rake/clean'
 
+require 'pathname'
 require 'ipaddr'
 
 class String
@@ -138,17 +139,12 @@ end
 
 # Returns [ source_path, output_basename ]
 def target_to_source(target)
-    dirs = target.to_s.split('/').delete_if{|dir| dir.empty?}
-
-    if dirs.length == 1
-        source_dir = SHELLCODE_DIR
-        source_basename = dirs[0]
-    else
-        source_dir = dirs[0..-2].join('/')
-        source_basename = dirs[-1]
+    path = Pathname.new(target.to_s).cleanpath
+    if path.relative? and path.each_filename.to_a.size == 1
+        path = Pathname.new(SHELLCODE_DIR).join(path)
     end
 
-    [ source_dir, source_basename ]
+    path.split
 end
 
 def compile(target, triple, output_dir, *opts)
@@ -159,7 +155,7 @@ def compile(target, triple, output_dir, *opts)
     cc = ENV['CC'] || CC
     cflags = CFLAGS.dup
     source_dir, target_name = target_to_source(target)
-    source_file = File.join(source_dir, "#{target_name}.cc")
+    source_file = source_dir.join("#{target_name}.cc")
 
     unless File.exists?(source_file)
         show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
@@ -228,13 +224,15 @@ def compile(target, triple, output_dir, *opts)
     }
 
     if ENV['OUTPUT_DEBUG'].to_i == 1
+        output_file = output_dir.join("#{target_name}.S")
         cflags << '-g'
-        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{source_file} -o #{output_dir}/#{target_name}.S #{defines.join(' ')}" do |ok, _|
+        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
             (STDERR.puts; show_error("Compilation failed.")) unless ok
         end
     end
 
-    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{source_file} -o #{output_dir}/#{target_name}.elf #{defines.join(' ')}" do |ok, _|
+    output_file = output_dir.join("#{target_name}.elf")
+    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
         (STDERR.puts; show_error("Compilation failed.")) unless ok
     end
 end
@@ -243,8 +241,8 @@ def generate_shellcode(target, triple, output_dir)
     _, target_name = target_to_source(target)
     triple_info = triple.empty? ? Triple.current : Triple.parse(triple)
 
-    input_file = File.join(output_dir, "#{target_name}.elf")
-    output_file = File.join(output_dir, "#{target_name}.#{triple_info.arch}-#{triple_info.os}.bin")
+    input_file = output_dir.join("#{target_name}.elf")
+    output_file = output_dir.join("#{target_name}.#{triple_info.arch}-#{triple_info.os}.bin")
 
     # Extract shellcode.
     triple += '-' unless triple.empty?
@@ -264,7 +262,7 @@ def generate_shellcode(target, triple, output_dir)
 end
 
 def build(target, *opts)
-    output_dir = OUTPUT_DIR
+    output_dir = Pathname.new(OUTPUT_DIR)
     triple = ''
     triple = ENV['TRIPLE'] if ENV['TRIPLE']
 
