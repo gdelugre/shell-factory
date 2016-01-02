@@ -1,85 +1,91 @@
 #ifndef GENERIC_SYSCALL_ABI_H_
 #define GENERIC_SYSCALL_ABI_H_
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-template <typename ...T>
-size_t SyscallArgumentsLength(T ...args)
-{
-    static_assert(sizeof...(args) < 8, "Too many arguments for syscall");
+#define SYSCALL_ARG_BIND_REGISTER(i, reg, value)                        \
+    register auto __arg##i asm (reg) = value;                           \
 
-    return sizeof...(args);
-}
-
-template <int N, typename ...Args> struct GetArgumentByIndexHelper;
-
-template <typename ArgType, typename ...Rest>
-struct GetArgumentByIndexHelper<0, ArgType, Rest...>
-{
-    static constexpr auto value(ArgType arg, Rest ...args)
-    {
-        return arg;
-    }
-};
-
-template <int N, typename ArgType, typename ...Rest>
-struct GetArgumentByIndexHelper<N, ArgType, Rest...>
-{
-    static constexpr auto value(ArgType arg, Rest ...args)
-    {
-        return GetArgumentByIndexHelper<N-1, Rest...>::value(args...);
-    }
-};
-
-template <int N>
-struct GetArgumentByIndexHelper<N>
-{
-    static constexpr auto value(void)
-    {
-        return -1;
-    }
-};
-
-template <int N, typename ...T>
-static constexpr auto GetArgumentByIndex(T ...args)
-{
-    return GetArgumentByIndexHelper<N, T...>::value(args...);
-}
-#pragma GCC diagnostic pop
-
-#define SYSCALL_ARG_BIND_REGISTER(n, reg, ...)                                  \
-    if ( nr_args > n )                                                          \
-    {                                                                           \
-        register auto __arg##n asm (reg) = GetArgumentByIndex<n>(__VA_ARGS__);  \
-        asm ("" :: "r" (__arg##n));                                             \
-    }
-
-#define EMIT_SYSCALL(name, ...)                                         \
+#define EMIT_SYSCALL0(name, ...)                                        \
 ({                                                                      \
-    size_t nr_args = SyscallArgumentsLength(__VA_ARGS__);               \
-    short sys_num = SYSCALL_NAME_TO_NUM(name);                          \
+    int sys_num = SYSCALL_NAME_TO_NUM(name);                            \
                                                                         \
-    SYSCALL_PUSH_ARGUMENTS(__VA_ARGS__);                                \
-                                                                        \
-    register short __sys_num asm ( SYSCALL_NUMBER_REGISTER ) = sys_num; \
+    register int __sys_num asm ( SYSCALL_NUMBER_REGISTER ) = sys_num;   \
     register long __sys_result asm ( SYSCALL_RESULT_REGISTER );         \
                                                                         \
     asm volatile (                                                      \
         SYSCALL_INSTRUCTION "\n"                                        \
-            : "=r" (__sys_result)                                       \
-            : "r" (__sys_num)                                           \
-            : "memory", "cc", SYSCALL_CLOBBERED_REGISTERS               \
+        : "=r" (__sys_result)                                           \
+        : "r" (__sys_num), ##__VA_ARGS__                                \
+        : "memory", "cc", SYSCALL_CLOBBERED_REGISTERS                   \
     );                                                                  \
                                                                         \
     __sys_result;                                                       \
-})
+})                                                                      \
 
-#define DO_SYSCALL(name, ...) ({ \
+#define EMIT_SYSCALL1(name, arg1, ...)                                  \
+({                                                                      \
+    SYSCALL_SET_ARG_1(arg1);                                            \
+    EMIT_SYSCALL0(name,                                                 \
+                  "X"(__arg1), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL2(name, arg1, arg2, ...)                            \
+({                                                                      \
+    SYSCALL_SET_ARG_2(arg2);                                            \
+    EMIT_SYSCALL1(name, arg1,                                           \
+                  "X"(__arg2), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL3(name, arg1, arg2, arg3, ...)                      \
+({                                                                      \
+    SYSCALL_SET_ARG_3(arg3);                                            \
+    EMIT_SYSCALL2(name, arg1, arg2,                                     \
+                  "X"(__arg3), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL4(name, arg1, arg2, arg3, arg4, ...)                \
+({                                                                      \
+    SYSCALL_SET_ARG_4(arg4);                                            \
+    EMIT_SYSCALL3(name, arg1, arg2, arg3,                               \
+                  "X"(__arg4), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL5(name, arg1, arg2, arg3, arg4, arg5, ...)          \
+({                                                                      \
+    SYSCALL_SET_ARG_5(arg5);                                            \
+    EMIT_SYSCALL4(name, arg1, arg2, arg3, arg4,                         \
+                  "X"(__arg5), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL6(name, arg1, arg2, arg3, arg4, arg5, arg6, ...)    \
+({                                                                      \
+    SYSCALL_SET_ARG_6(arg6);                                            \
+    EMIT_SYSCALL5(name, arg1, arg2, arg3, arg4, arg5,                   \
+                  "X"(__arg6), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL7(name, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ...) \
+({                                                                      \
+    SYSCALL_SET_ARG_7(arg7);                                            \
+    EMIT_SYSCALL5(name, arg1, arg2, arg3, arg4, arg5, arg6,             \
+                  "X"(__arg7), ##__VA_ARGS__);                          \
+})                                                                      \
+
+#define EMIT_SYSCALL_SWITCH(_1,_2,_3,_4,_5,_6,_7,_8,N,...) N
+#define EMIT_SYSCALL(name, args...)                                     \
+        EMIT_SYSCALL_SWITCH(0, ##args,                                  \
+                EMIT_SYSCALL7,                                          \
+                EMIT_SYSCALL6,                                          \
+                EMIT_SYSCALL5,                                          \
+                EMIT_SYSCALL4,                                          \
+                EMIT_SYSCALL3,                                          \
+                EMIT_SYSCALL2,                                          \
+                EMIT_SYSCALL1,                                          \
+                EMIT_SYSCALL0)(name, ##args)                            \
+
+#define DO_SYSCALL(name, args...) ({ \
   int err_val; \
   (void) err_val; \
-  EMIT_SYSCALL(name, __VA_ARGS__); \
+  EMIT_SYSCALL(name, ##args); \
   });
 
 

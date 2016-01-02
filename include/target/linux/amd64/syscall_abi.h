@@ -21,12 +21,13 @@
 #define SYSCALL_NUMBER_REGISTER "rax"
 #define SYSCALL_RESULT_REGISTER "rax"
 #define SYSCALL_INSTRUCTION     "syscall"
-#define SYSCALL_PUSH_ARGUMENTS(...) \
-    SYSCALL_ARG_BIND_REGISTER(0, "rdi", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(1, "rsi", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(2, "rdx", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(3, "r10", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(4, "r8", __VA_ARGS__);  \
-    SYSCALL_ARG_BIND_REGISTER(5, "r9", __VA_ARGS__);
+
+#define SYSCALL_SET_ARG_1(value) SYSCALL_ARG_BIND_REGISTER(1, "rdi", value)
+#define SYSCALL_SET_ARG_2(value) SYSCALL_ARG_BIND_REGISTER(2, "rsi", value)
+#define SYSCALL_SET_ARG_3(value) SYSCALL_ARG_BIND_REGISTER(3, "rdx", value)
+#define SYSCALL_SET_ARG_4(value) SYSCALL_ARG_BIND_REGISTER(4, "r10", value)
+#define SYSCALL_SET_ARG_5(value) SYSCALL_ARG_BIND_REGISTER(5, "r8", value)
+#define SYSCALL_SET_ARG_6(value) SYSCALL_ARG_BIND_REGISTER(6, "r9", value)
+#define SYSCALL_SET_ARG_7(value) static_assert(false, "Too many arguments for this architecture.")
 
 #endif

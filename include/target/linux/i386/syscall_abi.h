@@ -21,12 +21,13 @@
 #define SYSCALL_NUMBER_REGISTER "eax"
 #define SYSCALL_RESULT_REGISTER "eax"
 #define SYSCALL_INSTRUCTION     "int $0x80"
-#define SYSCALL_PUSH_ARGUMENTS(...) \
-    SYSCALL_ARG_BIND_REGISTER(0, "ebx", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(1, "ecx", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(2, "edx", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(3, "esi", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(4, "edi", __VA_ARGS__);  \
-    SYSCALL_ARG_BIND_REGISTER(5, "ebp", __VA_ARGS__);
+
+#define SYSCALL_SET_ARG_1(value) SYSCALL_ARG_BIND_REGISTER(1, "ebx", value)
+#define SYSCALL_SET_ARG_2(value) SYSCALL_ARG_BIND_REGISTER(2, "ecx", value)
+#define SYSCALL_SET_ARG_3(value) SYSCALL_ARG_BIND_REGISTER(3, "edx", value)
+#define SYSCALL_SET_ARG_4(value) SYSCALL_ARG_BIND_REGISTER(4, "esi", value)
+#define SYSCALL_SET_ARG_5(value) SYSCALL_ARG_BIND_REGISTER(5, "edi", value)
+#define SYSCALL_SET_ARG_6(value) SYSCALL_ARG_BIND_REGISTER(6, "ebp", value)
+#define SYSCALL_SET_ARG_7(value) static_assert(false, "Too many arguments for this architecture.")
 
 #endif

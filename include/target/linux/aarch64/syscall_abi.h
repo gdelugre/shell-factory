@@ -25,12 +25,13 @@
 #define SYSCALL_NUMBER_REGISTER "x8"
 #define SYSCALL_RESULT_REGISTER "x0"
 #define SYSCALL_INSTRUCTION     "svc 0"
-#define SYSCALL_PUSH_ARGUMENTS(...) \
-    SYSCALL_ARG_BIND_REGISTER(0, "x0", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(1, "x1", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(2, "x2", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(3, "x3", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(4, "x4", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(5, "x5", __VA_ARGS__); \
+
+#define SYSCALL_SET_ARG_1(value) SYSCALL_ARG_BIND_REGISTER(1, "x0", value)
+#define SYSCALL_SET_ARG_2(value) SYSCALL_ARG_BIND_REGISTER(2, "x1", value)
+#define SYSCALL_SET_ARG_3(value) SYSCALL_ARG_BIND_REGISTER(3, "x2", value)
+#define SYSCALL_SET_ARG_4(value) SYSCALL_ARG_BIND_REGISTER(4, "x3", value)
+#define SYSCALL_SET_ARG_5(value) SYSCALL_ARG_BIND_REGISTER(5, "x4", value)
+#define SYSCALL_SET_ARG_6(value) SYSCALL_ARG_BIND_REGISTER(6, "x5", value)
+#define SYSCALL_SET_ARG_7(value) static_assert(false, "Too many arguments for this architecture.")
 
 #endif

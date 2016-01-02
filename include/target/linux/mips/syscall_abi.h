@@ -18,21 +18,12 @@
  * return value to v0
  */
 
+#error "This architecture is not supported."
+
 #define SYSCALL_CLOBBERED_REGISTERS "$1", "$3", \
     "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "$24", "$25", "hi", "lo"
 #define SYSCALL_NUMBER_REGISTER "$2"
 #define SYSCALL_RESULT_REGISTER "$2"
 #define SYSCALL_INSTRUCTION     "syscall"
-#define SYSCALL_PUSH_ARGUMENTS(...) \
-({  \
-    size_t nr_args = SyscallArgumentsLength(__VA_ARGS__); \
-    void **stack_args = (void **) __builtin_alloca(sizeof(long) * 8); \
-    SYSCALL_ARG_BIND_REGISTER(0, "$4", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(1, "$5", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(2, "$6", __VA_ARGS__); \
-    SYSCALL_ARG_BIND_REGISTER(3, "$7", __VA_ARGS__); \
-    if ( nr_args > 4 ) \
-        stack_args[4] = const_cast<void *>(reinterpret_cast<const void *>(GetArgumentByIndex<4>(__VA_ARGS__))); \
-})
 
 #endif
