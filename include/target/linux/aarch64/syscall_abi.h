@@ -21,7 +21,7 @@
  * return value to x0
  */
 
-#define SYSCALL_CLOBBERED_REGISTERS "x6", "x7", \
+#define SYSCALL_CLOBBERED_REGISTERS "x1", "x2", "x3", "x4", "x5", "x6", "x7", \
     "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18"
 #define SYSCALL_NUMBER_REGISTER "x8"
 #define SYSCALL_RESULT_REGISTER "x0"

@@ -15,8 +15,9 @@
         SYSCALL_INSTRUCTION "\n"                                        \
         : "=r" (__sys_result)                                           \
         : "r" (__sys_num), ##__VA_ARGS__                                \
-        : "memory", "cc", SYSCALL_CLOBBERED_REGISTERS                   \
+        : "memory", "cc"                                                \
     );                                                                  \
+    asm volatile ("" ::: SYSCALL_CLOBBERED_REGISTERS );                 \
                                                                         \
     __sys_result;                                                       \
 })                                                                      \
