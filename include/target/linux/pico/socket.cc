@@ -8,9 +8,9 @@ namespace Pico {
     namespace Network {
 
         FUNCTION
-        uint16_t _htons(uint16_t port)
+        uint16_t host_to_net(uint16_t port)
         {
-            return cpu_to_be16(port);
+            return CPU::to_big_endian(port);
         }
 
         // From glibc 2.19, sysdeps/unix/sysv/linux/cmsg_nxthdr.c
@@ -50,7 +50,7 @@ namespace Pico {
                 struct sockaddr_in addr;
 
                 addr.sin_family         = family;
-                addr.sin_port           = _htons(port);
+                addr.sin_port           = host_to_net(port);
                 addr.sin_addr.s_addr    = ip.value;
 
                 size = sizeof(addr);
@@ -71,7 +71,7 @@ namespace Pico {
 
                 addr.sin6_flowinfo      = 0;
                 addr.sin6_family        = AF_INET6;
-                addr.sin6_port          = _htons(port);
+                addr.sin6_port          = host_to_net(port);
                 Memory::copy(&addr.sin6_addr.s6_addr, &ip, sizeof(ip));
 
                 size = sizeof(addr);
