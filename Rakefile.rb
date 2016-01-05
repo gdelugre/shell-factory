@@ -223,6 +223,10 @@ def compile(target, triple, output_dir, *opts)
         "-D#{k}=#{v}"
     }
 
+    if ENV['OUTPUT_STRIP'].to_i == 1
+        cflags << "-s"
+    end
+
     if ENV['OUTPUT_DEBUG'].to_i == 1
         output_file = output_dir.join("#{target_name}.S")
         cflags << '-g'
@@ -301,6 +305,7 @@ task :help do
     #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations. 
     #{'OUTPUT_LIB:'.color(:green)}     Compiles to a shared library instead of a standard executable.
     #{'OUTPUT_DEBUG:'.color(:green)}   Instructs the compiler to emit an assembly file.
+    #{'OUTPUT_STRIP:'.color(:green)}   Strip symbols from output file.
     #{'OUTPUT_HEX:'.color(:green)}     Prints the resulting shellcode as an hexadecimal string.
     #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
     #{'RELAX_INLINE:'.color(:green)}   Set to 1 to let the compiler uninline some functions.
