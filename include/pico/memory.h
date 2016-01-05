@@ -10,7 +10,10 @@ namespace Pico {
         constexpr int EXEC   = (1 << 2);
         constexpr int STACK  = (1 << 3);
 
-        FUNCTION void * allocate(size_t size, int prot);
+        FUNCTION void * allocate(void *base, size_t size, int prot);
+        FUNCTION void * allocate(size_t size, int prot) {
+            return allocate(nullptr, size, prot);
+        }
         FUNCTION void   release(void *ptr, size_t size);
 
         class Buffer
