@@ -1,6 +1,8 @@
 #ifndef PICOLIB_STREAM_IMPL_H_
 #define PICOLIB_STREAM_IMPL_H_
 
+#include <fcntl.h>
+
 namespace Pico {
 
     namespace Stdio {
@@ -31,6 +33,11 @@ namespace Pico {
     int SingleIO::close()
     {
         return Syscall::close(fd);
+    }
+
+    METHOD int SingleIO::close_on_exec()
+    {
+        return Syscall::fcntl(fd, F_SETFD, reinterpret_cast<void *>(FD_CLOEXEC));
     }
 
     template <typename Callback>

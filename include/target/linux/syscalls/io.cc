@@ -50,6 +50,8 @@ namespace Syscall {
     SYSTEM_CALL int     chdir(const char *);
     SYSTEM_CALL int     fchdir(int fd);
     SYSTEM_CALL int     chroot(const char *);
+    SYSTEM_CALL int     fcntl(int, int);
+    SYSTEM_CALL int     fcntl(int, int, void *);
 
     SYSTEM_CALL
     int open(const char *path, int flags)
@@ -192,6 +194,24 @@ namespace Syscall {
     int chroot(const char *path)
     {
         return DO_SYSCALL(chroot, path);
+    }
+
+    SYSTEM_CALL
+    int fcntl(int fd, int cmd)
+    {
+        return DO_SYSCALL(fcntl, fd, cmd);
+    }
+
+    /*
+     * The best solution would be an 'auto' arg here.
+     * But gcc has a bug and cannot generate the syscall correctly.
+     * Keep it like this until gcc is fixed (probably never), or
+     * until gcc support is definitely dropped in favor of clang.
+     */
+    SYSTEM_CALL
+    int fcntl(int fd, int cmd, void *arg)
+    {
+        return DO_SYSCALL(fcntl, fd, cmd, arg);
     }
 }
 

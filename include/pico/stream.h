@@ -49,6 +49,7 @@ namespace Pico {
             CONSTRUCTOR SingleIO(int fd) : fd(fd) {}
             METHOD int file_desc() const { return fd; }
             METHOD int close();
+            METHOD int close_on_exec();
             METHOD bool operator ==(SingleIO io) {
                 return file_desc() == io.file_desc();
             }
@@ -140,6 +141,7 @@ namespace Pico {
             METHOD Io  io_port() const { return io; }
             METHOD int file_desc() { return io.file_desc(); }
             METHOD int close() { return io.close(); }
+            METHOD int close_on_exec() { return io.close_on_exec(); }
 
             template <typename T>
             METHOD void duplicate(Stream<T>& s);
