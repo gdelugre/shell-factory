@@ -43,6 +43,7 @@ namespace Syscall {
     SYSTEM_CALL ssize_t readlink(const char *, char *, size_t);
     SYSTEM_CALL int     fstat(int, struct stat *);
     SYSTEM_CALL int     stat(int, struct stat *);
+    SYSTEM_CALL int     unlink(const char *);
     SYSTEM_CALL int     close(int);
     SYSTEM_CALL int     mkdir(const char *, mode_t);
     SYSTEM_CALL int     rmdir(const char *);
@@ -152,6 +153,12 @@ namespace Syscall {
     int stat(int fd, struct stat *buf)
     {
         return DO_SYSCALL(stat, fd, buf);
+    }
+
+    SYSTEM_CALL
+    int unlink(const char *path)
+    {
+        return DO_SYSCALL(unlink, path);
     }
 
     SYSTEM_CALL

@@ -49,6 +49,12 @@ namespace Pico {
         }
 
         METHOD
+        int File::remove(const char *path)
+        {
+            return Syscall::unlink(path);
+        }
+
+        METHOD
         int Directory::create(const char *path, mode_t mode)
         {
             return Syscall::mkdir(path, mode);
