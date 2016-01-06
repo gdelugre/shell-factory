@@ -14,8 +14,8 @@ namespace Pico {
         class Context;
 
         public:
-            CONSTRUCTOR Debuggee(Process proc) : Debuggee(proc.process_id()) {}
-            CONSTRUCTOR Debuggee(pid_t pid) : Process(pid) {
+            CONSTRUCTOR Debuggee(Process proc) : Debuggee(proc.id()) {}
+            CONSTRUCTOR Debuggee(process_id pid) : Process(pid) {
                 attach();
             }
             DESTRUCTOR ~Debuggee() {

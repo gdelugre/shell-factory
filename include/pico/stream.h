@@ -7,6 +7,8 @@
 
 namespace Pico {
 
+    using handle = Target::handle;
+
     class SingleIO;
     class IO
     {
@@ -46,8 +48,8 @@ namespace Pico {
     {
         public:
             CONSTRUCTOR SingleIO() = default;
-            CONSTRUCTOR SingleIO(int fd) : fd(fd) {}
-            METHOD int file_desc() const { return fd; }
+            CONSTRUCTOR SingleIO(handle fd) : fd(fd) {}
+            METHOD handle file_desc() const { return fd; }
             METHOD int close();
             METHOD int close_on_exec();
             METHOD bool operator ==(SingleIO io) {
@@ -55,7 +57,7 @@ namespace Pico {
             }
 
         protected:
-            int fd;
+            handle fd;
     };
 
     class BasicIO : public SingleIO
@@ -75,7 +77,7 @@ namespace Pico {
             typedef Io io_type;
 
             CONSTRUCTOR Stream() = default;
-            CONSTRUCTOR Stream(int fd) : io(fd) {}
+            CONSTRUCTOR Stream(handle fd) : io(fd) {}
 
             METHOD ssize_t read(void *ptr, size_t count) {
                 return io.in(ptr, count);
@@ -139,7 +141,7 @@ namespace Pico {
             METHOD_NOINLINE int printf(const char *format, ...);
             METHOD int vprintf(const char *format, va_list ap);
             METHOD Io  io_port() const { return io; }
-            METHOD int file_desc() { return io.file_desc(); }
+            METHOD handle file_desc() { return io.file_desc(); }
             METHOD int close() { return io.close(); }
             METHOD int close_on_exec() { return io.close_on_exec(); }
 
