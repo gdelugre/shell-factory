@@ -12,5 +12,6 @@
 #include "pico/debug.cc"
 #include "pico/socket.cc"
 #include "pico/ipc.cc"
+#include "pico/security.cc"
 
 #endif
