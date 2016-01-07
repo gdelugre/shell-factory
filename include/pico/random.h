@@ -100,9 +100,14 @@ namespace Pico {
     };
 
     //
-    // Linear congruential RNG based on old glibc parameters.
+    // Standard linear congruential RNG for C99 / C11.
     //
     using Random = LCG<uint32_t, 1103515245, 12345, 15, 16>;
+
+    //
+    // 48-bits congruential generator (POSIX rand48).
+    //
+    using Random48 = LCG<uint64_t, 25214903917, 11, 48, 16>;
 }
 
 #endif
