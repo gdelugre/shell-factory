@@ -31,7 +31,7 @@ namespace Pico {
                 constexpr static int APPEND     = (1 << 2);
                 constexpr static int TRUNCATE   = (1 << 3);
 
-                FUNCTION File           open(const char *path, int flags);
+                FUNCTION File           open(const char *path, int flags = READ);
                 FUNCTION File           create(const char *path, int flags, Rights rights = default_rights);
                 FUNCTION int            remove(const char *path);
                 FUNCTION size_t         size(const char *path);
@@ -51,7 +51,7 @@ namespace Pico {
                 METHOD int              change_owner(Owner owner);
                 METHOD int              change_rights(Rights rights);
 
-                CONSTRUCTOR             File(const char *path, int flags = READ|WRITE,
+                CONSTRUCTOR             File(const char *path, int flags = READ,
                                              bool create = false, Rights rights = default_rights);
         };
 
