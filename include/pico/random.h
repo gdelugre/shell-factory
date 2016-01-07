@@ -33,17 +33,21 @@ namespace Pico {
     //
     // Generic linear congruential random number generator.
     //
-    template <typename StateType, long A, long C, unsigned OutputBits>
+    template <typename StateType, long A, long C, unsigned OutputBits, unsigned OutputShift>
     class LCG
     {
-        using state_t = StateType;
+        static_assert(OutputBits > 0, "Number of output bits must be positive.");
+        static_assert(OutputShift < sizeof(StateType) * 8, "Output shift too big.");
+        static_assert(OutputBits <= sizeof(StateType) * 8 - OutputShift, "RNG state is too small for output parameters.");
 
+        using state_t = StateType;
         static constexpr auto a = A;
         static constexpr auto c = C;
+        static constexpr auto output_shift = OutputShift;
         static constexpr state_t output_mask = (static_cast<state_t>(1) << OutputBits) - 1;
 
         public:
-            LCG(state_t s = 1) {
+            LCG(state_t s = -1) {
                 seed(s);
             }
 
@@ -78,7 +82,7 @@ namespace Pico {
 
             METHOD void seed(state_t s)
             {
-                state = s & output_mask;
+                state = s;
             }
 
         private:
@@ -86,19 +90,19 @@ namespace Pico {
 
             static constexpr state_t transform(state_t prev)
             {
-                return (prev * a + c) & output_mask;
+                return (prev * a + c);
             } 
 
             METHOD state_t update() {
                 state = transform(state);
-                return state;
+                return (state >> output_shift) & output_mask;
             }
     };
 
     //
     // Linear congruential RNG based on old glibc parameters.
     //
-    using Random = LCG<uint32_t, 1103515245, 12345, 31>;
+    using Random = LCG<uint32_t, 1103515245, 12345, 15, 16>;
 }
 
 #endif
