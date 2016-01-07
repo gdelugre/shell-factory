@@ -16,7 +16,10 @@ namespace Pico {
                 FUNCTION File   open(const char *path, int flags);
                 FUNCTION File   create(const char *path, int flags, mode_t mode);
                 FUNCTION int    remove(const char *path);
+                FUNCTION size_t size(const char *path);
+
                 NO_RETURN METHOD void execute(char *const argv[] = nullptr, char *const envp[] = nullptr);
+                METHOD size_t   size();
 
                 CONSTRUCTOR     File(const char *path, int flags = READ|WRITE, bool create = false, mode_t mode = 0700);
         };

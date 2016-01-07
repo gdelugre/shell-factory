@@ -35,6 +35,24 @@ namespace Pico {
             return File(path, flags, true, mode);
         }
 
+        METHOD
+        size_t File::size(const char *path)
+        {
+            struct stat st;
+
+            Syscall::stat(path, &st);
+            return st.st_size;
+        }
+
+        METHOD
+        size_t File::size()
+        {
+            struct stat st;
+
+            Syscall::fstat(this->file_desc(), &st);
+            return st.st_size;
+        }
+
         CONSTRUCTOR
         File::File(const char *path, int flags, bool create, mode_t mode)
         {

@@ -146,9 +146,9 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
-    int stat(int fd, struct stat *buf)
+    int stat(const char *path, struct stat *buf)
     {
-        return DO_SYSCALL(stat, fd, buf);
+        return DO_SYSCALL(stat, path, buf);
     }
 
     SYSTEM_CALL
