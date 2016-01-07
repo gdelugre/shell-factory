@@ -15,6 +15,7 @@
 #include <pico/process.h> 
 #include <pico/debug.h>
 #include <pico/ipc.h>
+#include <pico/random.h>
 
 // Pico target implementation.
 #include <target/pico.h>
