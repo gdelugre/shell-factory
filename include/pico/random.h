@@ -6,30 +6,6 @@
 
 namespace Pico {
 
-    template <typename T1, typename T2, bool cmp>
-    struct min_type_helper;
-
-    template <typename T1, typename T2>
-    struct min_type_helper<T1, T2, true>
-    {
-        using type = T1;
-    };
-
-    template <typename T1, typename T2>
-    struct min_type_helper<T1, T2, false>
-    {
-        using type = T2;
-    };
-
-    //
-    // Select the smallest type between T1 and T2.
-    //
-    template <typename T1, typename T2>
-    struct min_type
-    {
-        using type = typename min_type_helper<T1, T2, sizeof(T1) < sizeof(T2)>::type;
-    };
-
     //
     // Generic linear congruential random number generator.
     //
@@ -43,46 +19,38 @@ namespace Pico {
         using state_t = StateType;
         static constexpr auto a = A;
         static constexpr auto c = C;
+        static constexpr size_t output_size = OutputBits;
         static constexpr auto output_shift = OutputShift;
-        static constexpr state_t output_mask = (static_cast<state_t>(1) << OutputBits) - 1;
+        static constexpr state_t output_mask = (static_cast<state_t>(1) << output_size) - 1;
 
         public:
-            LCG(state_t s = -1) {
+            CONSTRUCTOR LCG(state_t s = -1) {
                 seed(s);
             }
 
-            template <typename T = state_t>
-            T next()
+            METHOD state_t next()
             {
-                size_t remaining = sizeof(T);
-                size_t output_size = 0;
-                T value;
-
-                do {
-                    // Truncate type if possible to produce smaller code.
-                    typename min_type<state_t, T>::type rnd = update();
-                    size_t copy_sz = std::min(sizeof(rnd), remaining);
-
-                    // Help the compiler by providing him with a fixed copy size.
-                    if (copy_sz != sizeof(rnd))
-                        copy_sz = sizeof(T) % sizeof(rnd);
-
-                    Memory::copy(
-                        reinterpret_cast<char *>(&value) + output_size,
-                        &rnd,
-                        copy_sz
-                    );
-
-                    remaining -= copy_sz;
-                    output_size += copy_sz;
-                } while ( remaining > 0 );
-
-                return value; 
+                state = transform(state);
+                return (state >> output_shift) & output_mask;
             }
 
             METHOD void seed(state_t s)
             {
                 state = s;
+            }
+
+            template <typename T>
+            void fill(T& value)
+            {
+                static_assert(output_size / 8 > 0, "Output size too small for fill.");
+
+                for (size_t i = 0; i < sizeof(value); i++) {
+                    uint8_t c = next();
+
+                    auto ptr = reinterpret_cast<uint8_t *>(&value) + i;
+
+                    *ptr = c;
+                }
             }
 
         private:
@@ -92,11 +60,6 @@ namespace Pico {
             {
                 return (prev * a + c);
             } 
-
-            METHOD state_t update() {
-                state = transform(state);
-                return (state >> output_shift) & output_mask;
-            }
     };
 
     //
@@ -107,7 +70,7 @@ namespace Pico {
     //
     // 48-bits congruential generator (POSIX rand48).
     //
-    using Random48 = LCG<uint64_t, 25214903917, 11, 48, 16>;
+    using Random48 = LCG<uint64_t, 25214903917, 11, 32, 16>;
 }
 
 #endif
