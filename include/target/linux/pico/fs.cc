@@ -53,6 +53,30 @@ namespace Pico {
             return st.st_size;
         }
 
+        METHOD
+        bool File::exists(const char *path)
+        {
+            return Syscall::access(path, F_OK) == 0;
+        }
+
+        METHOD
+        bool File::is_readable(const char *path)
+        {
+            return Syscall::access(path, R_OK) == 0;
+        }
+
+        METHOD
+        bool File::is_writable(const char *path)
+        {
+            return Syscall::access(path, W_OK) == 0;
+        }
+
+        METHOD
+        bool File::is_executable(const char *path)
+        {
+            return Syscall::access(path, X_OK) == 0;
+        }
+
         CONSTRUCTOR
         File::File(const char *path, int flags, bool create, mode_t mode)
         {
