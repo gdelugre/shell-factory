@@ -6,7 +6,7 @@ namespace Pico {
     class User 
     {
         public:
-            using user_id = Target::user_id;
+            using user_id = Target::Security::user_id;
 
             CONSTRUCTOR User(user_id id) : uid(id) {}
             FUNCTION User current();
@@ -19,7 +19,7 @@ namespace Pico {
     class Group
     {
         public:
-            using group_id = Target::group_id;
+            using group_id = Target::Security::group_id;
 
             CONSTRUCTOR Group(group_id id) : gid(id) {}
             FUNCTION Group current();

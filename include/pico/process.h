@@ -10,7 +10,7 @@ namespace Pico {
         typedef void (* sighandler_t)(int);
 
         public:
-            using process_id = Target::process_id;
+            using process_id = Target::Process::process_id;
 
             FUNCTION Process        current();
             FUNCTION Process        parent();
