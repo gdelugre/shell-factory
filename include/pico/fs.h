@@ -5,9 +5,10 @@ namespace Pico {
 
     namespace Filesystem {
 
+        using namespace Target::Filesystem;
+
         struct Rights
         {
-            using fs_rights = Target::Filesystem::rights;
             CONSTRUCTOR Rights(fs_rights r) : value(r) {}
 
             fs_rights value;
@@ -24,9 +25,7 @@ namespace Pico {
         class File : public BasicStream
         {
             public:
-                using fs_rights = Target::Filesystem::rights;
-
-                constexpr static fs_rights default_rights = Target::Filesystem::default_file_rights;
+                constexpr static fs_rights default_rights = default_file_rights;
                 constexpr static int READ       = (1 << 0);
                 constexpr static int WRITE      = (1 << 1);
                 constexpr static int APPEND     = (1 << 2);
@@ -59,10 +58,9 @@ namespace Pico {
         class Directory : public SingleIO
         {
             public:
-                using fs_rights = Target::Filesystem::rights;
                 using SingleIO::SingleIO;
 
-                constexpr static fs_rights default_rights = Target::Filesystem::default_dir_rights;
+                constexpr static fs_rights default_rights = default_dir_rights;
 
                 FUNCTION        Directory open(const char *path);
                 FUNCTION int    create(const char *path, Rights rights = default_rights);
