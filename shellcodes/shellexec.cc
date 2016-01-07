@@ -19,5 +19,5 @@ SHELLCODE_ENTRY
 #endif
 
     auto channel = Options::channel();
-    Process::execute(cmd, argv, channel);
+    Process::execute(channel, cmd, argv);
 }

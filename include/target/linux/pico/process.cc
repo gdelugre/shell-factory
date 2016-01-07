@@ -136,12 +136,12 @@ namespace Pico {
 
     template <enum channel_mode M>
     METHOD
-    Process Process::spawn(const char *filename, char *const argv[], char *const envp[], Channel<M> channel)
+    Process Process::spawn(Channel<M> channel, const char *filename, char *const argv[], char *const envp[])
     {
         pid_t pid = Syscall::fork();
         if ( pid == 0 )
         {
-            execute(filename, argv, envp, channel);
+            execute(channel, filename, argv, envp);
         }
         else
             return Process(pid);

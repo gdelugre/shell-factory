@@ -21,51 +21,22 @@ namespace Pico {
             FUNCTION sighandler_t   set_signal_handler(int signal, sighandler_t handler);
 
             template <enum channel_mode M>
-            NO_RETURN FUNCTION void execute(const char *filename, char *const argv[], char *const envp[], Channel<M> channel) {
+            NO_RETURN FUNCTION void execute(Channel<M> channel, const char *filename,
+                                            char *const argv[] = nullptr, char *const envp[] = nullptr)
+            {
                 channel.dup_to_stdio();
                 execute(filename, argv, envp);
             }
 
-            template <enum channel_mode M>
-            NO_RETURN FUNCTION void execute(const char *filename, char *const argv[], Channel<M> channel) {
-                execute(filename, argv, nullptr, channel);
-            }
+            NO_RETURN FUNCTION void execute(const char *filename,
+                                            char *const argv[] = nullptr, char *const envp[] = nullptr);
 
             template <enum channel_mode M>
-            NO_RETURN FUNCTION void execute(const char *filename, Channel<M> channel) {
-                execute(filename, nullptr, channel);
-            }
+            FUNCTION Process        spawn(Channel<M> channel, const char *filename,
+                                          char *const argv[] = nullptr, char *const envp[] = nullptr);
 
-            NO_RETURN FUNCTION void execute(const char *filename, char *const argv[], char *const envp[]);
-            NO_RETURN FUNCTION void execute(const char *filename, char *const argv[]) {
-                execute(filename, argv, nullptr);
-            }
-
-            NO_RETURN FUNCTION void execute(const char *filename) {
-                execute(filename, nullptr);
-            }
-
-            template <enum channel_mode M>
-            FUNCTION Process        spawn(const char *filename, char *const argv[], char *const envp[], Channel<M> channel);
-
-            template <enum channel_mode M>
-            FUNCTION Process        spawn(const char *filename, char *const argv[], Channel<M> channel) {
-                return spawn(filename, argv, nullptr, channel);
-            }
-
-            template <enum channel_mode M>
-            FUNCTION Process        spawn(const char *filename, Channel<M> channel) {
-                return spawn(filename, nullptr, channel);
-            }
-
-            FUNCTION Process        spawn(const char *filename, char *const argv[], char *const envp[]);
-            FUNCTION Process        spawn(const char *filename, char *const argv[]) {
-                return spawn(filename, argv, nullptr);
-            }
-
-            FUNCTION Process        spawn(const char *filename) {
-                return spawn(filename, nullptr);
-            }
+            FUNCTION Process        spawn(const char *filename,
+                                          char *const argv[] = nullptr, char *const envp[] = nullptr);
 
             NO_RETURN FUNCTION void terminate_thread(int status);
             NO_RETURN FUNCTION void exit(int status);
