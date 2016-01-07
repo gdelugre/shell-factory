@@ -20,6 +20,9 @@ namespace Target {
 
     namespace Filesystem {
         using rights = mode_t;
+
+        static constexpr rights default_file_rights = 0644;
+        static constexpr rights default_dir_rights  = 0755;
     }
 }
 

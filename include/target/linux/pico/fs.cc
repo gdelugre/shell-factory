@@ -30,9 +30,9 @@ namespace Pico {
         }
 
         METHOD
-        File File::create(const char *path, int flags, mode_t mode)
+        File File::create(const char *path, int flags, Rights rights)
         {
-            return File(path, flags, true, mode);
+            return File(path, flags, true, rights.value);
         }
 
         METHOD
@@ -77,13 +77,73 @@ namespace Pico {
             return Syscall::access(path, X_OK) == 0;
         }
 
+        METHOD
+        Owner File::owner(const char *path)
+        {
+            struct stat st;
+
+            Syscall::stat(path, &st);
+            return Owner(st.st_uid, st.st_gid);
+        }
+
+        METHOD
+        int File::change_owner(const char *path, Owner owner)
+        {
+            return Syscall::chown(path, owner.user.id(), owner.group.id());
+        }
+
+        METHOD
+        Rights File::rights(const char *path)
+        {
+            struct stat st;
+
+            Syscall::stat(path, &st);
+            return Rights(st.st_mode);
+        }
+
+        METHOD
+        int File::change_rights(const char *path, Rights rights)
+        {
+            return Syscall::chmod(path, rights.value);
+        }
+
+        METHOD
+        Owner File::owner()
+        {
+            struct stat st;
+
+            Syscall::fstat(this->file_desc(), &st);
+            return Owner(st.st_uid, st.st_gid);
+        }
+
+        METHOD
+        int File::change_owner(Owner owner)
+        {
+            return Syscall::fchown(this->file_desc(), owner.user.id(), owner.group.id());
+        }
+
+        METHOD
+        Rights File::rights()
+        {
+            struct stat st;
+
+            Syscall::fstat(this->file_desc(), &st);
+            return Rights(st.st_mode);
+        }
+
+        METHOD
+        int File::change_rights(Rights rights)
+        {
+            return Syscall::fchmod(this->file_desc(), rights.value);
+        }
+
         CONSTRUCTOR
-        File::File(const char *path, int flags, bool create, mode_t mode)
+        File::File(const char *path, int flags, bool create, Rights rights)
         {
             int fd;
 
             if ( create )
-                fd = Syscall::create(path, open_flags(flags), mode);
+                fd = Syscall::create(path, open_flags(flags), rights.value);
             else
                 fd = Syscall::open(path, open_flags(flags));
 
@@ -97,9 +157,9 @@ namespace Pico {
         }
 
         METHOD
-        int Directory::create(const char *path, mode_t mode)
+        int Directory::create(const char *path, Rights rights)
         {
-            return Syscall::mkdir(path, mode);
+            return Syscall::mkdir(path, rights.value);
         }
 
         METHOD

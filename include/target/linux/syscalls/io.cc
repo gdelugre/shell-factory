@@ -48,6 +48,10 @@ namespace Syscall {
     SYSTEM_CALL int     chdir(const char *);
     SYSTEM_CALL int     fchdir(int fd);
     SYSTEM_CALL int     chroot(const char *);
+    SYSTEM_CALL int     chown(const char *, uid_t, gid_t);
+    SYSTEM_CALL int     fchown(int, uid_t, gid_t);
+    SYSTEM_CALL int     chmod(const char *, mode_t);
+    SYSTEM_CALL int     fchmod(int, mode_t);
     SYSTEM_CALL int     fcntl(int, int);
     SYSTEM_CALL int     fcntl(int, int, void *);
 
@@ -204,6 +208,30 @@ namespace Syscall {
     int chroot(const char *path)
     {
         return DO_SYSCALL(chroot, path);
+    }
+
+    SYSTEM_CALL
+    int chown(const char *path, uid_t owner, gid_t group)
+    {
+        return DO_SYSCALL(chown, path, owner, group);
+    }
+
+    SYSTEM_CALL
+    int fchown(int fd, uid_t owner, gid_t group)
+    {
+        return DO_SYSCALL(fchown, fd, owner, group);
+    }
+
+    SYSTEM_CALL
+    int chmod(const char *path, mode_t mode)
+    {
+        return DO_SYSCALL(chmod, path, mode);
+    }
+
+    SYSTEM_CALL
+    int fchmod(int fd, mode_t mode)
+    {
+        return DO_SYSCALL(fchmod, fd, mode);
     }
 
     SYSTEM_CALL
