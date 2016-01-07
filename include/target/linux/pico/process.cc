@@ -178,6 +178,15 @@ namespace Pico {
     {
         return send_signal(SIGKILL);
     }
+
+    namespace Filesystem {
+
+        NO_RETURN METHOD
+        void File::execute(char *const argv[], char *const envp[])
+        {
+            Syscall::execveat(this->file_desc(), "", argv, envp, AT_EMPTY_PATH);
+        }
+    }
 }
 
 #endif
