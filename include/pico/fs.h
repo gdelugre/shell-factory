@@ -22,6 +22,12 @@ namespace Pico {
             Group group;
         };
 
+        enum Seek {
+            BEGIN,
+            CURRENT,
+            END,
+        };
+
         class File : public BasicStream
         {
             public:
@@ -50,6 +56,7 @@ namespace Pico {
                 METHOD Rights           rights();
                 METHOD int              change_owner(Owner owner);
                 METHOD int              change_rights(Rights rights);
+                METHOD int              seek(off_t offset, Seek method);
 
                 CONSTRUCTOR             File(const char *path, int flags = READ,
                                              bool create = false, Rights rights = default_rights);

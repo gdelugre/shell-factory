@@ -23,10 +23,23 @@ namespace Pico {
                    O_NONBLOCK;
         }
 
+        constexpr int seek_whence(Seek method)
+        {
+            return (method == Seek::BEGIN) ? SEEK_SET :
+                   (method == Seek::CURRENT) ? SEEK_CUR :
+                   (method == Seek::END) ? SEEK_END : -1;
+        }
+
         METHOD
         File File::open(const char *path, int flags)
         {
             return File(path, flags, false);
+        }
+
+        METHOD
+        int File::seek(off_t offset, Seek method)
+        {
+            return Syscall::lseek(this->file_desc(), offset, seek_whence(method));
         }
 
         METHOD
