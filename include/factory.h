@@ -18,6 +18,7 @@
 #define VIRTUAL_METHOD virtual METHOD
 #define FUNCTION static METHOD
 #define FUNCTION_NOINLINE static METHOD_NOINLINE
+#define EXPORT_FUNCTION METHOD_NOINLINE
 #define SYSTEM_CALL static INLINE
 #define BUILTIN(func) __builtin_ ## func
 

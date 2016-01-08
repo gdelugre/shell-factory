@@ -5,6 +5,7 @@
 #include <target/types.h>
 
 // Pico class headers.
+#include <pico/concurrency.h>
 #include <pico/memory.h>
 #include <pico/stream.h>
 #include <pico/string.h>
