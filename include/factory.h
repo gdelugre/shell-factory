@@ -11,7 +11,6 @@
 #endif
 
 #define NO_RETURN [[noreturn]]
-#define GLOBAL_DECL static __attribute__((nocommon, section(".rodata")))
 #define CONSTRUCTOR INLINE
 #define DESTRUCTOR INLINE
 #define METHOD_NOINLINE __attribute__((noinline))
