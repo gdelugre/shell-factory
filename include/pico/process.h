@@ -6,8 +6,8 @@ namespace Pico {
     class Process {
 
         constexpr static unsigned THREAD_STACK_SIZE = 0x10000;
-        typedef int (* thread_routine)(void *);
-        typedef void (* sighandler_t)(int);
+        using thread_routine = int (*)(void *);
+        using sighandler_t = void (*)(int);
 
         public:
             using process_id = Target::Process::process_id;

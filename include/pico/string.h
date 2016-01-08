@@ -24,8 +24,8 @@ namespace Pico {
             T *chars;
     };
 
-    typedef BasicString<char> String;
-    typedef BasicString<wchar_t> WideString;
+    using String = BasicString<char>;
+    using WideString = BasicString<wchar_t>;
 
     template <typename T>
     METHOD

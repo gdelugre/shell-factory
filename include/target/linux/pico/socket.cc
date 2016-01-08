@@ -42,7 +42,7 @@ namespace Pico {
         struct Sockaddr<IPV4>
         {
             static constexpr int family = AF_INET;
-            typedef struct sockaddr_in type;
+            using type = struct sockaddr_in;
 
             FUNCTION
             struct sockaddr_in pack(IpAddress const ip, uint16_t port, size_t& size)
@@ -62,7 +62,7 @@ namespace Pico {
         struct Sockaddr<IPV6>
         {
             static constexpr int family = AF_INET6;
-            typedef struct sockaddr_in6 type;
+            using type = struct sockaddr_in6;
 
             FUNCTION
             struct sockaddr_in6 pack(IpAddress6 const ip, uint16_t port, size_t& size)
@@ -83,7 +83,7 @@ namespace Pico {
         struct Sockaddr<UNIX>
         {
             static constexpr int family = AF_UNIX;
-            typedef struct sockaddr_un type;
+            using type = struct sockaddr_un;
 
             FUNCTION
             struct sockaddr_un pack(UnixAddress const unixaddr, size_t& size)
@@ -103,7 +103,7 @@ namespace Pico {
         struct Sockaddr<UNIX_ABSTRACT>
         {
             static constexpr int family = AF_UNIX;
-            typedef struct sockaddr_un type;
+            using type = struct sockaddr_un;
 
             FUNCTION
             struct sockaddr_un pack(UnixAbstractAddress const unixaddr, size_t& size)

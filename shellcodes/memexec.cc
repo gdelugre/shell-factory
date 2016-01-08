@@ -14,7 +14,7 @@ namespace Options {
 
 using namespace Pico;
 
-typedef __attribute__((noreturn)) void (* shellcode)(void);
+using shellcode = void (*)(void);
 
 SHELLCODE_ENTRY
 {

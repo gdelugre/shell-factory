@@ -74,7 +74,7 @@ namespace Pico {
     class Stream
     {
         public:
-            typedef Io io_type;
+            using io_type = Io;
 
             CONSTRUCTOR Stream() = default;
             CONSTRUCTOR Stream(handle fd) : io(fd) {}
@@ -159,7 +159,7 @@ namespace Pico {
             Io io;
     };
 
-    typedef Stream<BasicIO> BasicStream;
+    using BasicStream = Stream<BasicIO>;
 
     namespace Stdio
     {

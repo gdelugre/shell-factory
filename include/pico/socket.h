@@ -42,10 +42,10 @@ namespace Pico {
             char *path;
         };
 
-        typedef Address<IPV4> IpAddress;
-        typedef Address<IPV6> IpAddress6;
-        typedef Address<UNIX> UnixAddress;
-        typedef Address<UNIX_ABSTRACT> UnixAbstractAddress;
+        using IpAddress             = Address<IPV4>;
+        using IpAddress6            = Address<IPV6>;
+        using UnixAddress           = Address<UNIX>;
+        using UnixAbstractAddress   = Address<UNIX_ABSTRACT>;
 
         template <size_t N>
         struct ip_address_type;
@@ -53,13 +53,13 @@ namespace Pico {
         template <>
         struct ip_address_type<4>
         {
-            typedef IpAddress type;
+            using type = IpAddress;
         };
 
         template <>
         struct ip_address_type<16>
         {
-            typedef IpAddress6 type;
+            using type = IpAddress6;
         };
 
         // Generates an IP address structure out of a list of static arguments.

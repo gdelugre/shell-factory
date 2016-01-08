@@ -28,7 +28,7 @@ namespace Pico {
         template<>                                              \
         struct ChannelMode<mode>                                \
         {                                                       \
-            typedef type stream_type;                           \
+            using stream_type = type;                           \
             static constexpr bool dupable_to_stdio = dupable;   \
         };                                                      \
 
