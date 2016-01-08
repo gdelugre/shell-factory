@@ -67,7 +67,9 @@ CC = "g++"
 OUTPUT_DIR = "bins"
 SHELLCODE_DIR = "shellcodes"
 INCLUDE_DIRS = %w{include}
-CFLAGS = %w{-std=c++1y
+LD_SCRIPT = File.join(File.dirname(__FILE__), "factory.lds")
+OUTPUT_SECTIONS = %w{.text .rodata .data}
+CFLAGS = %W{-std=c++1y
             -Wall
             -Wextra
             -Wfatal-errors
@@ -81,6 +83,9 @@ CFLAGS = %w{-std=c++1y
             -nostdlib
             -Wl,-e_start
             -Wl,--gc-sections
+            -Wl,-N
+            -Wl,-T#{LD_SCRIPT}
+            -Wl,--build-id=none
          }
 
 COMPILER_CFLAGS =
@@ -250,7 +255,8 @@ def generate_shellcode(target, triple, output_dir)
 
     # Extract shellcode.
     triple += '-' unless triple.empty?
-    sh "#{triple}objcopy -O binary -j .text -j .rodata #{input_file} #{output_file}" do |ok, res|
+    sections = OUTPUT_SECTIONS.map{|s| "-j #{s}"}.join(' ')
+    sh "#{triple}objcopy -O binary #{sections} #{input_file} #{output_file}" do |ok, res|
         STDERR.puts
         show_error("Cannot extract shellcode from #{input_file}") unless ok
     end
