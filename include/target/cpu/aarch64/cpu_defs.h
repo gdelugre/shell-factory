@@ -7,6 +7,7 @@ namespace CPU {
 
     using reg_t     = uint64_t;
     using addr_t    = uint64_t;
+    using word_t    = uint64_t;
 
     enum registers
     {
