@@ -9,7 +9,7 @@ namespace CPU {
     using addr_t    = uint64_t;
     using word_t    = uint64_t;
 
-    enum cpu_registers : reg_t
+    enum registers
     {
         // General registers.
         CPU_REG_RAX,
