@@ -22,6 +22,7 @@ namespace Pico {
         {
             public:
                 CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE) {
+                    size = round_up_page_size(size);
                     ptr = Memory::allocate(size, prot);
                     region_size = size;
                 }
@@ -29,6 +30,7 @@ namespace Pico {
                 METHOD size_t   size() const { return region_size; }
 
                 METHOD int      resize(size_t new_size, bool can_move = true) {
+                    new_size = round_up_page_size(new_size);
                     void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
                     if ( new_ptr == nullptr )
                         return -1;
@@ -49,6 +51,14 @@ namespace Pico {
             private:
                 void *ptr;
                 size_t region_size;
+
+                size_t round_up_page_size(size_t size)
+                {
+                    size_t page_size = Memory::page_size();
+                    size_t nr_pages = (size + page_size - 1) / page_size;
+
+                    return nr_pages * page_size;
+                }
         };
 
         template <typename T>
