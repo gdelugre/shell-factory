@@ -15,16 +15,27 @@ namespace Pico {
         FUNCTION void * allocate(size_t size, int prot) {
             return allocate(nullptr, size, prot);
         }
+        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size);
         FUNCTION void   release(void *ptr, size_t size);
 
         class Region
         {
             public:
-                CONSTRUCTOR     Region(size_t size = page_size(), int prot = READ | WRITE);
+                CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE) {
+                    ptr = Memory::allocate(size, prot);
+                    region_size = size;
+                }
                 METHOD void *   pointer() const { return ptr; }
-                METHOD size_t   size() const { return size_; }
-                METHOD void     resize(size_t new_size);
-                METHOD void     free();
+                METHOD size_t   size() const { return region_size; }
+
+                METHOD void     resize(size_t new_size) {
+                    ptr = Memory::resize(ptr, region_size, new_size);
+                    region_size = new_size;
+                }
+
+                METHOD void     free() {
+                    Memory::release(ptr, region_size);
+                }
 
                 // Automatic pointer cast.
                 template <typename T>
@@ -32,7 +43,7 @@ namespace Pico {
 
             private:
                 void *ptr;
-                size_t size_;
+                size_t region_size;
         };
 
         template <typename T>

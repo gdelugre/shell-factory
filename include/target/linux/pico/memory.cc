@@ -33,28 +33,15 @@ namespace Pico {
         }
 
         METHOD
+        void *resize(void *ptr, size_t old_size, size_t new_size)
+        {
+            return Syscall::mremap(ptr, old_size, new_size, MREMAP_MAYMOVE);
+        }
+
+        METHOD
         void release(void *ptr, size_t size)
         {
             Syscall::munmap(ptr, size);
-        }
-
-        CONSTRUCTOR
-        Region::Region(size_t size, int prot) : size_(size)
-        {
-            ptr = Memory::allocate(size, prot);
-        }
-
-        METHOD
-        void Region::resize(size_t new_size)
-        {
-            ptr = Syscall::mremap(ptr, size_, new_size, MREMAP_MAYMOVE);
-            size_ = new_size;
-        }
-
-        METHOD
-        void Region::free()
-        {
-            Memory::release(ptr, size_);
         }
     }
 }
