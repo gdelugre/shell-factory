@@ -9,7 +9,7 @@ namespace Pico {
     //
     // Generic linear congruential random number generator.
     //
-    template <typename StateType, long A, long C, unsigned OutputBits, unsigned OutputShift>
+    template <typename StateType, uint64_t A, uint64_t C, unsigned OutputBits, unsigned OutputShift>
     class LCG
     {
         static_assert(OutputBits > 0, "Number of output bits must be positive.");
