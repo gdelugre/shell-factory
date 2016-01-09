@@ -2,7 +2,6 @@
 #define PICOLIB_RANDOM_H_
 
 #include <cstdint>
-#include <algorithm>
 
 namespace Pico {
 
