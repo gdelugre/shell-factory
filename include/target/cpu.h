@@ -4,18 +4,18 @@
 #include <limits>
 
 #if defined(__i386__)
-#include <target/cpu/i386/cpu_regs.h>
+#include <target/cpu/i386/cpu_defs.h>
 #elif defined(__amd64__)
-#include <target/cpu/amd64/cpu_regs.h>
+#include <target/cpu/amd64/cpu_defs.h>
 #elif defined(__arm__)
 #include <target/cpu/arm/softfloat.h>
-#include <target/cpu/arm/cpu_regs.h>
+#include <target/cpu/arm/cpu_defs.h>
 #elif defined(__aarch64__)
-#include <target/cpu/aarch64/cpu_regs.h>
+#include <target/cpu/aarch64/cpu_defs.h>
 #elif defined(__mips__)
-#include <target/cpu/mips/cpu_regs.h>
+#include <target/cpu/mips/cpu_defs.h>
 #else
-#error "No registers defined for this CPU."
+#error "No definitions for this CPU."
 #endif
 
 #define FLUSH_VARIABLE(var) \
