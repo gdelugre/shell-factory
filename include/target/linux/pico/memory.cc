@@ -1,9 +1,17 @@
 #ifndef PICOLIB_MEMORY_IMPL_H_
 #define PICOLIB_MEMORY_IMPL_H_
 
+#include <sys/user.h>
+
 namespace Pico {
 
     namespace Memory {
+
+        FUNCTION
+        size_t page_size()
+        {
+            return PAGE_SIZE;
+        }
 
         // Converts pico memory protection to target protection.
         // TODO: would be better with a nicely formatted constexpr, but keep it as a single return for gcc <=4.9 for now.
@@ -31,20 +39,20 @@ namespace Pico {
         }
 
         CONSTRUCTOR
-        Buffer::Buffer(size_t size, int prot) : size_(size) 
+        Region::Region(size_t size, int prot) : size_(size)
         {
             ptr = Memory::allocate(size, prot);
         }
 
         METHOD
-        void Buffer::resize(size_t new_size)
+        void Region::resize(size_t new_size)
         {
             ptr = Syscall::mremap(ptr, size_, new_size, MREMAP_MAYMOVE);
             size_ = new_size;
         }
 
         METHOD
-        void Buffer::free()
+        void Region::free()
         {
             Memory::release(ptr, size_);
         }

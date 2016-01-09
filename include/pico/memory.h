@@ -10,25 +10,25 @@ namespace Pico {
         constexpr int EXEC   = (1 << 2);
         constexpr int STACK  = (1 << 3);
 
+        FUNCTION size_t page_size();
         FUNCTION void * allocate(void *base, size_t size, int prot);
         FUNCTION void * allocate(size_t size, int prot) {
             return allocate(nullptr, size, prot);
         }
         FUNCTION void   release(void *ptr, size_t size);
 
-        class Buffer
+        class Region
         {
             public:
-                CONSTRUCTOR     Buffer() : ptr(nullptr), size_(0) {}
-                CONSTRUCTOR     Buffer(size_t size, int prot);
-                CONSTRUCTOR     Buffer(size_t size) : Buffer(size, READ | WRITE) {}
+                CONSTRUCTOR     Region(size_t size = page_size(), int prot = READ | WRITE);
                 METHOD void *   pointer() const { return ptr; }
                 METHOD size_t   size() const { return size_; }
                 METHOD void     resize(size_t new_size);
                 METHOD void     free();
 
+                // Automatic pointer cast.
                 template <typename T>
-                METHOD T        as() { return static_cast<T>(ptr); }
+                METHOD operator T *() const { return static_cast<T *>(ptr); }
 
             private:
                 void *ptr;

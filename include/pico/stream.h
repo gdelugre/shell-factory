@@ -87,38 +87,6 @@ namespace Pico {
                 return io.out(ptr, count);
             }
 
-            METHOD ssize_t read(Memory::Buffer const& buffer) {
-                return read(buffer.pointer(), buffer.size());
-            }
-
-            METHOD ssize_t write(Memory::Buffer const& buffer) {
-                return write(buffer.pointer(), buffer.size());
-            }
-
-            METHOD friend Stream<Io>& operator <<(Stream<Io>& stm, Memory::Buffer const& buffer)
-            {
-                stm.write(buffer);
-                return stm;
-            }
-
-            METHOD friend Stream<Io>& operator >>(Stream<Io>& stm, Memory::Buffer const& buffer)
-            {
-                stm.read(buffer);
-                return stm;
-            }
-
-            METHOD friend Stream<Io>& operator <<(Memory::Buffer const& buffer, Stream<Io>& stm)
-            {
-                stm >> buffer;
-                return stm;
-            }
-
-            METHOD friend Stream<Io>& operator >>(Memory::Buffer const& buffer, Stream<Io>& stm)
-            {
-                stm << buffer;
-                return stm;
-            }
-
             // Streams are compared using their IO ports.
             METHOD bool operator ==(Stream<Io> stm) {
                 return io_port() == stm.io_port();

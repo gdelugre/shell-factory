@@ -236,29 +236,29 @@ namespace Pico {
         int Directory::list(Func proc)
         {
             // Fetch the list of directories.
-            Memory::Buffer buffer(PAGE_SIZE);
-            struct linux_dirent *dirents = buffer.as<struct linux_dirent *>();
+            Memory::Region region;
+            struct linux_dirent *dirents = region;
             size_t read_size = 0;
 
             while ( true )
             {
-                int ret = Syscall::getdents(fd, dirents, buffer.size() - read_size);
+                int ret = Syscall::getdents(fd, dirents, region.size() - read_size);
                 if ( ret == 0 )
                     break;
 
                 if ( ret < 0 )
                 {
-                    buffer.free();
+                    region.free();
                     return ret;
                 }
 
                 read_size += ret;
-                buffer.resize(buffer.size() * 2);
-                dirents = static_cast<struct linux_dirent *>((void *)((char *) buffer.pointer() + read_size));
+                region.resize(region.size() * 2);
+                dirents = static_cast<struct linux_dirent *>((void *)((char *) region.pointer() + read_size));
             }
 
             // Process each directory entry and pass it to function.
-            dirents = buffer.as<struct linux_dirent *>();
+            dirents = region;
             struct linux_dirent *current;
             size_t off;
             int ret;
@@ -270,7 +270,7 @@ namespace Pico {
                     break;
             }
 
-            buffer.free();
+            region.free();
             return ret;
         }
     }

