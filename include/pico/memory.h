@@ -18,6 +18,14 @@ namespace Pico {
         FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, bool can_move = true);
         FUNCTION void   release(void *ptr, size_t size);
 
+        FUNCTION size_t round_up_page_size(size_t size)
+        {
+            size_t page_size = Memory::page_size();
+            size_t nr_pages = (size + page_size - 1) / page_size;
+
+            return nr_pages * page_size;
+        }
+
         class Region
         {
             public:
@@ -51,14 +59,6 @@ namespace Pico {
             private:
                 void *ptr;
                 size_t region_size;
-
-                size_t round_up_page_size(size_t size)
-                {
-                    size_t page_size = Memory::page_size();
-                    size_t nr_pages = (size + page_size - 1) / page_size;
-
-                    return nr_pages * page_size;
-                }
         };
 
         template <typename T>
