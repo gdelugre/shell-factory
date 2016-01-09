@@ -5,8 +5,8 @@ namespace Pico {
 
     class CpuContext
     {
-        VIRTUAL_METHOD cpu_reg_t instruction_pointer() = 0;
-        VIRTUAL_METHOD cpu_reg_t stack_pointer() = 0;
+        VIRTUAL_METHOD CPU::reg_t instruction_pointer() = 0;
+        VIRTUAL_METHOD CPU::reg_t stack_pointer() = 0;
     };
 
     class Debuggee : public Process

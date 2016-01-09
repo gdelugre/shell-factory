@@ -3,41 +3,45 @@
 
 #define SP_REGISTER "esp"
 
-enum cpu_registers
-{
-    // General registers.
-    CPU_REG_EAX,
-    CPU_REG_EBX,
-    CPU_REG_ECX,
-    CPU_REG_EDX,
-    CPU_REG_ESI,
-    CPU_REG_EDI,
-    CPU_REG_EBP,
-    CPU_REG_ESP,
-    CPU_REG_EIP,
+namespace CPU {
 
-    // Flags.
-    CPU_REG_EFLAGS,
+    using reg_t     = uint32_t;
+    using addr_t    = uint32_t;
 
-    // Segment selectors.
-    CPU_REG_CS,
-    CPU_REG_DS,
-    CPU_REG_ES,
-    CPU_REG_FS,
-    CPU_REG_GS,
-    CPU_REG_SS,
+    enum registers
+    {
+        // General registers.
+        CPU_REG_EAX,
+        CPU_REG_EBX,
+        CPU_REG_ECX,
+        CPU_REG_EDX,
+        CPU_REG_ESI,
+        CPU_REG_EDI,
+        CPU_REG_EBP,
+        CPU_REG_ESP,
+        CPU_REG_EIP,
 
-    // Debug registers.
-    CPU_REG_DR0,
-    CPU_REG_DR1,
-    CPU_REG_DR2,
-    CPU_REG_DR3,
-    CPU_REG_DR4,
-    CPU_REG_DR5,
-    CPU_REG_DR6,
-    CPU_REG_DR7,
-};
+        // Flags.
+        CPU_REG_EFLAGS,
 
-typedef uint32_t cpu_reg_t;
+        // Segment selectors.
+        CPU_REG_CS,
+        CPU_REG_DS,
+        CPU_REG_ES,
+        CPU_REG_FS,
+        CPU_REG_GS,
+        CPU_REG_SS,
+
+        // Debug registers.
+        CPU_REG_DR0,
+        CPU_REG_DR1,
+        CPU_REG_DR2,
+        CPU_REG_DR3,
+        CPU_REG_DR4,
+        CPU_REG_DR5,
+        CPU_REG_DR6,
+        CPU_REG_DR7,
+    };
+}
 
 #endif
