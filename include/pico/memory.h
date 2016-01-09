@@ -15,7 +15,7 @@ namespace Pico {
         FUNCTION void * allocate(size_t size, int prot) {
             return allocate(nullptr, size, prot);
         }
-        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size);
+        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, bool can_move = true);
         FUNCTION void   release(void *ptr, size_t size);
 
         class Region

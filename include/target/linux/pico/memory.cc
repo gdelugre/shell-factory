@@ -33,9 +33,14 @@ namespace Pico {
         }
 
         METHOD
-        void *resize(void *ptr, size_t old_size, size_t new_size)
+        void *resize(void *ptr, size_t old_size, size_t new_size, bool can_move)
         {
-            return Syscall::mremap(ptr, old_size, new_size, MREMAP_MAYMOVE);
+            int flags = 0;
+
+            if ( can_move )
+                flags |= MREMAP_MAYMOVE;
+
+            return Syscall::mremap(ptr, old_size, new_size, flags);
         }
 
         METHOD
