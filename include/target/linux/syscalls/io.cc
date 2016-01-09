@@ -1,7 +1,6 @@
 #ifndef SYSCALL_IO_H_
 #define SYSCALL_IO_H_
 
-#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>

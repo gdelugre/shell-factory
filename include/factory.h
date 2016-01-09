@@ -1,8 +1,8 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 #if defined(RELAX_INLINE) && (RELAX_INLINE == 1)
 #define INLINE inline

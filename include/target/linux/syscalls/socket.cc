@@ -1,7 +1,6 @@
 #ifndef SYSCALL_SOCKET_H_
 #define SYSCALL_SOCKET_H_
 
-#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

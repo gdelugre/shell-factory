@@ -3,7 +3,7 @@
 
 #include <limits>
 #include <type_traits>
-#include <stdint.h>
+#include <cstdint>
 
 namespace Bits {
 
