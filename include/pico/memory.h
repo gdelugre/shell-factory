@@ -28,9 +28,14 @@ namespace Pico {
                 METHOD void *   pointer() const { return ptr; }
                 METHOD size_t   size() const { return region_size; }
 
-                METHOD void     resize(size_t new_size) {
-                    ptr = Memory::resize(ptr, region_size, new_size);
+                METHOD int      resize(size_t new_size, bool can_move = true) {
+                    void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
+                    if ( new_ptr == nullptr )
+                        return -1;
+
+                    ptr = new_ptr;
                     region_size = new_size;
+                    return 0;
                 }
 
                 METHOD void     free() {
