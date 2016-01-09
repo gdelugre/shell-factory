@@ -6,6 +6,10 @@
 
 #if defined(RELAX_INLINE) && (RELAX_INLINE == 1)
 #define INLINE inline
+#elif defined(RELAX_INLINE) && (RELAX_INLINE == 2)
+#define INLINE
+#elif defined(RELAX_INLINE) && (RELAX_INLINE == 3)
+#define INLINE __attribute__((noinline))
 #else
 #define INLINE inline __attribute__((always_inline))
 #endif
