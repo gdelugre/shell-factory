@@ -38,7 +38,7 @@ namespace Syscall {
     void *mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
     {
     #if SYSCALL_EXISTS(mmap2)
-        return Syscall::mmap2(addr, len, prot, flags, fildes, off / PAGE_SIZE);
+        return Syscall::mmap2(addr, len, prot, flags, fildes, off / Target::PAGE_SIZE);
     #else
         return (void *) DO_SYSCALL(mmap, addr, len, prot, flags, fildes, off);
     #endif

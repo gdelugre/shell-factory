@@ -1,5 +1,5 @@
-#ifndef GENERIC_CPU_REGS_H_
-#define GENERIC_CPU_REGS_H_
+#ifndef GENERIC_CPU_DEFS_H_
+#define GENERIC_CPU_DEFS_H_
 
 #include <limits>
 

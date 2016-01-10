@@ -1,8 +1,6 @@
 #ifndef PICOLIB_MEMORY_IMPL_H_
 #define PICOLIB_MEMORY_IMPL_H_
 
-#include <sys/user.h>
-
 namespace Pico {
 
     namespace Memory {
@@ -10,7 +8,7 @@ namespace Pico {
         FUNCTION
         size_t page_size()
         {
-            return PAGE_SIZE;
+            return Target::PAGE_SIZE;
         }
 
         // Converts pico memory protection to target protection.
