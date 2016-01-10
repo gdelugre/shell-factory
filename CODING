@@ -48,6 +48,10 @@ The code must not contain:
 Those objects need to have their constructor called before main execution.
 Since we have no init section, we cannot have that.
 
+Global objects with constructors can be used if they are declared as a static
+variable inside a function wrapper. The object then is constructed on the
+first time the function is called. See Pico::global_heap for an example.
+
 #### Do not use C++14 constexprs
 
 They require GCC 5 or later, which can be a pain to cross-compile for some
