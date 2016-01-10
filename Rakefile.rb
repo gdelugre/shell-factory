@@ -198,6 +198,10 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
+    if ENV['STACK_REALIGN'].to_i == 1
+        cflags << "-mstackrealign"
+    end
+
     if ENV['CFLAGS']
         cflags += [ ENV['CFLAGS'] ]
     end
@@ -314,7 +318,9 @@ task :help do
     #{'OUTPUT_STRIP:'.color(:green)}   Strip symbols from output file.
     #{'OUTPUT_HEX:'.color(:green)}     Prints the resulting shellcode as an hexadecimal string.
     #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
+    #{'NO_ASSERTS:'.color(:green)}     Set to 1 to disable runtime asserts.
     #{'RELAX_INLINE:'.color(:green)}   Set to 1 to let the compiler uninline some functions.
+    #{'STACK_REALIGN'.color(:green)}   Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
 
  #{'Shellcode customization options:'.color(:cyan)}
 
