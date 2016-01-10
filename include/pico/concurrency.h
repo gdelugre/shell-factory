@@ -12,7 +12,7 @@
 extern "C" {
     using guard_type = uint64_t;
 
-    EXPORT_FUNCTION int __cxa_guard_acquire(guard_type* guard) 
+    EXPORT_ABI_FUNCTION int __cxa_guard_acquire(guard_type* guard)
     { 
         char *initialized = reinterpret_cast<char *>(guard);
         int ret = *initialized == 0;
@@ -21,7 +21,7 @@ extern "C" {
         return ret; 
     }
 
-    EXPORT_FUNCTION void __cxa_guard_release(guard_type* guard) {}
+    EXPORT_ABI_FUNCTION void __cxa_guard_release(guard_type* guard) {}
 }
 
 #endif
