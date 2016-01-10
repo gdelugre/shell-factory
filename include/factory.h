@@ -43,12 +43,16 @@ extern "C" {
     }
 }
 
+#if defined(NO_ASSERTS) && (NO_ASSERTS == 1)
+#define assert(expr)
+#else
 FUNCTION
 void assert(bool expr)
 {
     if ( !expr )
         __builtin_trap();
 }
+#endif
 
 // TODO: Move to CPU definition header.
 #define PAGE_SIZE 4096
