@@ -152,6 +152,406 @@ namespace Pico {
             set(s, 0, n);
         }
     }
+
+    //
+    // Pico::Heap is a custom memory allocator.
+    //
+    // Maintains two kind of structures in memory:
+    //   - chunks holds the memory chunks allocated.
+    //   - free_slots is an array of structures pointing to free memory areas.
+    //
+    class Heap
+    {
+        static constexpr size_t DEFAULT_SIZE = 65536;
+
+        enum ChunkType {
+            STANDARD_CHUNK,
+            BIG_CHUNK
+        };
+
+        // An allocated memory chunk.
+        struct Chunk {
+            size_t size;
+            ChunkType type;
+        };
+
+        // A free memory entry in the free slots array.
+        struct FreeEntry {
+            void *base;
+            size_t size;
+
+            METHOD bool invalid() const { return base == nullptr; }
+            METHOD void invalidate() { base = nullptr; size = 0; }
+            METHOD void *start_address() const {
+                return base;
+            }
+
+            METHOD void *end_address() const {
+                return static_cast<uint8_t *>(base) + size - 1;
+            }
+        };
+
+        // Class managing the list of free slots.
+        class FreeSlots {
+            public:
+                CONSTRUCTOR FreeSlots(void *base, size_t size) : memory_start(base), free_space(0), nr_slots(0) {
+                    FreeEntry *first_entry = first();
+
+                    first_entry->base = base;
+                    first_entry->size = size;
+                    nr_slots = 1;
+                    memory_end = first_entry->end_address();
+                    free_space = size;
+                }
+
+                METHOD int increase_memory_size(size_t extra)
+                {
+                    memory_end = static_cast<uint8_t *>(memory_end) + extra;
+
+                    void *new_space = static_cast<uint8_t *>(memory_end) + 1;
+                    if ( add_slot(new_space, extra) == nullptr )
+                        return -1;
+
+                    return 0;
+                }
+
+                //
+                // Mark a given range of memory as unallocated.
+                //
+                METHOD void unallocate(void *address, size_t size)
+                {
+                    FreeEntry *new_entry = add_slot(address, size);
+
+                    assert(new_entry != nullptr);
+                }
+
+                //
+                // Find an empty memory area of a given size and returns a pointer to it.
+                //
+                METHOD void *consume(size_t size)
+                {
+                    // Not enough space available, early exit.
+                    if ( size > free_space )
+                        return nullptr;
+
+                    FreeEntry *entry = find(size);
+                    if ( entry == nullptr )
+                        return nullptr;
+
+                    void *ptr = entry->base;
+
+                    if ( entry->size == size ) {
+                        entry->invalidate();
+                        nr_slots--;
+                    }
+                    else {
+                        entry->base = static_cast<uint8_t *>(ptr) + size;
+                        entry->size -= size;
+                    }
+
+                    free_space -= size;
+                    return ptr;
+                }
+
+                METHOD size_t available_space() const { return free_space; }
+
+            private:
+                METHOD FreeEntry *first() const {
+                    return slots;
+                }
+
+                METHOD int expand(size_t extra)
+                {
+                    int ret = slots.resize(max_slots * sizeof(FreeEntry) + extra);
+                    if ( ret != 0 )
+                        return ret;
+
+                    max_slots = slots.size() / sizeof(FreeEntry);
+                    return 0;
+                }
+
+                // Find a free entry whose size is at least the specified size.
+                METHOD FreeEntry *find(size_t min_size) const
+                {
+                    FreeEntry *entries = first();
+                    for ( size_t i = 0; i < nr_slots; i++ )
+                    {
+                        FreeEntry *entry = entries++;
+
+                        if ( entry->invalid() )
+                            continue;
+
+                        if ( entry->size >= min_size )
+                            return entry;
+                    }
+
+                    return nullptr;
+                }
+
+                // Find a free entry including a particular address.
+                METHOD FreeEntry *find_by_address(void *address) const
+                {
+                    FreeEntry *entries = first();
+                    for ( size_t i = 0; i < nr_slots; i++ )
+                    {
+                        FreeEntry *entry = entries++;
+
+                        if ( entry->invalid() )
+                            continue;
+
+                        if ( address >= entry->start_address() && address <= entry->end_address() )
+                            return entry;
+                    }
+
+                    return nullptr;
+                }
+
+                METHOD FreeEntry *get_unused_slot()
+                {
+                    FreeEntry *entries = first();
+                    for ( size_t i = 0; i < max_slots; i++ ) {
+                        FreeEntry *entry = entries++;
+
+                        if ( entry->invalid() )
+                            return entry;
+                    }
+
+                    // No available slot, expand the slot area.
+                    int ret = expand(sizeof(FreeEntry));
+                    if ( ret != 0 )
+                        return nullptr;
+
+                    // Retry.
+                    return get_unused_slot();
+                }
+
+                METHOD FreeEntry *add_slot(void *address, size_t size)
+                {
+                    void *prev_address = static_cast<uint8_t *>(address) - 1;
+                    assert(is_valid_range(address, size));
+
+                    // If an entry already exists, then just expand it.
+                    FreeEntry *prev_entry = find_by_address(prev_address);
+                    if ( prev_entry != nullptr ) {
+                        assert(prev_entry->end_address() == prev_address);
+
+                        prev_entry->size += size;
+                        free_space += size;
+                        return prev_entry;
+                    }
+
+                    // Otherwise, create a new entry.
+                    FreeEntry *new_slot = get_unused_slot();
+                    if ( new_slot == nullptr )
+                        return nullptr;
+
+                    new_slot->base = address;
+                    new_slot->size = size;
+
+                    // Merge with an adjacent slot if possible.
+                    void *next_address = static_cast<uint8_t *>(new_slot->end_address()) + 1;
+                    FreeEntry *next_entry = find_by_address(next_address);
+                    if ( next_entry != nullptr ) {
+                        assert(next_entry->start_address() == next_address);
+
+                        new_slot->size += next_entry->size;
+                        next_entry->invalidate();
+                        nr_slots--;
+                    }
+
+                    nr_slots++;
+                    free_space += size;
+
+                    return new_slot;
+                }
+
+                METHOD bool is_valid_address(void *address) {
+                    return address >= memory_start && address <= memory_end;
+                }
+
+                METHOD bool is_valid_range(void *address, size_t size) {
+                    void *end_address = static_cast<uint8_t *>(address) + size - 1;
+                    return is_valid_address(address) && is_valid_address(end_address);
+                }
+
+                Memory::Region slots;
+                size_t free_space = 0;
+                size_t nr_slots = 0;
+                size_t max_slots = slots.size() / sizeof(FreeEntry);
+                const void *memory_start;
+                void *memory_end;
+        };
+
+        public:
+            CONSTRUCTOR Heap(size_t size = DEFAULT_SIZE) : chunks(size), heap_size(size), total_size(size), free_slots(chunks, heap_size) {}
+            METHOD void *allocate(size_t count);
+            METHOD void free(void *ptr);
+            METHOD void free(void *ptr, size_t size);
+            METHOD size_t size() const { return heap_size; }
+            METHOD size_t free_space() const { return free_slots.available_space(); }
+            METHOD size_t used_space() const { return total_size - free_space(); }
+            METHOD size_t allocated_objects() const { return nr_objects; }
+
+        private:
+            Memory::Region chunks;
+            size_t heap_size;
+            size_t total_size;
+            FreeSlots free_slots;
+            size_t nr_objects = 0;
+            const size_t big_chunk_threshold = Memory::page_size();
+
+            METHOD void *find_free_space(size_t slot_size);
+            METHOD int grow(size_t extra);
+    };
+
+    METHOD
+    void *Heap::find_free_space(size_t size)
+    {
+        return free_slots.consume(size);
+    }
+
+    METHOD int Heap::grow(size_t extra)
+    {
+        int ret;
+
+        ret = chunks.resize(heap_size + extra, false);
+        if ( ret != 0 )
+            return ret;
+
+        heap_size = chunks.size();
+
+        // More space is available now.
+        // Free slots needs to be updated to reflect this change.
+        ret = free_slots.increase_memory_size(extra);
+        if ( ret != 0 )
+            return ret;
+
+        return 0;
+    }
+
+    METHOD
+    void *Heap::allocate(size_t count)
+    {
+        size_t needed_size = sizeof(Chunk) + count;
+
+        // Big chunks are allocated into separate memory areas.
+        if ( needed_size >= big_chunk_threshold ) {
+            size_t alloc_size = Memory::round_up_page_size(needed_size);
+            struct Chunk *chunk = static_cast<Chunk *>(Memory::allocate(alloc_size, Memory::READ | Memory::WRITE));
+
+            chunk->type = BIG_CHUNK;
+            chunk->size = alloc_size - sizeof(Chunk);
+            nr_objects++;
+            total_size += alloc_size;
+
+            void *ptr = chunk + 1;
+            return ptr;
+        }
+
+        Chunk *chunk = static_cast<Chunk *>( find_free_space(needed_size) );
+        if ( chunk == nullptr )
+        {
+            // No free space available, grow the heap.
+            if ( grow(needed_size) != 0 )
+                return nullptr;
+
+            // Retry.
+            return allocate(count);
+        }
+
+        chunk->type = STANDARD_CHUNK;
+        chunk->size = count;
+        nr_objects++;
+
+        void *ptr = chunk + 1;
+        return ptr;
+    }
+
+    METHOD
+    void Heap::free(void *ptr, size_t size)
+    {
+        if ( ptr == nullptr )
+            return;
+
+        struct Chunk *chunk = reinterpret_cast<Chunk *>(static_cast<char *>(ptr) - sizeof(Chunk));
+        size_t used_size = sizeof(Chunk) + chunk->size;
+
+        // Sized-deallocation is not supported.
+        assert(size == chunk->size);
+
+        // Big chunks have their own dedicated memory region, just release it.
+        if ( chunk->type == BIG_CHUNK ) {
+            Memory::release(ptr, used_size);
+
+            nr_objects--;
+            total_size -= used_size;
+            return;
+        }
+
+        assert(chunk->type == STANDARD_CHUNK);
+
+        chunk->size = 0;
+        free_slots.unallocate(chunk, used_size);
+        nr_objects--;
+    }
+
+    METHOD
+    void Heap::free(void *ptr)
+    {
+        if ( ptr == nullptr )
+            return;
+
+        struct Chunk *chunk = reinterpret_cast<Chunk *>(static_cast<char *>(ptr) - sizeof(Chunk));
+        free(ptr, chunk->size);
+    }
+
+    FUNCTION
+    Heap& global_heap()
+    {
+        static Heap default_heap;
+
+        return default_heap;
+    }
+}
+
+//
+// Global memory allocation functions.
+//
+
+METHOD
+void *operator new(size_t count)
+{
+    return Pico::global_heap().allocate(count);
+}
+
+METHOD
+void *operator new[](size_t count)
+{
+    return Pico::global_heap().allocate(count);
+}
+
+METHOD
+void operator delete(void *ptr)
+{
+    return Pico::global_heap().free(ptr);
+}
+
+METHOD
+void operator delete[](void *ptr)
+{
+    return Pico::global_heap().free(ptr);
+}
+
+METHOD
+void operator delete(void *ptr, size_t size)
+{
+    return Pico::global_heap().free(ptr, size);
+}
+
+METHOD
+void operator delete[](void *ptr, size_t size)
+{
+    return Pico::global_heap().free(ptr, size);
 }
 
 #endif
