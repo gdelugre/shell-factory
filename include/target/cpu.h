@@ -44,27 +44,32 @@ namespace CPU {
     static constexpr bool big_endian = (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
     static constexpr bool little_endian = !big_endian;
 
+    FUNCTION
     uint8_t bswap(uint8_t b)
     {
         return b;
     }
 
+    FUNCTION
     uint16_t bswap(uint16_t h)
     {
         return BUILTIN(bswap16)(h);
     }
 
+    FUNCTION
     uint32_t bswap(uint32_t d)
     {
         return BUILTIN(bswap32)(d);
     }
 
+    FUNCTION
     uint64_t bswap(uint64_t q)
     {
         return BUILTIN(bswap64)(q);
     }
 
     template <typename T>
+    FUNCTION
     T byte_swap(T num)
     {
         constexpr size_t num_size = sizeof(T) * 8;
@@ -82,6 +87,7 @@ namespace CPU {
     }
 
     template <typename T>
+    FUNCTION
     T to_big_endian(T num)
     {
         static_assert(std::numeric_limits<T>::is_integer, "Cannot use to_big_endian with non-integer types.");
@@ -93,6 +99,7 @@ namespace CPU {
     }
 
     template <typename T>
+    FUNCTION
     T to_little_endian(T num)
     {
         static_assert(std::numeric_limits<T>::is_integer, "Cannot use to_big_endian with non-integer types.");
