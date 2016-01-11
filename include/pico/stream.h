@@ -144,10 +144,16 @@ namespace Pico {
             METHOD ssize_t out(const void *ptr, size_t count) {
                 return tx.out(ptr, count);
             }
-            METHOD int read_file_desc() const {
+
+            // Should not be called. Undefined behavior.
+            METHOD handle file_desc() const {
+                assert(true);
+            }
+
+            METHOD handle read_file_desc() const {
                 return rx.file_desc();
             }
-            METHOD int write_file_desc() const {
+            METHOD handle write_file_desc() const {
                 return tx.file_desc();
             }
             METHOD int close() {
