@@ -85,7 +85,6 @@ CFLAGS = %W{-std=c++1y
             -Wl,--gc-sections
             -Wl,-N
             -Wl,-T#{LD_SCRIPT}
-            -Wl,--build-id=none
          }
 
 COMPILER_CFLAGS =
@@ -105,6 +104,7 @@ COMPILER_CFLAGS =
 
 OS_CFLAGS =
 {
+    /linux/ => %w{-Wl,--build-id=none},
     /none/ => %w{-U__STDC_HOSTED__}
 }
 
