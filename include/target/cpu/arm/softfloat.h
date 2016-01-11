@@ -4,6 +4,12 @@
 extern "C" {
 
     EXPORT_ABI_FUNCTION
+    uint32_t __clzsi2(uint32_t n)
+    {
+        return Bits::soft_clz(n);
+    }
+
+    EXPORT_ABI_FUNCTION
     uint32_t __udivsi3(uint32_t dividend, uint32_t divisor)
     {
         return Math::soft_div(dividend, divisor);

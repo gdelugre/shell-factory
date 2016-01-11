@@ -7,12 +7,86 @@
 
 namespace Bits {
 
+    // Find most-significant bit set.
+    template <typename T>
+    FUNCTION
+    unsigned soft_fls(T w)
+    {
+        static_assert(std::numeric_limits<T>::is_integer, "Cannot use soft_fls with non-integer types.");
+        static_assert(sizeof(T) <= sizeof(unsigned int) ||
+                      sizeof(T) == sizeof(unsigned long) ||
+                      sizeof(T) == sizeof(unsigned long long), "fls not supported for this type size.");
+
+        using value_type = typename std::make_unsigned<T>::type;
+        constexpr size_t nr_bits = sizeof(value_type) * 8;
+
+        unsigned count = sizeof(value_type) * 8;
+        value_type value = w;
+
+        if ( value == 0 )
+            return 0;
+
+        // Unrolled version of:
+        //
+        //  size_t shift = nr_bits / 2;
+        //  while ( shift != 0 ) {
+        //      if ( value >> (nr_bits - shift) == 0 ) {
+        //          value <<= shift;
+        //          count -= shift;
+        //      }
+        //
+        //      shift /= 2;
+        //  }
+        //
+        //  Compact version not used here because some architectures do not like arbitrary sized shifts.
+
+        if ( nr_bits == 64 && (value >> (nr_bits - 32)) == 0) {
+            value <<= 32;
+            count -= 32;
+        }
+
+        if ( nr_bits >= 32 && (value >> (nr_bits - 16)) == 0) {
+            value <<= 16;
+            count -= 16;
+        }
+
+        if ( nr_bits >= 16 && (value >> (nr_bits - 8)) == 0) {
+            value <<= 8;
+            count -= 8;
+        }
+
+        if ( value >> (nr_bits - 4) == 0 ) {
+            value <<= 4;
+            count -= 4;
+        }
+
+        if ( value >> (nr_bits - 2) == 0 ) {
+            value <<= 2;
+            count -= 2;
+        }
+
+        if ( value >> (nr_bits - 1) == 0 ) {
+            value <<= 1;
+            count -= 1;
+        }
+
+        return count;
+    }
+
+    // Count leading zeros.
+    template <typename T>
+    FUNCTION
+    unsigned soft_clz(T w)
+    {
+        return (sizeof(T) * 8) - soft_fls(w);
+    }
+
     template <typename T>
     FUNCTION
     unsigned count_leading_zeros(T w)
     {
         static_assert(std::numeric_limits<T>::is_integer, "Cannot use clz with non-integer types.");
-        static_assert(sizeof(T) <= sizeof(unsigned int) || 
+        static_assert(sizeof(T) <= sizeof(unsigned int) ||
                       sizeof(T) == sizeof(unsigned long) ||
                       sizeof(T) == sizeof(unsigned long long), "clz not supported for this type size.");
 
@@ -51,7 +125,7 @@ namespace Math {
             if ( a >= b << i )
             {
                 a -= b << i;
-                q |= 1 << i; 
+                q |= 1 << i;
 
                 if ( a == 0 )
                     break;
@@ -65,7 +139,7 @@ namespace Math {
     FUNCTION
     auto soft_div(T1 a, T2 b)
     {
-        static_assert(std::numeric_limits<T1>::is_integer && 
+        static_assert(std::numeric_limits<T1>::is_integer &&
                       std::numeric_limits<T2>::is_integer, "Cannot use soft_div with non-integer types.");
 
         char sign = 1;
@@ -73,7 +147,7 @@ namespace Math {
             sign *= -1;
         if ( b < 0 )
             sign *= -1;
-        
+
         using result_type = decltype(a / b);
         using unsigned_type = typename std::make_unsigned<result_type>::type;
 
@@ -89,7 +163,7 @@ namespace Math {
     FUNCTION
     auto soft_mod(T1 a, T2 b)
     {
-        static_assert(std::numeric_limits<T1>::is_integer && 
+        static_assert(std::numeric_limits<T1>::is_integer &&
                       std::numeric_limits<T2>::is_integer, "Cannot use soft_mod with non-integer types.");
 
         using result_type = decltype(a % b);
