@@ -17,6 +17,7 @@ namespace Target {
     namespace Process {
         using thread_id = pid_t;
         using process_id = pid_t;
+        using signal_handler = sighandler_t;
     }
 
     namespace Filesystem {

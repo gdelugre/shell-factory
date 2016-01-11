@@ -11,6 +11,7 @@ namespace Pico {
 
         public:
             using process_id = Target::Process::process_id;
+            using signal_handler = Target::Process::signal_handler;
 
             FUNCTION Process        current();
             FUNCTION Process        parent();
@@ -18,7 +19,7 @@ namespace Pico {
             FUNCTION Process        find_process_by_name(char *proc_name);
             FUNCTION Process        find_process_by_path(char *exe_path);
             FUNCTION Process        create_thread(thread_routine thread_entry, void *arg);
-            FUNCTION sighandler_t   set_signal_handler(int signal, sighandler_t handler);
+            FUNCTION signal_handler set_signal_handler(int signal, signal_handler handler);
 
             template <enum channel_mode M>
             NO_RETURN FUNCTION void execute(Channel<M> channel, const char *filename,
