@@ -37,6 +37,16 @@ namespace Target {
                                                          GROUP_READ|GROUP_WRITE |
                                                          OTHER_READ|OTHER_WRITE;
     }
+
+    using error_code = int;
+    constexpr error_code max_error = 4095;
+
+    template <typename T>
+    FUNCTION
+    constexpr bool is_error(T err)
+    {
+        return (reinterpret_cast<unsigned long>(err) >= static_cast<unsigned long>(-max_error));
+    }
 }
 
 #endif

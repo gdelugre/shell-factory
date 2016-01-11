@@ -27,7 +27,11 @@ namespace Pico {
             if ( prot & Memory::STACK )
                 flags |= MAP_GROWSDOWN;
 
-            return Syscall::mmap(base, size, mmap_prot(prot), flags, 0, 0);
+            void *ptr = Syscall::mmap(base, size, mmap_prot(prot), flags, 0, 0);
+            if ( Target::is_error(ptr) )
+                return nullptr;
+            else
+                return ptr;
         }
 
         METHOD
@@ -38,7 +42,11 @@ namespace Pico {
             if ( can_move )
                 flags |= MREMAP_MAYMOVE;
 
-            return Syscall::mremap(ptr, old_size, new_size, flags);
+            ptr = Syscall::mremap(ptr, old_size, new_size, flags);
+            if ( Target::is_error(ptr) )
+                return nullptr;
+            else
+                return ptr;
         }
 
         METHOD
