@@ -206,9 +206,9 @@ namespace Pico {
 
                 METHOD int increase_memory_size(size_t extra)
                 {
+                    void *new_space = static_cast<uint8_t *>(memory_end) + 1;
                     memory_end = static_cast<uint8_t *>(memory_end) + extra;
 
-                    void *new_space = static_cast<uint8_t *>(memory_end) + 1;
                     if ( add_slot(new_space, extra) == nullptr )
                         return -1;
 
@@ -327,8 +327,8 @@ namespace Pico {
 
                 METHOD FreeEntry *add_slot(void *address, size_t size)
                 {
-                    void *prev_address = static_cast<uint8_t *>(address) - 1;
                     assert(is_valid_range(address, size));
+                    void *prev_address = static_cast<uint8_t *>(address) - 1;
 
                     // If an entry already exists, then just expand it.
                     FreeEntry *prev_entry = find_by_address(prev_address);
@@ -418,7 +418,12 @@ namespace Pico {
         if ( ret != 0 )
             return ret;
 
-        heap_size = chunks.size();
+        size_t new_heap_size = chunks.size();
+
+        // Compute actual extra extra size.
+        extra = new_heap_size - heap_size;
+        heap_size = new_heap_size;
+        total_size += extra;
 
         // More space is available now.
         // Free slots needs to be updated to reflect this change.
