@@ -486,7 +486,7 @@ namespace Pico {
 
         // Big chunks have their own dedicated memory region, just release it.
         if ( chunk->type == BIG_CHUNK ) {
-            Memory::release(ptr, used_size);
+            Memory::release(chunk, used_size);
 
             nr_objects--;
             total_size -= used_size;
