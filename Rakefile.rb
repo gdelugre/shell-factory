@@ -89,14 +89,14 @@ CFLAGS = %W{-std=c++1y
 
 COMPILER_CFLAGS =
 {
-    /^g\+\+$/ =>
+    /^g\+\+/ =>
         %w{-fno-toplevel-reorder
            -finline-functions
            -nodefaultlibs
            -Os
            },
 
-    /^clang\+\+$/ =>
+    /^clang\+\+/ =>
         %w{-Oz
            -Wno-invalid-noreturn
           }
