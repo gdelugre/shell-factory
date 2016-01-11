@@ -116,13 +116,6 @@ namespace Pico {
             template <typename T>
             METHOD void duplicate(Stream<T>& s);
 
-            template <typename T>
-            METHOD void duplicate2(Stream<T>& r, Stream<T> &w)
-            {
-                duplicate(r);
-                duplicate(w);
-            }
-
         protected:
             Io io;
     };

@@ -59,8 +59,11 @@ namespace Pico {
             {
                 BasicStream std_in = Stdio::input();
                 BasicStream std_out = Stdio::output();
+                BasicStream std_err = Stdio::error();
 
-                this->duplicate2(std_in, std_out);
+                this->duplicate(std_in);
+                this->duplicate(std_out);
+                this->duplicate(std_err);
             }
         }
     };
