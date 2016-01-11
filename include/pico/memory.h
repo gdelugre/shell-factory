@@ -34,6 +34,12 @@ namespace Pico {
                     ptr = Memory::allocate(size, prot);
                     region_size = size;
                 }
+                CONSTRUCTOR Region(void *base, size_t size = page_size(), int prot = READ | WRITE) {
+                    size = round_up_page_size(size);
+                    ptr = Memory::allocate(base, size, prot);
+                    region_size = size;
+                }
+
                 METHOD void *   pointer() const { return ptr; }
                 METHOD size_t   size() const { return region_size; }
 
