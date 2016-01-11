@@ -153,7 +153,7 @@ def target_to_source(target)
 end
 
 def compile(target, triple, output_dir, *opts)
-    common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS}
+    common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
@@ -330,6 +330,8 @@ task :help do
     #{'PORT:'.color(:green)}           Remote port or local port for socket bind.
     #{'FORK_ON_ACCEPT:'.color(:green)} Keeps listening when accepting connections.
     #{'REUSE_ADDR:'.color(:green)}     Bind sockets with SO_REUSEADDR.
+    #{'HEAP_BASE'.color(:green)}       Base address for heap allocations.
+    #{'HEAP_SIZE'.color(:green)}       Size of heap, defaults to 64k.
 
     USAGE
 

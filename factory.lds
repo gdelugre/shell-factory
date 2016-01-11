@@ -34,8 +34,10 @@ SECTIONS
     __bss_start = .;
     .bss                : { *(.bss .bss.* .gnu.linkonce.b.*) *(COMMON) }
 
-    _end = .;
-    PROVIDE (end = .);
+    PROVIDE (ebss = .);
+
+    _end = NEXT(4096);
+    PROVIDE (eend = _end);
 
     /DISCARD/           : { *(.note.*) }
 }

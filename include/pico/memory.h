@@ -168,7 +168,7 @@ namespace Pico {
     //
     class Heap
     {
-        static constexpr size_t DEFAULT_SIZE = 65536;
+        static constexpr size_t DEFAULT_SIZE = Options::heap_size;
 
         enum ChunkType {
             STANDARD_CHUNK,
@@ -389,7 +389,7 @@ namespace Pico {
         };
 
         public:
-            CONSTRUCTOR Heap(size_t size = DEFAULT_SIZE) : chunks(size), heap_size(size), total_size(size), free_slots(chunks, heap_size) {}
+            CONSTRUCTOR Heap(size_t size = DEFAULT_SIZE) : chunks(Options::heap_address, size), heap_size(size), total_size(size), free_slots(chunks, heap_size) {}
             METHOD void *allocate(size_t count);
             METHOD void free(void *ptr);
             METHOD void free(void *ptr, size_t size);

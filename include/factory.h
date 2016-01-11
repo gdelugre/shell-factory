@@ -55,6 +55,12 @@ void assert(bool expr)
 }
 #endif
 
+extern char __executable_start;
+extern char etext;
+extern char edata;
+extern char ebss;
+extern char eend;
+
 #include <softfloat.h>
 #include <factory-options.h>
 #include <target/cpu.h>
