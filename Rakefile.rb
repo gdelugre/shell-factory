@@ -142,7 +142,8 @@ def cc_invoke(cc, triple, sysroot = nil)
         "#{triple}-#{cc}"
 
     when 'clang++'
-        "#{cc} -target #{triple}"
+        sysroot ||= "/usr/#{triple}"
+        "#{cc} -target #{triple} --sysroot=#{sysroot}"
     end
 
     triple_cc << " --sysroot=#{sysroot}" unless sysroot.nil?
