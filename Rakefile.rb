@@ -92,6 +92,7 @@ COMPILER_CFLAGS =
     /^g\+\+/ =>
         %w{-fno-toplevel-reorder
            -finline-functions
+           -flto
            -nodefaultlibs
            -Os
            },
