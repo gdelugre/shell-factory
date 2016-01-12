@@ -93,7 +93,7 @@
 #if defined(__linux__)
 #include <target/linux/syscalls.h>
 #else
-#error "No syscall ABI defined for this operating system."
+#pragma message "No operating system detected, compiling to bare-metal."
 #endif
 
 #endif
