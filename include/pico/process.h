@@ -3,11 +3,29 @@
 
 namespace Pico {
 
-    class Process {
+    class Thread {
+        constexpr static unsigned STACK_SIZE = 1024 * 1024;
 
-        constexpr static unsigned THREAD_STACK_SIZE = 0x10000;
-        using thread_routine = int (*)(void *);
-        using sighandler_t = void (*)(int);
+        public:
+            using thread_routine = int (*)(void *);
+            using thread_id = Target::Process::thread_id;
+
+            FUNCTION Thread         current();
+            FUNCTION void           set_name(const char *comm);
+            FUNCTION Thread         create(thread_routine thread_entry, void *arg);
+            NO_RETURN FUNCTION void exit(int status);
+
+            CONSTRUCTOR             Thread(thread_id tid) : tid(tid) {}
+            METHOD thread_id        id() const { return tid; }
+            METHOD int              signal(int signal);
+            METHOD int              wait(int *status);
+            METHOD int              kill();
+
+        protected:
+            thread_id tid;
+    };
+
+    class Process {
 
         public:
             using process_id = Target::Process::process_id;
@@ -15,10 +33,8 @@ namespace Pico {
 
             FUNCTION Process        current();
             FUNCTION Process        parent();
-            FUNCTION void           set_current_thread_name(const char *comm);
-            FUNCTION Process        find_process_by_name(char *proc_name);
-            FUNCTION Process        find_process_by_path(char *exe_path);
-            FUNCTION Process        create_thread(thread_routine thread_entry, void *arg);
+            FUNCTION Process        find_by_name(char *proc_name);
+            FUNCTION Process        find_by_path(char *exe_path);
             FUNCTION signal_handler set_signal_handler(int signal, signal_handler handler);
 
             template <enum channel_mode M>
@@ -39,12 +55,11 @@ namespace Pico {
             FUNCTION Process        spawn(const char *filename,
                                           char *const argv[] = nullptr, char *const envp[] = nullptr);
 
-            NO_RETURN FUNCTION void terminate_thread(int status);
             NO_RETURN FUNCTION void exit(int status);
 
             CONSTRUCTOR             Process(process_id pid) : pid(pid) {}
             METHOD process_id       id() const { return pid; };
-            METHOD int              send_signal(int signal);
+            METHOD int              signal(int signal);
             METHOD int              wait(int *status);
             METHOD int              kill();
 

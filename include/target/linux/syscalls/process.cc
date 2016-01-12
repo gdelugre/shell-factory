@@ -20,6 +20,7 @@ namespace Syscall {
 
     SYSTEM_CALL pid_t           getpid(void);
     SYSTEM_CALL pid_t           getppid(void);
+    SYSTEM_CALL pid_t           gettid(void);
     SYSTEM_CALL pid_t           fork(void);
     NO_RETURN SYSTEM_CALL int   execve(const char *, char *const[], char *const[]);
     #if SYSCALL_EXISTS(execveat)
@@ -32,9 +33,10 @@ namespace Syscall {
     #endif
     SYSTEM_CALL long            ptrace(enum __ptrace_request, pid_t, void *, void *);
     SYSTEM_CALL pid_t           wait4(pid_t, int *, int, struct rusage *);
+    SYSTEM_CALL int             tkill(pid_t, int);
     SYSTEM_CALL int             kill(pid_t, int);
-    NO_RETURN SYSTEM_CALL void  exit_thread(int);
-    NO_RETURN SYSTEM_CALL void  exit_process(int);
+    NO_RETURN SYSTEM_CALL void  exit(int);
+    NO_RETURN SYSTEM_CALL void  exit_group(int);
 
     SYSTEM_CALL
     pid_t getpid(void)
@@ -46,6 +48,12 @@ namespace Syscall {
     pid_t getppid(void)
     {
         return DO_SYSCALL(getppid);
+    }
+
+    SYSTEM_CALL
+    pid_t gettid(void)
+    {
+        return DO_SYSCALL(gettid);
     }
 
     SYSTEM_CALL
@@ -122,20 +130,26 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
+    int tkill(pid_t tid, int sig)
+    {
+        return DO_SYSCALL(tkill, tid, sig);
+    }
+
+    SYSTEM_CALL
     int kill(pid_t pid, int sig)
     {
         return DO_SYSCALL(kill, pid, sig);
     }
 
     NO_RETURN SYSTEM_CALL
-    void exit_thread(int status)
+    void exit(int status)
     {
         DO_SYSCALL(exit, status);
         __builtin_unreachable();
     }
 
     NO_RETURN SYSTEM_CALL
-    void exit_process(int status)
+    void exit_group(int status)
     {
         DO_SYSCALL(exit_group, status);
         __builtin_unreachable();

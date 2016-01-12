@@ -18,13 +18,19 @@ namespace Pico {
     }
 
     METHOD
-    void set_current_thread_name(const char *comm)
+    Thread Thread::current()
+    {
+        return Thread( Syscall::gettid() );
+    }
+
+    METHOD
+    void Thread::set_name(const char *comm)
     {
         Syscall::prctl(PR_SET_NAME,  (unsigned long) comm, 0, 0, 0);
     } 
 
     METHOD
-    Process Process::find_process_by_name(char *proc_name)
+    Process Process::find_by_name(char *proc_name)
     {
         pid_t result = 0;
 
@@ -55,7 +61,7 @@ namespace Pico {
     }
 
     METHOD
-    Process Process::find_process_by_path(char *exe_path)
+    Process Process::find_by_path(char *exe_path)
     {
         pid_t result = 0;
 
@@ -86,22 +92,22 @@ namespace Pico {
     }
 
     NO_RETURN METHOD
-    void Process::terminate_thread(int status)
+    void Thread::exit(int status)
     {
-        Syscall::exit_thread(status);
+        Syscall::exit(status);
     }
 
     NO_RETURN METHOD
     void Process::exit(int status)
     {
-        Syscall::exit_process(status);
+        Syscall::exit_group(status);
     }
     
     METHOD
-    Process Process::create_thread(thread_routine thread_entry, void *arg)
+    Thread Thread::create(thread_routine thread_entry, void *arg)
     {
         void *child_stack;
-        size_t stack_size = Process::THREAD_STACK_SIZE;
+        size_t stack_size = STACK_SIZE;
         pid_t tid;
 
         child_stack = Memory::allocate(stack_size, Memory::READ | Memory::WRITE | Memory::STACK);
@@ -113,9 +119,9 @@ namespace Pico {
         );
 
         if ( !tid )
-            Process::terminate_thread(thread_entry(arg));
+            Thread::exit(thread_entry(arg));
         else
-            return Process(tid);
+            return Thread(tid);
     }
 
     NO_RETURN METHOD
@@ -162,21 +168,39 @@ namespace Pico {
     }
 
     METHOD
+    int Thread::wait(int *status)
+    {
+        return Syscall::wait4(tid, status, 0, nullptr);
+    }
+
+    METHOD
     int Process::wait(int *status)
     {
         return Syscall::wait4(pid, status, 0, nullptr);
     }
 
     METHOD
-    int Process::send_signal(int signal)
+    int Thread::signal(int signal)
+    {
+        return Syscall::tkill(tid, signal);
+    }
+
+    METHOD
+    int Process::signal(int signal)
     {
         return Syscall::kill(pid, signal);
+    }
+
+    METHOD
+    int Thread::kill()
+    {
+        return signal(SIGKILL);
     }
     
     METHOD
     int Process::kill()
     {
-        return send_signal(SIGKILL);
+        return signal(SIGKILL);
     }
 
     namespace Filesystem {
