@@ -319,8 +319,8 @@ task :help do
     #{'OUTPUT_HEX:'.color(:green)}     Prints the resulting shellcode as an hexadecimal string.
     #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
     #{'NO_ASSERTS:'.color(:green)}     Set to 1 to disable runtime asserts.
-    #{'RELAX_INLINE:'.color(:green)}   Set to 1 to let the compiler uninline some functions.
-    #{'STACK_REALIGN'.color(:green)}   Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
+    #{'RELAX_INLINE:'.color(:green)}   Set to 1, 2 or 3 to let the compiler uninline some functions.
+    #{'STACK_REALIGN:'.color(:green)}   Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
 
  #{'Shellcode customization options:'.color(:cyan)}
 
@@ -330,8 +330,8 @@ task :help do
     #{'PORT:'.color(:green)}           Remote port or local port for socket bind.
     #{'FORK_ON_ACCEPT:'.color(:green)} Keeps listening when accepting connections.
     #{'REUSE_ADDR:'.color(:green)}     Bind sockets with SO_REUSEADDR.
-    #{'HEAP_BASE'.color(:green)}       Base address for heap allocations.
-    #{'HEAP_SIZE'.color(:green)}       Size of heap, defaults to 64k.
+    #{'HEAP_BASE:'.color(:green)}       Base address for heap allocations.
+    #{'HEAP_SIZE:'.color(:green)}       Size of heap, defaults to 64k.
 
     USAGE
 
