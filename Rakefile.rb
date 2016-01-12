@@ -130,16 +130,23 @@ def show_error(str)
     abort
 end
 
-def cc_invoke(cc, triple)
-    return cc if triple.empty?
+def cc_invoke(cc, triple, sysroot = nil)
+    if triple.empty?
+        return cc if sysroot.nil?
+        return "#{cc} --sysroot=#{sysroot}"
+    end
 
+    triple_cc =
     case cc
     when 'g++'
         "#{triple}-#{cc}"
 
     when 'clang++'
-        "#{cc} -target #{triple} --sysroot /usr/#{triple}/"
+        "#{cc} -target #{triple}"
     end
+
+    triple_cc << " --sysroot=#{sysroot}" unless sysroot.nil?
+    triple_cc
 end
 
 # Returns [ source_path, output_basename ]
@@ -161,6 +168,7 @@ def compile(target, triple, output_dir, *opts)
     cflags = CFLAGS.dup
     source_dir, target_name = target_to_source(target)
     source_file = source_dir.join("#{target_name}.cc")
+    sysroot = ENV['SYSROOT']
 
     unless File.exists?(source_file)
         show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
@@ -173,7 +181,7 @@ def compile(target, triple, output_dir, *opts)
         'Compiler' => cc,
         'Host architecture' => host_triple,
         'Target architecture' => target_triple,
-        'Options' => defines 
+        'Options' => defines
     )
     STDERR.puts
 
@@ -217,7 +225,7 @@ def compile(target, triple, output_dir, *opts)
     unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
-    
+
     if defines['NO_BUILTIN'].to_i == 1
         cflags << "-fno-builtin"
     end
@@ -239,13 +247,13 @@ def compile(target, triple, output_dir, *opts)
     if ENV['OUTPUT_DEBUG'].to_i == 1
         output_file = output_dir.join("#{target_name}.S")
         cflags << '-g'
-        sh "#{cc_invoke(cc,triple)} -S #{cflags.join(" ")} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
+        sh "#{cc_invoke(cc,triple,sysroot)} -S #{cflags.join(" ")} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
             (STDERR.puts; show_error("Compilation failed.")) unless ok
         end
     end
 
     output_file = output_dir.join("#{target_name}.elf")
-    sh "#{cc_invoke(cc,triple)} #{cflags.join(' ')} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
+    sh "#{cc_invoke(cc,triple,sysroot)} #{cflags.join(' ')} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
         (STDERR.puts; show_error("Compilation failed.")) unless ok
     end
 end
@@ -307,12 +315,13 @@ task :help do
 
  #{'Compilation options:'.color(:cyan)}
 
-    #{'CC:'.color(:green)}             Let you choose the compiler. Only supported are g++ and clang++.  
+    #{'CC:'.color(:green)}             Let you choose the compiler. Only supported are g++ and clang++.
     #{'TRIPLE:'.color(:green)}         Cross compilation target. For example: "aarch64-linux-gnu".
     #{'ARCH'.color(:green)}            Specify a specific architecture to compile to (e.g. armv7-r).
-    #{'CPU'.color(:green)}             Specify a specific CPU to compile to (e.g. cortex-a15). 
+    #{'CPU'.color(:green)}             Specify a specific CPU to compile to (e.g. cortex-a15).
     #{'CFLAGS:'.color(:green)}         Add custom flags to the compiler. For example "-m32".
-    #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations. 
+    #{'SYSROOT:'.color(:green)}        Use the specified directory as the filesystem root for finding headers.
+    #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations.
     #{'OUTPUT_LIB:'.color(:green)}     Compiles to a shared library instead of a standard executable.
     #{'OUTPUT_DEBUG:'.color(:green)}   Instructs the compiler to emit an assembly file.
     #{'OUTPUT_STRIP:'.color(:green)}   Strip symbols from output file.
@@ -320,7 +329,7 @@ task :help do
     #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
     #{'NO_ASSERTS:'.color(:green)}     Set to 1 to disable runtime asserts.
     #{'RELAX_INLINE:'.color(:green)}   Set to 1, 2 or 3 to let the compiler uninline some functions.
-    #{'STACK_REALIGN:'.color(:green)}   Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
+    #{'STACK_REALIGN:'.color(:green)}  Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
 
  #{'Shellcode customization options:'.color(:cyan)}
 
@@ -330,8 +339,8 @@ task :help do
     #{'PORT:'.color(:green)}           Remote port or local port for socket bind.
     #{'FORK_ON_ACCEPT:'.color(:green)} Keeps listening when accepting connections.
     #{'REUSE_ADDR:'.color(:green)}     Bind sockets with SO_REUSEADDR.
-    #{'HEAP_BASE:'.color(:green)}       Base address for heap allocations.
-    #{'HEAP_SIZE:'.color(:green)}       Size of heap, defaults to 64k.
+    #{'HEAP_BASE:'.color(:green)}      Base address for heap allocations.
+    #{'HEAP_SIZE:'.color(:green)}      Size of heap, defaults to 64k.
 
     USAGE
 
