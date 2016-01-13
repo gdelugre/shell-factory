@@ -70,7 +70,7 @@ CC = "g++"
 OUTPUT_DIR = "bins"
 SHELLCODE_DIR = "shellcodes"
 INCLUDE_DIRS = %w{include}
-LD_SCRIPT = File.join(File.dirname(__FILE__), "factory.lds")
+LD_SCRIPT_ELF = File.join(File.dirname(__FILE__), "factory-elf.lds")
 OUTPUT_SECTIONS = %w{.text .rodata .data}
 CFLAGS = %W{-std=c++1y
             -Wall
@@ -87,7 +87,6 @@ CFLAGS = %W{-std=c++1y
             -Wl,-e_start
             -Wl,--gc-sections
             -Wl,-N
-            -Wl,-T#{LD_SCRIPT}
          }
 
 COMPILER_CFLAGS =
@@ -108,8 +107,9 @@ COMPILER_CFLAGS =
 
 OS_CFLAGS =
 {
-    /linux/ => %w{-Wl,--build-id=none},
-    /none/ => %w{-U__STDC_HOSTED__}
+    /linux/ => %W{-Wl,-T#{LD_SCRIPT_ELF} -Wl,--build-id=none},
+    /bsd/ => %W{-Wl,-T#{LD_SCRIPT_ELF}},
+    /none/ => %W{-Wl,-T#{LD_SCRIPT_ELF} -U__STDC_HOSTED__}
 }
 
 # Architecture-dependent flags.
