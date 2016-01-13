@@ -89,7 +89,7 @@ CFLAGS = %W{-std=c++1y
 
 COMPILER_CFLAGS =
 {
-    /^g\+\+/ =>
+    /^g\+\+|gcc/ =>
         %w{-fno-toplevel-reorder
            -finline-functions
            -flto
@@ -97,7 +97,7 @@ COMPILER_CFLAGS =
            -Os
            },
 
-    /^clang\+\+/ =>
+    /^clang/ =>
         %w{-Oz
            -Wno-invalid-noreturn
           }
