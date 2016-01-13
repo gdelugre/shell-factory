@@ -7,7 +7,7 @@ namespace Pico {
         constexpr static unsigned STACK_SIZE = 1024 * 1024;
 
         public:
-            using thread_routine = int (*)(void *);
+            using thread_routine = Target::Process::thread_routine;
             using thread_id = Target::Process::thread_id;
 
             FUNCTION Thread         current();
