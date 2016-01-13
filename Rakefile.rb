@@ -276,21 +276,22 @@ def compile(target, triple, output_dir, *opts)
     sh "#{cc_invoke(cc,triple,sysroot)} #{cflags.join(' ')} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
         (STDERR.puts; show_error("Compilation failed.")) unless ok
     end
+
+    output_file
 end
 
-def generate_shellcode(target, triple, output_dir)
+def generate_shellcode(object_file, target, triple, output_dir)
     _, target_name = target_to_source(target)
     triple_info = triple.empty? ? Triple.current : Triple.parse(triple)
 
-    input_file = output_dir.join("#{target_name}.elf")
     output_file = output_dir.join("#{target_name}.#{triple_info.arch}-#{triple_info.os}.bin")
 
     # Extract shellcode.
     triple += '-' unless triple.empty?
     sections = OUTPUT_SECTIONS.map{|s| "-j #{s}"}.join(' ')
-    sh "#{triple}objcopy -O binary #{sections} #{input_file} #{output_file}" do |ok, res|
+    sh "#{triple}objcopy -O binary #{sections} #{object_file} #{output_file}" do |ok, res|
         STDERR.puts
-        show_error("Cannot extract shellcode from #{input_file}") unless ok
+        show_error("Cannot extract shellcode from #{object_file}") unless ok
     end
 
     # Read shellcode.
@@ -309,8 +310,8 @@ def build(target, *opts)
     triple = ENV['TRIPLE'] if ENV['TRIPLE']
 
     make_directory(output_dir)
-    compile(target, triple, output_dir, *opts)
-    generate_shellcode(target, triple, output_dir)
+    object_file = compile(target, triple, output_dir, *opts)
+    generate_shellcode(object_file, target, triple, output_dir)
 end
 
 def make_directory(path)
