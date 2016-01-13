@@ -119,6 +119,18 @@ ARCH_CFLAGS =
     /.*/ => %w{-fPIC}
 }
 
+FILE_EXT =
+{
+    :exec => {
+        /win/ => 'exe',
+        /.*/ => 'elf'
+    },
+    :shared => {
+        /win/ => 'dll',
+        /.*/ => 'so'
+    }
+}
+
 def show_info(str, list = {})
     STDERR.puts "[".bold + "*".bold.color(:green) + "] ".bold + str
 
@@ -174,6 +186,7 @@ def compile(target, triple, output_dir, *opts)
     source_dir, target_name = target_to_source(target)
     source_file = source_dir.join("#{target_name}.cc")
     sysroot = ENV['SYSROOT']
+    file_type = :exec
 
     unless File.exists?(source_file)
         show_error("Cannot find source for target '#{target.to_s.color(:red)}'.")
@@ -236,6 +249,7 @@ def compile(target, triple, output_dir, *opts)
     end
 
     if ENV['OUTPUT_LIB'].to_i == 1
+        file_type = :shared
         cflags << '-shared'
     end
 
@@ -257,7 +271,8 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
-    output_file = output_dir.join("#{target_name}.elf")
+    output_ext = FILE_EXT[file_type].select{|os, ext| target_triple.os =~ os}.values.first
+    output_file = output_dir.join("#{target_name}.#{output_ext}")
     sh "#{cc_invoke(cc,triple,sysroot)} #{cflags.join(' ')} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
         (STDERR.puts; show_error("Compilation failed.")) unless ok
     end
