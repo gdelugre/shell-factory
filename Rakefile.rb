@@ -59,7 +59,10 @@ class Triple
     end
 
     def self.current
-        Triple.parse RbConfig::CONFIG['target']
+        arch, vendor = RbConfig::CONFIG['target_cpu'], RbConfig::CONFIG['target_vendor']
+        os, abi = RbConfig::CONFIG['target_os'].split('-')
+
+        Triple.new(arch, vendor, os, abi)
     end
 end
 
