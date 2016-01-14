@@ -203,7 +203,7 @@ def compile(target, triple, output_dir, *opts)
     target_triple = triple.empty? ? Triple.current : Triple.parse(triple)
 
     show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'",
-        'Compiler' => cc,
+        'Compiler' => real_cc,
         'Host architecture' => host_triple,
         'Target architecture' => target_triple,
         'Options' => defines
