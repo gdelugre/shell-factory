@@ -66,7 +66,7 @@ class Triple
     end
 end
 
-CC = "g++"
+CC = "cc"
 OUTPUT_DIR = "bins"
 SHELLCODE_DIR = "shellcodes"
 INCLUDE_DIRS = %w{include}
@@ -131,6 +131,12 @@ FILE_EXT =
     }
 }
 
+def detect_compiler(cmd)
+    %x{#{cmd} -v 2>&1} =~ /(\w+) version /m
+
+    $1
+end
+
 def show_info(str, list = {})
     STDERR.puts "[".bold + "*".bold.color(:green) + "] ".bold + str
 
@@ -154,10 +160,10 @@ def cc_invoke(cc, triple, sysroot = nil)
 
     triple_cc =
     case cc
-    when 'g++'
+    when /^g\+\+|gcc/
         "#{triple}-#{cc}"
 
-    when 'clang++'
+    when /^clang/
         sysroot ||= "/usr/#{triple}"
         "#{cc} -target #{triple} --sysroot=#{sysroot}"
     end
@@ -182,6 +188,7 @@ def compile(target, triple, output_dir, *opts)
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
     cc = ENV['CC'] || CC
+    real_cc = (cc == 'cc') ? detect_compiler(cc) : cc
     cflags = CFLAGS.dup
     source_dir, target_name = target_to_source(target)
     source_file = source_dir.join("#{target_name}.cc")
@@ -218,7 +225,7 @@ def compile(target, triple, output_dir, *opts)
     end
 
     COMPILER_CFLAGS.each_pair do |comp, flags|
-        if cc =~ comp
+        if real_cc =~ comp
             cflags += flags
             break
         end
