@@ -134,7 +134,7 @@ FILE_EXT =
 def detect_compiler(cmd)
     %x{#{cmd} -v 2>&1} =~ /(\w+) version /m
 
-    $1
+    $1 or cmd
 end
 
 def show_info(str, list = {})
@@ -188,7 +188,7 @@ def compile(target, triple, output_dir, *opts)
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
     cc = ENV['CC'] || CC
-    real_cc = (cc == 'cc') ? detect_compiler(cc) : cc
+    cc = (cc == 'cc') ? detect_compiler(cc) : cc
     cflags = CFLAGS.dup
     source_dir, target_name = target_to_source(target)
     source_file = source_dir.join("#{target_name}.cc")
@@ -203,7 +203,7 @@ def compile(target, triple, output_dir, *opts)
     target_triple = triple.empty? ? Triple.current : Triple.parse(triple)
 
     show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'",
-        'Compiler' => real_cc,
+        'Compiler' => cc,
         'Host architecture' => host_triple,
         'Target architecture' => target_triple,
         'Options' => defines
@@ -225,7 +225,7 @@ def compile(target, triple, output_dir, *opts)
     end
 
     COMPILER_CFLAGS.each_pair do |comp, flags|
-        if real_cc =~ comp
+        if cc =~ comp
             cflags += flags
             break
         end
