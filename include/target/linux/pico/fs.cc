@@ -247,10 +247,7 @@ namespace Pico {
                     break;
 
                 if ( ret < 0 )
-                {
-                    region.free();
                     return ret;
-                }
 
                 read_size += ret;
                 region.resize(region.size() * 2);
@@ -270,7 +267,6 @@ namespace Pico {
                     break;
             }
 
-            region.free();
             return ret;
         }
     }

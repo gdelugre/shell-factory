@@ -39,6 +39,9 @@ namespace Pico {
                     ptr = Memory::allocate(base, size, prot);
                     region_size = size;
                 }
+                DESTRUCTOR ~Region() {
+                    free();
+                }
 
                 METHOD void *   pointer() const { return ptr; }
                 METHOD size_t   size() const { return region_size; }
@@ -54,15 +57,15 @@ namespace Pico {
                     return 0;
                 }
 
-                METHOD void     free() {
-                    Memory::release(ptr, region_size);
-                }
-
                 // Automatic pointer cast.
                 template <typename T>
                 METHOD operator T *() const { return static_cast<T *>(ptr); }
 
             private:
+                METHOD void free() {
+                    Memory::release(ptr, region_size);
+                }
+
                 void *ptr;
                 size_t region_size;
         };
