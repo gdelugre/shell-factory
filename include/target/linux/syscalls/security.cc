@@ -12,6 +12,7 @@ namespace Syscall {
     SYSTEM_CALL uid_t   geteuid();
     SYSTEM_CALL gid_t   getgid();
     SYSTEM_CALL gid_t   getegid();
+    SYSTEM_CALL int     getrandom(void *, size_t, unsigned int);
 
     SYSTEM_CALL
     uid_t getuid()
@@ -36,6 +37,14 @@ namespace Syscall {
     {
         return DO_SYSCALL(getegid);
     }
+
+    #if SYSCALL_EXISTS(getrandom)
+    SYSTEM_CALL
+    int getrandom(void *buf, size_t buflen, unsigned int flags)
+    {
+        return DO_SYSCALL(getrandom, buf, buflen, flags);
+    }
+    #endif
 }
 
 #endif

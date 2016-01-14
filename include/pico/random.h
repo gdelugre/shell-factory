@@ -6,6 +6,11 @@
 namespace Pico {
 
     //
+    // Target-specific implementation.
+    //
+    class SecureRandom;
+
+    //
     // Generic linear congruential random number generator.
     //
     template <typename StateType, uint64_t A, uint64_t C, unsigned OutputBits, unsigned OutputShift>
