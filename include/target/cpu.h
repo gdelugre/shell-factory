@@ -21,13 +21,13 @@
 #define FLUSH_VARIABLE(var) \
     asm("" :: "r" (var));
 
-register char *__reg_sp asm ( SP_REGISTER );
-
 namespace Stack {
 
     FUNCTION
     void shift(long offset)
     {
+        register char *__reg_sp asm ( SP_REGISTER );
+
         __reg_sp += offset;
         FLUSH_VARIABLE(__reg_sp);
     }
@@ -35,6 +35,8 @@ namespace Stack {
     FUNCTION
     void *pointer()
     {
+        register char *__reg_sp asm ( SP_REGISTER );
+
         return __reg_sp;
     }
 }
