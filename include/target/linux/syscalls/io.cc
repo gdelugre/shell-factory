@@ -130,10 +130,10 @@ namespace Syscall {
     SYSTEM_CALL
     int select(int nfds, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, struct timeval *timeout)
     {
-        #if defined(__mips__) || defined(__arm__)
-        return DO_SYSCALL(_newselect, nfds, read_fds, write_fds, except_fds, timeout);
-        #else
+        #if SYSCALL_EXISTS(select)
         return DO_SYSCALL(select, nfds, read_fds, write_fds, except_fds, timeout);
+        #else
+        return DO_SYSCALL(_newselect, nfds, read_fds, write_fds, except_fds, timeout);
         #endif
     }
 

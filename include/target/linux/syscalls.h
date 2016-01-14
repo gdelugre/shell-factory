@@ -14,6 +14,8 @@
 #include <target/linux/aarch64/syscall_abi.h>
 #elif defined(__mips__)
 #include <target/linux/mips/syscall_abi.h>
+#elif defined(__SH4__)
+#include <target/linux/sh4/syscall_abi.h>
 #else
 #error "No syscall ABI defined for this architecture."
 #endif

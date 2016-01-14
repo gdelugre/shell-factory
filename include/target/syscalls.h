@@ -14,7 +14,7 @@
     asm volatile (                                                      \
         SYSCALL_INSTRUCTION "\n"                                        \
         : "=r" (__sys_result)                                           \
-        : "r" (__sys_num), ##__VA_ARGS__                                \
+        : [nr_args] "i"(4), "r" (__sys_num), ##__VA_ARGS__              \
         : "memory", "cc"                                                \
     );                                                                  \
     asm volatile ("" ::: SYSCALL_CLOBBERED_REGISTERS );                 \
