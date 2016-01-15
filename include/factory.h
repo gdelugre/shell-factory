@@ -40,10 +40,17 @@ namespace Shellcode {
 }
 
 extern "C" {
+
+    // Shellcode entry point.
     NO_RETURN void _start(void)
     {
         Shellcode::entry();
         __builtin_unreachable();
+    }
+
+    // Exit destructors are not handled.
+    int __cxa_atexit(void (*f)(void *), void *objptr, void *dso) {
+        return 0;
     }
 }
 
