@@ -69,7 +69,7 @@ namespace Syscall {
     SYSTEM_CALL
     int access(const char *path, int mode)
     {
-        return DO_SYSCALL(access, mode);
+        return DO_SYSCALL(access, path, mode);
     }
 
     SYSTEM_CALL
