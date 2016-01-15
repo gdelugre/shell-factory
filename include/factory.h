@@ -25,9 +25,11 @@
 #define VIRTUAL_METHOD virtual METHOD
 #define FUNCTION static METHOD
 #define FUNCTION_NOINLINE static METHOD_NOINLINE
-#define EXPORT_FUNCTION METHOD_NOINLINE
+#define EXPORT_FUNCTION METHOD USED
 #define EXPORT_ABI_FUNCTION EXPORT_FUNCTION __attribute__((visibility("internal")))
 #define SYSTEM_CALL static INLINE
+#define UNUSED __attribute__((unused))
+#define USED __attribute__((used))
 #define BUILTIN(func) __builtin_ ## func
 
 #define STRINGIZE(x) #x
