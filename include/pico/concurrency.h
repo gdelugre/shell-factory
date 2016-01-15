@@ -1,27 +1,79 @@
 #ifndef PICOLIB_CONCURRENCY_H_
 #define PICOLIB_CONCURRENCY_H_
 
-#include <cstdint>
+namespace Pico {
+
+    template <typename T>
+    class Atomic;
+
+    template <typename T>
+    class Atomic<T *>
+    {
+        public:
+            CONSTRUCTOR Atomic(T *ptr) : ptr(ptr) {}
+            METHOD bool compare_exchange(T expected, T desired) {
+                return __sync_bool_compare_and_swap(ptr, expected, desired);
+            }
+            METHOD T operator ++() {
+                return __sync_add_and_fetch(ptr, 1);
+            }
+
+            METHOD T operator ++(int) {
+                return __sync_fetch_and_add(ptr, 1);
+            }
+            METHOD T operator --() {
+                return __sync_sub_and_fetch(ptr, 1);
+            }
+
+            METHOD T operator --(int) {
+                return __sync_fetch_and_sub(ptr, 1);
+            }
+
+        private:
+            T *ptr;
+    };
+
+    template <typename T>
+    class Atomic
+    {
+        public:
+            CONSTRUCTOR Atomic(T init_val) : value(init_val) {}
+            METHOD bool compare_exchange(T expected, T desired) {
+                return __sync_bool_compare_and_swap(&value, expected, desired);
+            }
+            METHOD T operator ++() {
+                return __sync_add_and_fetch(&value, 1);
+            }
+
+            METHOD T operator ++(int) {
+                return __sync_fetch_and_add(&value, 1);
+            }
+            METHOD T operator --() {
+                return __sync_sub_and_fetch(&value, 1);
+            }
+
+            METHOD T operator --(int) {
+                return __sync_fetch_and_sub(&value, 1);
+            }
+
+        private:
+            T value;
+    };
+}
 
 /* 
- * XXX: Locking of statically declared variables in functions.
- *
- * Synchronization primitives are not implemented yet.
- * This is a non thread-safe implementation.
+ * Locking of statically declared variables in functions.
  */
 extern "C" {
-    using guard_type = uint64_t;
+    using guard_type = char;
 
     EXPORT_ABI_FUNCTION int __cxa_guard_acquire(guard_type* guard)
     { 
-        char *initialized = reinterpret_cast<char *>(guard);
-        int ret = *initialized == 0;
-
-        *initialized = 1;
-        return ret; 
+        Pico::Atomic<guard_type *> atom(guard);
+        return atom.compare_exchange(0, 1);
     }
 
-    EXPORT_ABI_FUNCTION void __cxa_guard_release(guard_type* guard) {}
+    EXPORT_ABI_FUNCTION void __cxa_guard_release(guard_type* UNUSED guard) {}
 }
 
 #endif
