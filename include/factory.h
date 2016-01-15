@@ -1,6 +1,9 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
+// Unneeded and may conflict with our function definitions.
+#undef _FORTIFY_SOURCE
+
 #include <cstdint>
 #include <cstddef>
 
