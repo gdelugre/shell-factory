@@ -148,6 +148,7 @@ namespace Pico {
             // Should not be called. Undefined behavior.
             METHOD handle file_desc() const {
                 assert(true);
+                return -1;
             }
 
             METHOD handle read_file_desc() const {

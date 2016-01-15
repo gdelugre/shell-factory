@@ -51,7 +51,7 @@ extern "C" {
     }
 
     // Exit destructors are not handled.
-    int __cxa_atexit(void (*f)(void *), void *objptr, void *dso) {
+    int __cxa_atexit(void UNUSED (*f)(void *), UNUSED void *objptr, UNUSED void *dso) {
         return 0;
     }
 }

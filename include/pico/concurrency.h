@@ -73,7 +73,7 @@ extern "C" {
         return atom.compare_exchange(0, 1);
     }
 
-    EXPORT_ABI_FUNCTION void __cxa_guard_release(guard_type* UNUSED guard) {}
+    EXPORT_ABI_FUNCTION void __cxa_guard_release(UNUSED guard_type* guard) {}
 }
 
 #endif

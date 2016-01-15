@@ -384,11 +384,11 @@ namespace Pico {
                 }
 
                 Memory::Region slots;
-                size_t free_space = 0;
-                size_t nr_slots = 0;
                 size_t max_slots = slots.size() / sizeof(FreeEntry);
                 const void *memory_start;
                 void *memory_end;
+                size_t free_space = 0;
+                size_t nr_slots = 0;
         };
 
         public:

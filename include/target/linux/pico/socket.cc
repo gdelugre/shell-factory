@@ -227,7 +227,7 @@ namespace Pico {
         {
             char dummy                       = 0;
             int fd                           = io.file_desc();
-            struct msghdr msg                = {0};
+            struct msghdr msg                = {};
             char buf[CMSG_SPACE(sizeof(fd))] = {0};
             struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
 
@@ -251,7 +251,7 @@ namespace Pico {
         {
             char dummy;
             int fd                           = -1;
-            struct msghdr msg                = {0};
+            struct msghdr msg                = {};
             char buf[CMSG_SPACE(sizeof(fd))] = {0};
             struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
 
