@@ -27,30 +27,43 @@ namespace Pico {
     void Thread::set_name(const char *comm)
     {
         Syscall::prctl(PR_SET_NAME,  (unsigned long) comm, 0, 0, 0);
-    } 
+    }
+
+    template <typename Func>
+    METHOD
+    int Process::list(Func cb)
+    {
+        Filesystem::Directory::each("/proc", [cb](const char *filename) -> int {
+            pid_t pid = atoi(filename);
+            if ( pid == 0 )
+                return 0;
+
+            int ret;
+            Process proc(pid);
+
+            return cb(proc);
+        });
+    }
 
     METHOD
     Process Process::find_by_name(char *proc_name)
     {
         pid_t result = 0;
 
-        Filesystem::Directory::each("/proc", [proc_name,&result](const char *filename) -> int {
+        Process::list([proc_name, &result](Process proc) -> int {
             char comm_path[PATH_MAX];
             char comm[COMM_MAX + 1];
 
-            pid_t pid = atoi(filename);
-            if ( pid == 0 )
-                return 0;
+            sprintf(comm_path, "/proc/%d/comm", proc.id());
 
-            sprintf(comm_path, "/proc/%s/comm", filename);
-            int fd = Syscall::open(comm_path, O_RDONLY);
-            ssize_t n = Syscall::read(fd, comm, sizeof(comm));
+            Filesystem::File comm_file(comm_path, Filesystem::File::READ);
+            ssize_t n = comm_file.read(comm, sizeof(comm));
             comm[n - 1] = '\0';
-            Syscall::close(fd);
+            comm_file.close();
 
             if ( String(proc_name) == comm )
             {
-                result = pid;
+                result = proc.id();
                 return 1;
             }
 
@@ -65,15 +78,11 @@ namespace Pico {
     {
         pid_t result = 0;
 
-        Filesystem::Directory::each("/proc", [exe_path,&result](const char *filename) {
+        Process::list([exe_path, &result](Process proc) -> int {
             char link_path[PATH_MAX];
             char exe[PATH_MAX + 1];
-            pid_t pid = atoi(filename);
 
-            if ( pid == 0 )
-                return 0;
-
-            sprintf(link_path, "/proc/%s/exe", filename);
+            sprintf(link_path, "/proc/%d/exe", proc.id());
             ssize_t n = Syscall::readlink(link_path, exe, sizeof(exe));
             if ( n < 0 )
                 return 0;
@@ -81,7 +90,7 @@ namespace Pico {
             exe[n] = '\0';
             if ( String(exe_path) == exe )
             {
-                result = pid;
+                result = proc.id();
                 return 1;
             }
 
@@ -102,7 +111,7 @@ namespace Pico {
     {
         Syscall::exit_group(status);
     }
-    
+
     METHOD
     Thread Thread::create(thread_routine thread_entry, void *arg)
     {
@@ -196,7 +205,7 @@ namespace Pico {
     {
         return signal(SIGKILL);
     }
-    
+
     METHOD
     int Process::kill()
     {
