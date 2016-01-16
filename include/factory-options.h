@@ -28,7 +28,7 @@
 #if defined(HEAP_SIZE)
 #define OPT_HEAP_SIZE HEAP_SIZE
 #else
-#define OPT_HEAP_SIZE 64 * 1024
+#define OPT_HEAP_SIZE 64_KB
 #endif
 
 namespace Options {

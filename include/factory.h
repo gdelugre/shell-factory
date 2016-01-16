@@ -4,9 +4,6 @@
 // Unneeded and may conflict with our function definitions.
 #undef _FORTIFY_SOURCE
 
-#include <cstdint>
-#include <cstddef>
-
 #if defined(RELAX_INLINE) && (RELAX_INLINE == 1)
 #define INLINE inline
 #elif defined(RELAX_INLINE) && (RELAX_INLINE == 2)
@@ -73,6 +70,7 @@ extern char edata;
 extern char ebss;
 extern char eend;
 
+#include <sizes.h>
 #include <softfloat.h>
 #include <factory-options.h>
 #include <target/cpu.h>

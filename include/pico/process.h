@@ -4,7 +4,7 @@
 namespace Pico {
 
     class Thread {
-        constexpr static unsigned STACK_SIZE = 1024 * 1024;
+        constexpr static unsigned STACK_SIZE = 1_MB;
 
         public:
             using thread_routine = Target::Process::thread_routine;
