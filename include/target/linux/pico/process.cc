@@ -33,7 +33,7 @@ namespace Pico {
     METHOD
     int Process::list(Func cb)
     {
-        Filesystem::Directory::each("/proc", [cb](const char *filename) -> int {
+        return Filesystem::Directory::each("/proc", [cb](const char *filename) -> int {
             pid_t pid = atoi(filename);
             if ( pid == 0 )
                 return 0;
