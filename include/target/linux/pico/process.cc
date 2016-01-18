@@ -38,9 +38,7 @@ namespace Pico {
             if ( pid == 0 )
                 return 0;
 
-            int ret;
             Process proc(pid);
-
             return cb(proc);
         });
     }
@@ -48,7 +46,7 @@ namespace Pico {
     METHOD
     Process Process::find_by_name(char *proc_name)
     {
-        pid_t result = 0;
+        pid_t result = -1;
 
         Process::list([proc_name, &result](Process proc) -> int {
             char comm_path[PATH_MAX];
@@ -76,7 +74,7 @@ namespace Pico {
     METHOD
     Process Process::find_by_path(char *exe_path)
     {
-        pid_t result = 0;
+        pid_t result = -1;
 
         Process::list([exe_path, &result](Process proc) -> int {
             char link_path[PATH_MAX];
