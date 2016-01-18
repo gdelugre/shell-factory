@@ -3,6 +3,15 @@
 
 namespace Pico {
 
+    namespace Memory {
+
+        FUNCTION
+        void barrier()
+        {
+            __sync_synchronize();
+        }
+    }
+
     template <typename T>
     class Atomic;
 
