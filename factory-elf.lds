@@ -36,7 +36,7 @@ SECTIONS
 
     PROVIDE (ebss = .);
 
-    _end = NEXT(4096);
+    _end = ALIGN(4096);
     PROVIDE (eend = _end);
 
     /DISCARD/           : { *(.note.*) }
