@@ -235,6 +235,10 @@ def compile(target, triple, output_dir, *opts)
         cflags << "-mstackrealign"
     end
 
+    if ENV['LD']
+        cflags << "-fuse-ld=#{ENV['LD'].inspect}"
+    end
+
     if ENV['CFLAGS']
         cflags += [ ENV['CFLAGS'] ]
     end
@@ -346,6 +350,7 @@ task :help do
  #{'Compilation options:'.color(:cyan)}
 
     #{'CC:'.color(:green)}             Let you choose the compiler. Only supported are g++ and clang++.
+    #{'LD:'.color(:green)}             Let you choose the linker. Supported values are "bfd" and "gold".
     #{'TRIPLE:'.color(:green)}         Cross compilation target. For example: "aarch64-linux-gnu".
     #{'ARCH'.color(:green)}            Specify a specific architecture to compile to (e.g. armv7-r).
     #{'CPU'.color(:green)}             Specify a specific CPU to compile to (e.g. cortex-a15).
