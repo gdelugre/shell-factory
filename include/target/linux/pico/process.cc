@@ -31,7 +31,7 @@ namespace Pico {
 
     template <typename Func>
     METHOD
-    int Process::list(Func cb)
+    int Process::each(Func cb)
     {
         return Filesystem::Directory::each("/proc", [cb](const char *filename) -> int {
             pid_t pid = atoi(filename);
@@ -48,7 +48,7 @@ namespace Pico {
     {
         pid_t result = -1;
 
-        Process::list([proc_name, &result](Process proc) -> int {
+        Process::each([proc_name, &result](Process proc) -> int {
             char comm_path[PATH_MAX];
             char comm[COMM_MAX + 1];
 
@@ -76,7 +76,7 @@ namespace Pico {
     {
         pid_t result = -1;
 
-        Process::list([exe_path, &result](Process proc) -> int {
+        Process::each([exe_path, &result](Process proc) -> int {
             char link_path[PATH_MAX];
             char exe[PATH_MAX + 1];
 

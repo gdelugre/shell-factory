@@ -38,7 +38,7 @@ namespace Pico {
             FUNCTION signal_handler set_signal_handler(int signal, signal_handler handler);
 
             template <typename Func>
-            FUNCTION int list(Func cb);
+            FUNCTION int each(Func cb);
 
             template <enum channel_mode M>
             NO_RETURN FUNCTION void execute(Channel<M> channel, const char *filename,
