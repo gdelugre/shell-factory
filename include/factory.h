@@ -48,6 +48,7 @@ extern "C" {
     }
 
     // Exit destructors are not handled.
+    EXPORT_ABI_FUNCTION
     int __cxa_atexit(void UNUSED (*f)(void *), UNUSED void *objptr, UNUSED void *dso) {
         return 0;
     }

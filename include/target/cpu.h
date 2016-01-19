@@ -15,6 +15,7 @@
 #elif defined(__mips__)
 #include <target/cpu/mips/cpu_defs.h>
 #elif defined(__SH4__)
+#include <target/cpu/sh4/softfloat.h>
 #include <target/cpu/sh4/cpu_defs.h>
 #else
 #error "No definitions for this CPU."
