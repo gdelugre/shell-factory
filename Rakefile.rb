@@ -271,11 +271,13 @@ def compile(target, triple, output_dir, *opts)
     end
 
     if ENV['OUTPUT_DEBUG'].to_i == 1
+        asm_cflags = ['-S'] + cflags + ['-fno-lto']
         output_file = output_dir.join("#{target_name}.S")
-        cflags << '-g'
-        sh "#{cc_invoke(cc,triple,sysroot)} -S #{cflags.join(" ")} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
+        sh "#{cc_invoke(cc,triple,sysroot)} #{asm_cflags.join(" ")} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
             (STDERR.puts; show_error("Compilation failed.")) unless ok
         end
+
+        cflags << '-g'
     end
 
     output_ext = FILE_EXT[file_type].select{|os, ext| target_triple.os =~ os}.values.first
