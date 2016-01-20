@@ -52,6 +52,14 @@ extern "C" {
     int __cxa_atexit(void UNUSED (*f)(void *), UNUSED void *objptr, UNUSED void *dso) {
         return 0;
     }
+
+    NO_RETURN
+    EXPORT_ABI_FUNCTION
+    void abort()
+    {
+        __builtin_trap();
+        __builtin_unreachable();
+    }
 }
 
 #if defined(NO_ASSERTS) && (NO_ASSERTS == 1)
@@ -61,7 +69,7 @@ FUNCTION
 void assert(bool expr)
 {
     if ( !expr )
-        __builtin_trap();
+        abort();
 }
 #endif
 

@@ -1,6 +1,8 @@
 #ifndef ARM_SOFTFLOAT_H_
 #define ARM_SOFTFLOAT_H_
 
+#include <cstdint>
+
 extern "C" {
 
     EXPORT_ABI_FUNCTION

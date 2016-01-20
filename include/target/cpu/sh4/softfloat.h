@@ -1,6 +1,8 @@
 #ifndef SH4_SOFTFLOAT_H_
 #define SH4_SOFTFLOAT_H_
 
+#include <cstdint>
+
 extern "C" {
 
     EXPORT_ABI_FUNCTION

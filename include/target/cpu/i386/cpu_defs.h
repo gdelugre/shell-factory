@@ -1,6 +1,8 @@
 #ifndef CPU_REGS_H_
 #define CPU_REGS_H_
 
+#include <cstdint>
+
 #define SP_REGISTER "esp"
 
 namespace CPU {
