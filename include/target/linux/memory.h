@@ -11,6 +11,8 @@
 #include <target/linux/aarch64/memory.h>
 #elif defined(__mips__)
 #include <target/linux/mips/memory.h>
+#elif defined(__powerpc__)
+#include <target/linux/ppc/memory.h>
 #elif defined(__SH4__)
 #include <target/linux/sh4/memory.h>
 #else

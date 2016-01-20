@@ -1,19 +1,6 @@
 #ifndef GENERIC_SYSCALL_ABI_H_
 #define GENERIC_SYSCALL_ABI_H_
 
-class StackFrame
-{
-    public:
-        CONSTRUCTOR StackFrame(unsigned elements) {
-            space = (void **) __builtin_alloca(elements * sizeof(void *));
-
-            space[0] = (void *) 42;
-        }
-
-    private:
-        void **space;
-};
-
 #define SYSCALL_ARG_BIND_REGISTER(i, reg, value)                        \
     register auto __arg##i asm (reg) = value;                           \
 
