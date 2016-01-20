@@ -13,6 +13,7 @@
 /* Syscall definitions */
 #include <sys/syscall.h>
 
+#include "syscalls/sys.cc"
 #include "syscalls/io.cc"
 #include "syscalls/process.cc"
 #include "syscalls/memory.cc"

@@ -1,6 +1,8 @@
 #ifndef PICOLIB_PROCESS_IMPL_H_
 #define PICOLIB_PROCESS_IMPL_H_
 
+#include <sys/user.h>
+
 namespace Pico {
 
     constexpr int COMM_MAX = MAXCOMLEN;
@@ -30,6 +32,43 @@ namespace Pico {
     void Thread::set_name(const char *comm)
     {
         Syscall::thr_set_name(Thread::current().id(), comm);
+    }
+
+
+    template <typename Func>
+    METHOD 
+    int Process::each(Func cb)
+    {
+        size_t size;
+        int mib[3] =
+        {
+            CTL_KERN,
+            KERN_PROC,
+            KERN_PROC_PROC,
+        };
+
+        if ( Syscall::sysctl(mib, 3, nullptr, &size, nullptr, 0) != 0 )
+            return -1;
+
+        size += size / 8;
+        Memory::Region region(size); 
+        struct kinfo_proc *kip = region;
+
+        if ( Syscall::sysctl(mib, 3, kip, &size, nullptr, 0) != 0 )
+            return -1;
+
+        int ret = 0;
+        for (unsigned i = 0; i < size; i += kip->ki_structsize, kip++) {
+            if (kip->ki_structsize != sizeof(struct kinfo_proc))
+                return -1;
+
+            Process proc(kip->ki_pid);
+            ret = cb(proc);
+            if ( ret != 0 )
+                break; 
+        }
+
+        return ret;
     }
 
     // TODO
