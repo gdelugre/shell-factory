@@ -3,6 +3,8 @@
 
 #if defined(__linux__)
 #include <target/linux/types.h>
+#elif defined(__FreeBSD__)
+#include <target/freebsd/types.h>
 #else
 #error "Types are not defined for this operating system."
 #endif

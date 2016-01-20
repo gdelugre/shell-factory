@@ -92,6 +92,8 @@
 
 #if defined(__linux__)
 #include <target/linux/syscalls.h>
+#elif defined(__FreeBSD__)
+#include <target/freebsd/syscalls.h>
 #else
 #pragma message "No operating system detected, compiling to bare-metal."
 #endif
