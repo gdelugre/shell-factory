@@ -5,25 +5,13 @@
 
 extern "C" {
 
+    #if defined(__ARM_EABI__)
     EXPORT_ABI_FUNCTION
-    uint32_t __clzsi2(uint32_t n)
+    int32_t __aeabi_idiv(int32_t dividend, int32_t divisor)
     {
-        return Bits::soft_clz(n);
+        return __divsi3(dividend, divisor);
     }
 
-    EXPORT_ABI_FUNCTION
-    uint32_t __udivsi3(uint32_t dividend, uint32_t divisor)
-    {
-        return Math::soft_div(dividend, divisor);
-    }
-
-    EXPORT_ABI_FUNCTION
-    uint32_t __umodsi3(uint32_t dividend, uint32_t divisor)
-    {
-        return Math::soft_mod(dividend, divisor);
-    }
-
-#if defined(__ARM_EABI__)
     EXPORT_ABI_FUNCTION
     uint32_t __aeabi_uidiv(uint32_t dividend, uint32_t divisor)
     {
@@ -39,7 +27,7 @@ extern "C" {
         uint64_t result = q | (r << 32);
         return result;
     }
-#endif
+    #endif
 }
 
 #endif

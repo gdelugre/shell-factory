@@ -173,4 +173,41 @@ namespace Math {
     }
 }
 
+//
+// Common softfloat arithmetic functions.
+// See https://gcc.gnu.org/onlinedocs/gccint/Integer-library-routines.html
+//
+extern "C" {
+
+    EXPORT_ABI_FUNCTION
+    int __clzsi2(unsigned int a)
+    {
+        return Bits::soft_clz(a);
+    }
+
+    EXPORT_ABI_FUNCTION
+    int __divsi3(int a, int b)
+    {
+        return Math::soft_div(a, b);
+    }
+
+    EXPORT_ABI_FUNCTION
+    unsigned int __udivsi3(unsigned int a, unsigned int b)
+    {
+        return Math::soft_udiv(a, b);
+    }
+
+    EXPORT_ABI_FUNCTION
+    int __modsi3(int a, int b)
+    {
+        return Math::soft_mod(a, b);
+    }
+
+    EXPORT_ABI_FUNCTION
+    unsigned int __umodsi3(unsigned int a, unsigned int b)
+    {
+        return Math::soft_mod(a, b);
+    }
+}
+
 #endif
