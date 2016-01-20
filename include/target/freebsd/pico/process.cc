@@ -116,9 +116,21 @@ namespace Pico {
     }
 
     METHOD
+    int Thread::signal(int signal)
+    {
+        return Syscall::thr_kill(tid, signal);
+    }
+
+    METHOD
     int Process::signal(int signal)
     {
         return Syscall::kill(pid, signal);
+    }
+
+    METHOD
+    int Thread::kill()
+    {
+        return signal(SIGKILL);
     }
     
     METHOD

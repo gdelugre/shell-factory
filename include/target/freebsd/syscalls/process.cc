@@ -25,6 +25,7 @@ namespace Syscall {
     SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
     SYSTEM_CALL long            ptrace(int, pid_t, void *, void *);
     SYSTEM_CALL pid_t           wait4(pid_t, int *, int, struct rusage *);
+    SYSTEM_CALL int             thr_kill(lwpid_t, int);
     SYSTEM_CALL int             kill(pid_t, int);
     NO_RETURN SYSTEM_CALL int   thr_exit(long *state);
     NO_RETURN SYSTEM_CALL void  exit(int);
@@ -82,6 +83,12 @@ namespace Syscall {
     pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage)
     {
         return DO_SYSCALL(wait4, pid, status, options, rusage);
+    }
+
+    SYSTEM_CALL
+    int thr_kill(lwpid_t tid, int sig)
+    {
+        return DO_SYSCALL(thr_kill, tid, sig);
     }
 
     SYSTEM_CALL
