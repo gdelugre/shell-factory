@@ -1,10 +1,12 @@
 #ifndef PICOLIB_FS_IMPL_H_
 #define PICOLIB_FS_IMPL_H_
 
-#define foreach_dirent(dirents, dirent, off, dsize) \
-    for (off = 0, dirent = dirents; \
-            dirent && off < dsize; \
-            off += dirent->d_reclen, dirent = static_cast<struct linux_dirent *>((void *)(((char *) dirent) + dirent->d_reclen)))
+#include <dirent.h>
+
+#define foreach_dirent(dirents, ent, off, dsize) \
+    for (off = 0, ent = dirents; \
+            ent && off < dsize; \
+            off += ent->d_reclen, ent = static_cast<struct dirent *>((void *)(((char *) ent) + ent->d_reclen)))
 
 #define dirent_name(dirent) dirent->d_name
 
@@ -237,7 +239,7 @@ namespace Pico {
         {
             // Fetch the list of directories.
             Memory::Region region;
-            struct linux_dirent *dirents = region;
+            struct dirent *dirents = region;
             size_t read_size = 0;
 
             while ( true )
@@ -247,19 +249,16 @@ namespace Pico {
                     break;
 
                 if ( ret < 0 )
-                {
-                    region.free();
                     return ret;
-                }
 
                 read_size += ret;
                 region.resize(region.size() * 2);
-                dirents = static_cast<struct linux_dirent *>((void *)((char *) region.pointer() + read_size));
+                dirents = static_cast<struct dirent *>((void *)((char *) region.pointer() + read_size));
             }
 
             // Process each directory entry and pass it to function.
             dirents = region;
-            struct linux_dirent *current;
+            struct dirent *current;
             size_t off;
             int ret;
 
@@ -270,7 +269,6 @@ namespace Pico {
                     break;
             }
 
-            region.free();
             return ret;
         }
     }

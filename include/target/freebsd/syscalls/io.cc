@@ -8,13 +8,7 @@
 #include <poll.h>
 #include <unistd.h>
 #include <errno.h>
-
-struct linux_dirent {
-    unsigned long   d_ino;
-    unsigned long   d_off;
-    unsigned short  d_reclen;
-    char            d_name[1];
-};
+#include <dirent.h>
 
 /*
  * System calls defined in this file.
@@ -35,7 +29,7 @@ namespace Syscall {
     SYSTEM_CALL int     fsync(int);
     SYSTEM_CALL int     poll(struct pollfd *, nfds_t, int);
     SYSTEM_CALL int     select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
-    SYSTEM_CALL int     getdents(unsigned int, struct linux_dirent *, unsigned int);
+    SYSTEM_CALL int     getdents(unsigned int, struct dirent *, unsigned int);
     SYSTEM_CALL ssize_t readlink(const char *, char *, size_t);
     SYSTEM_CALL int     fstat(int, struct stat *);
     SYSTEM_CALL int     stat(int, struct stat *);
@@ -138,7 +132,7 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
-    int getdents(unsigned int fd, struct linux_dirent *dirp, unsigned int count)
+    int getdents(unsigned int fd, struct dirent *dirp, unsigned int count)
     {
         return DO_SYSCALL(getdents, fd, dirp, count);
     }
