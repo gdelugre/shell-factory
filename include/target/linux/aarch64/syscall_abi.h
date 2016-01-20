@@ -25,7 +25,7 @@
     "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18"
 #define SYSCALL_NUMBER_REGISTER "x8"
 #define SYSCALL_RESULT_REGISTER "x0"
-#define SYSCALL_INSTRUCTION     "svc %[nr_args]"
+#define SYSCALL_INSTRUCTION     "svc 0"
 
 #define SYSCALL_SET_ARG_1(value) SYSCALL_ARG_BIND_REGISTER(1, "x0", value)
 #define SYSCALL_SET_ARG_2(value) SYSCALL_ARG_BIND_REGISTER(2, "x1", value)
