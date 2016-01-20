@@ -13,5 +13,6 @@
 #include "pico/socket.cc"
 #include "pico/ipc.cc"
 #include "pico/security.cc"
+#include "pico/random.cc"
 
 #endif
