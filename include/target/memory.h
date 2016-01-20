@@ -3,6 +3,8 @@
 
 #if defined(__linux__)
 #include <target/linux/memory.h>
+#elif defined(__FreeBSD__)
+#include <target/freebsd/memory.h>
 #endif
 
 #endif
