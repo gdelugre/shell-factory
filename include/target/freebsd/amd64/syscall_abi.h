@@ -17,7 +17,7 @@
  * return value to rax
  */
 
-#define SYSCALL_CLOBBERED_REGISTERS "rcx", "r11", "r8", "r9"
+#define SYSCALL_CLOBBERED_REGISTERS "rcx", "r8", "r9", "r10", "r11"
 #define SYSCALL_NUMBER_REGISTER "rax"
 #define SYSCALL_RESULT_REGISTER "rax"
 #define SYSCALL_INSTRUCTION     "syscall"
