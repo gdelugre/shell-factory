@@ -15,7 +15,7 @@ namespace Target {
     }
 
     namespace Process {
-        using thread_id = pid_t;
+        using thread_id = lwpid_t;
         using process_id = pid_t;
         using signal_handler = void (*)(int);
     }

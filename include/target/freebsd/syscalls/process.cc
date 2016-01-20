@@ -16,6 +16,7 @@
  */
 namespace Syscall {
 
+    SYSTEM_CALL int             thr_self(lwpid_t *);
     SYSTEM_CALL pid_t           getpid(void);
     SYSTEM_CALL pid_t           getppid(void);
     SYSTEM_CALL pid_t           fork(void);
@@ -25,8 +26,14 @@ namespace Syscall {
     SYSTEM_CALL long            ptrace(int, pid_t, void *, void *);
     SYSTEM_CALL pid_t           wait4(pid_t, int *, int, struct rusage *);
     SYSTEM_CALL int             kill(pid_t, int);
-    /* TODO: implement thr_exit */
-    NO_RETURN SYSTEM_CALL void  exit_process(int);
+    NO_RETURN SYSTEM_CALL int   thr_exit(long *state);
+    NO_RETURN SYSTEM_CALL void  exit(int);
+
+    SYSTEM_CALL
+    int thr_self(lwpid_t *tid)
+    {
+        return DO_SYSCALL(thr_self, tid);
+    }
 
     SYSTEM_CALL
     pid_t getpid(void)
@@ -84,7 +91,14 @@ namespace Syscall {
     }
 
     NO_RETURN SYSTEM_CALL
-    void exit_process(int status)
+    int thr_exit(long *state)
+    {
+        DO_SYSCALL(thr_exit, state);
+        __builtin_unreachable();
+    }
+
+    NO_RETURN SYSTEM_CALL
+    void exit(int status)
     {
         DO_SYSCALL(exit, status);
         __builtin_unreachable();

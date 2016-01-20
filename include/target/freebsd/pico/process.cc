@@ -6,6 +6,15 @@ namespace Pico {
     constexpr int COMM_MAX = 16;
 
     METHOD
+    Thread Thread::current()
+    {
+        lwpid_t tid;
+
+        Syscall::thr_self(&tid);
+        return Thread(tid);
+    }
+
+    METHOD
     Process Process::current()
     {
         return Process( Syscall::getpid() );
@@ -21,39 +30,39 @@ namespace Pico {
     // Could be implemented for setting the process name though, as in setproctitle.
     //
     // METHOD
-    // void set_current_thread_name(const char *comm)
+    // void Thread::set_name(const char *comm)
     // {
     // } 
 
     // TODO
     //
     // METHOD
-    // Process Process::find_process_by_name(char *proc_name)
+    // Process Process::find_by_name(char *proc_name)
     // {
     // }
 
     // TODO
     // METHOD
-    // Process Process::find_process_by_path(char *exe_path)
+    // Process Process::find_by_path(char *exe_path)
     // {
     // }
 
-    // TODO
-    // NO_RETURN METHOD
-    // void Process::terminate_thread(int status)
-    // {
-    //    Syscall::exit_thread(status);
-    // }
+    NO_RETURN METHOD
+    void Thread::exit(int UNUSED status)
+    {
+        long state;
+        Syscall::thr_exit(&state);
+    }
 
     NO_RETURN METHOD
     void Process::exit(int status)
     {
-        Syscall::exit_process(status);
+        Syscall::exit(status);
     }
     
     // TODO
     // METHOD
-    // Process Process::create_thread(thread_routine thread_entry, void *arg)
+    // Thread Thread::create(thread_routine thread_entry, void *arg)
     // {
     // }
 
@@ -107,7 +116,7 @@ namespace Pico {
     }
 
     METHOD
-    int Process::send_signal(int signal)
+    int Process::signal(int signal)
     {
         return Syscall::kill(pid, signal);
     }
@@ -115,7 +124,7 @@ namespace Pico {
     METHOD
     int Process::kill()
     {
-        return send_signal(SIGKILL);
+        return signal(SIGKILL);
     }
 
     namespace Filesystem {
