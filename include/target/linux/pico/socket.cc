@@ -178,7 +178,7 @@ namespace Pico {
 
         template <enum AddressType T>
         METHOD
-        int StreamSocket::connect(Address<T> addr)
+        int Socket::connect(Address<T> addr)
         {
             static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
             size_t addr_len;
@@ -189,7 +189,7 @@ namespace Pico {
 
         template <enum AddressType T>
         METHOD
-        int StreamSocket::connect(Address<T> addr, uint16_t port)
+        int Socket::connect(Address<T> addr, uint16_t port)
         {
             size_t addr_len;
             auto serv_addr = Sockaddr<T>::pack(addr, port, addr_len);

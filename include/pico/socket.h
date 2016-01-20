@@ -92,6 +92,12 @@ namespace Pico {
                 METHOD int get(int level, int optname, void *val, unsigned *len);
                 METHOD int set(int level, int optname, void *val, unsigned len);
 
+                template <AddressType T>
+                METHOD int connect(Address<T> addr);
+
+                template <AddressType T>
+                METHOD int connect(Address<T> addr, uint16_t port);
+
                 template <enum AddressType T>
                 METHOD int bind(Address<T> addr);
 
@@ -127,12 +133,6 @@ namespace Pico {
                 using Socket::Socket;
 
                 CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
-
-                template <AddressType T>
-                METHOD int connect(Address<T> addr);
-
-                template <AddressType T>
-                METHOD int connect(Address<T> addr, uint16_t port);
 
                 METHOD int listen(int backlog);
 
