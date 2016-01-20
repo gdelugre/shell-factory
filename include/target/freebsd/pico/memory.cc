@@ -27,7 +27,7 @@ namespace Pico {
             if ( prot & Memory::STACK )
                 flags |= MAP_STACK;
 
-            void *ptr = Syscall::mmap(base, size, mmap_prot(prot), flags, 0, 0);
+            void *ptr = Syscall::mmap(base, size, mmap_prot(prot), flags, -1, 0);
             if ( Target::is_error(ptr) )
                 return nullptr;
             else
@@ -49,6 +49,9 @@ namespace Pico {
             void *new_ptr = allocate(nullptr, new_size, Memory::READ | Memory::WRITE);
             if ( Target::is_error(new_ptr) )
                 return nullptr;
+
+            if ( new_ptr != ptr )
+                Memory::copy(new_ptr, ptr, old_size);
 
             release(ptr, old_size); 
             return new_ptr;
