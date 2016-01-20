@@ -3,7 +3,7 @@
 
 namespace Pico {
 
-    constexpr int COMM_MAX = 16;
+    constexpr int COMM_MAX = MAXCOMLEN;
 
     METHOD
     Thread Thread::current()
@@ -26,13 +26,11 @@ namespace Pico {
         return Process( Syscall::getppid() );
     }
 
-    // XXX: Probably not possible.
-    // Could be implemented for setting the process name though, as in setproctitle.
-    //
-    // METHOD
-    // void Thread::set_name(const char *comm)
-    // {
-    // } 
+    METHOD
+    void Thread::set_name(const char *comm)
+    {
+        Syscall::thr_set_name(Thread::current().id(), comm);
+    }
 
     // TODO
     //
@@ -59,12 +57,30 @@ namespace Pico {
     {
         Syscall::exit(status);
     }
-    
-    // TODO
-    // METHOD
-    // Thread Thread::create(thread_routine thread_entry, void *arg)
-    // {
-    // }
+
+    METHOD
+    Thread Thread::create(thread_routine thread_entry, void *arg)
+    {
+        void *child_stack;
+        size_t stack_size = STACK_SIZE;
+        struct thr_param param;
+        long tid;
+
+        child_stack = Memory::allocate(stack_size, Memory::READ | Memory::WRITE | Memory::STACK);
+        param.start_func = thread_entry;
+        param.arg = arg;
+        param.stack_base = static_cast<char *>(child_stack);
+        param.stack_size = stack_size;
+        param.tls_base = nullptr;
+        param.tls_size = 0;
+        param.child_tid = nullptr;
+        param.parent_tid = &tid;
+        param.flags = 0;
+        param.rtp = nullptr;
+
+        Syscall::thr_new(&param, sizeof(param));
+        return Thread(static_cast<lwpid_t>(tid));
+    }
 
     NO_RETURN METHOD
     void Process::execute(const char *filename, char *const argv[], char *const envp[])
@@ -109,6 +125,12 @@ namespace Pico {
         return old_act.sa_handler;
     }
 
+    // No implementation defined.
+    // METHOD
+    // int Thread::wait(int *status)
+    // {
+    // }
+
     METHOD
     int Process::wait(int *status)
     {
@@ -132,7 +154,7 @@ namespace Pico {
     {
         return signal(SIGKILL);
     }
-    
+
     METHOD
     int Process::kill()
     {

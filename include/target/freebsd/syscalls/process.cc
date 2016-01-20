@@ -6,10 +6,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
-//#include <linux/sched.h>
-//#include <linux/limits.h>
 #include <sys/ptrace.h>
 #include <sys/time.h>
+#include <sys/thr.h>
 
 /*
  * System calls defined in this file.
@@ -17,11 +16,12 @@
 namespace Syscall {
 
     SYSTEM_CALL int             thr_self(lwpid_t *);
+    SYSTEM_CALL int             thr_set_name(lwpid_t, const char *);
     SYSTEM_CALL pid_t           getpid(void);
     SYSTEM_CALL pid_t           getppid(void);
     SYSTEM_CALL pid_t           fork(void);
     NO_RETURN SYSTEM_CALL int   execve(const char *, char *const[], char *const[]);
-    /* TODO: implement thr_new */
+    SYSTEM_CALL int             thr_new(struct thr_param *, int);
     SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
     SYSTEM_CALL long            ptrace(int, pid_t, void *, void *);
     SYSTEM_CALL pid_t           wait4(pid_t, int *, int, struct rusage *);
@@ -34,6 +34,12 @@ namespace Syscall {
     int thr_self(lwpid_t *tid)
     {
         return DO_SYSCALL(thr_self, tid);
+    }
+
+    SYSTEM_CALL
+    int thr_set_name(lwpid_t tid, const char *name)
+    {
+        return DO_SYSCALL(thr_set_name, tid, name);
     }
 
     SYSTEM_CALL
@@ -59,6 +65,12 @@ namespace Syscall {
     {
         DO_SYSCALL(execve, filename, argv, envp);
         __builtin_unreachable();
+    }
+
+    SYSTEM_CALL
+    int thr_new(struct thr_param *param, int param_size)
+    {
+        return DO_SYSCALL(thr_new, param, param_size);
     }
 
     SYSTEM_CALL
