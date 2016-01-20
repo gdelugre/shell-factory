@@ -71,18 +71,65 @@ namespace Pico {
         return ret;
     }
 
-    // TODO
-    //
-    // METHOD
-    // Process Process::find_by_name(char *proc_name)
-    // {
-    // }
+    METHOD
+    Process Process::find_by_name(char *proc_name)
+    {
+        pid_t result = -1;
 
-    // TODO
-    // METHOD
-    // Process Process::find_by_path(char *exe_path)
-    // {
-    // }
+        Process::each([proc_name, &result](Process proc) -> int {
+            struct kinfo_proc ki;
+            size_t size = sizeof(ki);
+            int mib[4] =
+            {
+                CTL_KERN,
+                KERN_PROC,
+                KERN_PROC_PID,
+                proc.id()
+            };
+
+            if ( Syscall::sysctl(mib, 4, &ki, &size, nullptr, 0) != 0 )
+                return -1;
+
+            if ( String(proc_name) == ki.ki_comm ) {
+                result = proc.id();
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return Process(result);
+    }
+
+    METHOD
+    Process Process::find_by_path(char *exe_path)
+    {
+        pid_t result = -1;
+
+        Process::each([exe_path, &result](Process proc) -> int {
+            char path[MAXPATHLEN];
+            size_t size = sizeof(path);
+            int mib[4] =
+            {
+                CTL_KERN,
+                KERN_PROC,
+                KERN_PROC_PATHNAME,
+                proc.id()
+            };
+
+            if ( Syscall::sysctl(mib, 4, &path, &size, nullptr, 0) != 0 )
+                return -1;
+
+            if ( String(exe_path) == path ) {
+                result = proc.id();
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return Process(result);
+    }
 
     NO_RETURN METHOD
     void Thread::exit(int UNUSED status)
