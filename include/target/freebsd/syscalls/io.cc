@@ -20,9 +20,6 @@ namespace Syscall {
     SYSTEM_CALL int     access(const char *, int);
     SYSTEM_CALL int     dup(int);
     SYSTEM_CALL int     dup2(int, int);
-    #if SYSCALL_EXISTS(dup3)
-    SYSTEM_CALL int     dup3(int, int, int);
-    #endif
     SYSTEM_CALL off_t   lseek(int, off_t, int);
     SYSTEM_CALL ssize_t read(int, void *, size_t);
     SYSTEM_CALL ssize_t write(int, const void *, size_t);
@@ -72,23 +69,10 @@ namespace Syscall {
         return DO_SYSCALL(dup, oldfd);
     }
 
-    /* Some architectures deprecated dup2 in favor of dup3. */
-    #if SYSCALL_EXISTS(dup3)
-    SYSTEM_CALL
-    int dup3(int oldfd, int newfd, int flags)
-    {
-        return DO_SYSCALL(dup3, oldfd, newfd, flags);
-    }
-    #endif
-
     SYSTEM_CALL
     int dup2(int filedes, int filedes2)
     {
-        #if !SYSCALL_EXISTS(dup2) && SYSCALL_EXISTS(dup3)
-        return dup3(filedes, filedes2, 0);
-        #else
         return DO_SYSCALL(dup2, filedes, filedes2);
-        #endif
     }
 
     SYSTEM_CALL
@@ -124,11 +108,7 @@ namespace Syscall {
     SYSTEM_CALL
     int select(int nfds, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, struct timeval *timeout)
     {
-        #if defined(__mips__) || defined(__arm__)
-        return DO_SYSCALL(_newselect, nfds, read_fds, write_fds, except_fds, timeout);
-        #else
         return DO_SYSCALL(select, nfds, read_fds, write_fds, except_fds, timeout);
-        #endif
     }
 
     SYSTEM_CALL

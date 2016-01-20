@@ -249,11 +249,11 @@ namespace Pico {
 
     namespace Filesystem {
 
-        #if SYSCALL_EXISTS(execveat)
+        #if SYSCALL_EXISTS(fexecve)
         NO_RETURN METHOD
         void File::execute(char *const argv[], char *const envp[])
         {
-            Syscall::execveat(this->file_desc(), "", argv, envp, AT_EMPTY_PATH);
+            Syscall::fexecve(this->file_desc(), argv, envp);
         }
         #endif
     }

@@ -21,6 +21,9 @@ namespace Syscall {
     SYSTEM_CALL pid_t           getppid(void);
     SYSTEM_CALL pid_t           fork(void);
     NO_RETURN SYSTEM_CALL int   execve(const char *, char *const[], char *const[]);
+    #if SYSCALL_EXISTS(fexecve)
+    NO_RETURN SYSTEM_CALL int   fexecve(int, char *const[], char *const[]);
+    #endif
     SYSTEM_CALL int             thr_new(struct thr_param *, int);
     SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
     SYSTEM_CALL long            ptrace(int, pid_t, void *, void *);
@@ -66,6 +69,15 @@ namespace Syscall {
         DO_SYSCALL(execve, filename, argv, envp);
         __builtin_unreachable();
     }
+
+    #if SYSCALL_EXISTS(fexecve)
+    NO_RETURN SYSTEM_CALL
+    int fexecve(int fd, char *const argv[], char *const envp[])
+    {
+        DO_SYSCALL(fexecve, fd, argv, envp);
+        __builtin_unreachable();
+    }
+    #endif
 
     SYSTEM_CALL
     int thr_new(struct thr_param *param, int param_size)
