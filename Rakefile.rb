@@ -235,6 +235,10 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
+    if ENV['VERBOSE'].to_i == 1
+        cflags << '-v'
+    end
+
     if ENV['STACK_REALIGN'].to_i == 1
         cflags << "-mstackrealign"
     end
@@ -362,9 +366,10 @@ task :help do
     #{'SYSROOT:'.color(:green)}        Use the specified directory as the filesystem root for finding headers.
     #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations.
     #{'OUTPUT_LIB:'.color(:green)}     Compiles to a shared library instead of a standard executable.
-    #{'OUTPUT_DEBUG:'.color(:green)}   Instructs the compiler to emit an assembly file.
+    #{'OUTPUT_DEBUG:'.color(:green)}   Instructs the compiler to emit an assembly file and debug symbols.
     #{'OUTPUT_STRIP:'.color(:green)}   Strip symbols from output file.
     #{'OUTPUT_HEX:'.color(:green)}     Prints the resulting shellcode as an hexadecimal string.
+    #{'VERBOSE:'.color(:green)}        Set to 1 for verbose compilation commands.
     #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
     #{'NO_ASSERTS:'.color(:green)}     Set to 1 to disable runtime asserts.
     #{'RELAX_INLINE:'.color(:green)}   Set to 1, 2 or 3 to let the compiler uninline some functions.
