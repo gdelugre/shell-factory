@@ -80,6 +80,7 @@ CFLAGS = %W{-std=c++1y
             -fno-rtti
             -fno-exceptions
             -fno-non-call-exceptions
+            -fno-asynchronous-unwind-tables
             -fomit-frame-pointer
             -ffunction-sections
             -fdata-sections
