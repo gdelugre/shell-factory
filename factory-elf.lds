@@ -1,6 +1,8 @@
 /* 
  * Linker script for generating shell-factory targets with -N.
  */
+ENTRY(_start);
+
 SECTIONS
 {
     PROVIDE (__executable_start = SEGMENT_START("text-segment", 0x400000));

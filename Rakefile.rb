@@ -84,7 +84,6 @@ CFLAGS = %W{-std=c++1y
             -ffunction-sections
             -fdata-sections
             -nostdlib
-            -Wl,-e_start
             -Wl,--gc-sections
             -Wl,-N
          }
