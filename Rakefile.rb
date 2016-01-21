@@ -124,7 +124,6 @@ OS_CFLAGS =
            -Wl,-dead_strip
            -Wl,-no_eh_labels
            -static
-           -fno-asynchronous-unwind-tables
           },
 
     /none/ =>
