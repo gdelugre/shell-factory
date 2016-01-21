@@ -532,38 +532,32 @@ namespace Pico {
 // Global memory allocation functions.
 //
 
-METHOD
 void *operator new(size_t count)
 {
     return Pico::global_heap().allocate(count);
 }
 
-METHOD
 void *operator new[](size_t count)
 {
     return Pico::global_heap().allocate(count);
 }
 
-METHOD
-void operator delete(void *ptr)
+void operator delete(void *ptr) noexcept
 {
     return Pico::global_heap().free(ptr);
 }
 
-METHOD
-void operator delete[](void *ptr)
+void operator delete[](void *ptr) noexcept
 {
     return Pico::global_heap().free(ptr);
 }
 
-METHOD
-void operator delete(void *ptr, size_t size)
+void operator delete(void *ptr, size_t size) noexcept
 {
     return Pico::global_heap().free(ptr, size);
 }
 
-METHOD
-void operator delete[](void *ptr, size_t size)
+void operator delete[](void *ptr, size_t size) noexcept
 {
     return Pico::global_heap().free(ptr, size);
 }
