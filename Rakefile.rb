@@ -132,9 +132,13 @@ FILE_EXT =
 }
 
 def detect_compiler(cmd)
-    %x{#{cmd} -v 2>&1} =~ /(\w+) version /m
-
-    $1 or cmd
+    version = %x{#{cmd} -v 2>&1}
+    case version
+    when /gcc version / then "gcc"
+    when /clang version /, /Apple LLVM version / then "clang"
+    else
+        cmd
+    end
 end
 
 def show_info(str, list = {})
