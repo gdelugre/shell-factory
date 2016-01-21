@@ -85,8 +85,6 @@ CFLAGS = %W{-std=c++1y
             -ffunction-sections
             -fdata-sections
             -nostdlib
-            -Wl,--gc-sections
-            -Wl,-N
          }
 
 COMPILER_CFLAGS =
@@ -107,9 +105,34 @@ COMPILER_CFLAGS =
 
 OS_CFLAGS =
 {
-    /linux/ => %W{-Wl,-T#{LD_SCRIPT_ELF} -Wl,--build-id=none},
-    /bsd/ => %W{-Wl,-T#{LD_SCRIPT_ELF}},
-    /none/ => %W{-Wl,-T#{LD_SCRIPT_ELF} -U__STDC_HOSTED__}
+    /linux/ =>
+        %W{-Wl,-T#{LD_SCRIPT_ELF}
+           -Wl,--gc-sections
+           -Wl,-N
+           -Wl,--build-id=none
+           },
+
+    /bsd/ =>
+        %W{-Wl,-T#{LD_SCRIPT_ELF}
+           -Wl,--gc-sections
+           -Wl,-N
+          },
+
+    /darwin/ =>
+        %w{
+           -Wl,-e -Wl,__start
+           -Wl,-dead_strip
+           -Wl,-no_eh_labels
+           -static
+           -fno-asynchronous-unwind-tables
+          },
+
+    /none/ =>
+        %W{-Wl,-T#{LD_SCRIPT_ELF}
+           -Wl,--gc-sections
+           -Wl,-N
+           -U__STDC_HOSTED__
+          }
 }
 
 # Architecture-dependent flags.
@@ -122,10 +145,12 @@ ARCH_CFLAGS =
 FILE_EXT =
 {
     :exec => {
+        /darwin/ => 'macho',
         /win/ => 'exe',
         /.*/ => 'elf'
     },
     :shared => {
+        /darwin/ => 'dylib',
         /win/ => 'dll',
         /.*/ => 'so'
     }
