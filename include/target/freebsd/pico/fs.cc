@@ -33,6 +33,19 @@ namespace Pico {
         }
 
         METHOD
+        Memory::Region File::map(void *base, int prot, size_t size, file_off offset)
+        {
+            int flags = MAP_SHARED;
+            void *ptr = Syscall::mmap(base, size, Memory::mmap_prot(prot), flags, file_desc(), offset);
+            if ( Target::is_error(ptr) ) {
+                ptr = nullptr;
+                size = 0;
+            }
+
+            return Memory::Region::from(ptr, size);
+        }
+
+        METHOD
         File File::open(const char *path, int flags)
         {
             return File(path, flags, false);
