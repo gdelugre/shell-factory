@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/errno.h>
 
 namespace Target {
 
@@ -23,6 +24,7 @@ namespace Target {
 
     namespace Filesystem {
         using fs_rights = mode_t;
+        using file_off = off_t;
 
         static constexpr fs_rights USER_READ   = S_IRUSR;
         static constexpr fs_rights USER_WRITE  = S_IWUSR;
@@ -43,13 +45,14 @@ namespace Target {
     using random_pool = handle;
 
     using error_code = int;
-    constexpr error_code max_error = 4095;
+    constexpr error_code max_error = ELAST;
 
     template <typename T>
     FUNCTION
     constexpr bool is_error(T err)
     {
-        return (reinterpret_cast<unsigned long>(err) >= static_cast<unsigned long>(-max_error));
+        return (reinterpret_cast<unsigned long>(err) > 0 &&
+                reinterpret_cast<unsigned long>(err) <= static_cast<unsigned long>(max_error));
     }
 }
 
