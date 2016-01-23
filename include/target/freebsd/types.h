@@ -40,7 +40,7 @@ namespace Target {
                                                          OTHER_READ|OTHER_WRITE;
     }
 
-    using random_pool = Filesystem::File;
+    using random_pool = handle;
 
     using error_code = int;
     constexpr error_code max_error = 4095;
