@@ -8,7 +8,18 @@ namespace Pico {
     //
     // Target-specific implementation.
     //
-    class SecureRandom;
+    class SecureRandom
+    {
+        public:
+            CONSTRUCTOR SecureRandom();
+            DESTRUCTOR ~SecureRandom();
+
+            template <typename T>
+            size_t read(T& value);
+
+        private:
+            Target::random_pool pool;
+    };
 
     //
     // Generic linear congruential random number generator.

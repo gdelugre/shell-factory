@@ -40,6 +40,12 @@ namespace Target {
                                                          OTHER_READ|OTHER_WRITE;
     }
 
+    #if SYSCALL_EXISTS(getrandom)
+    using random_pool = EmptyType;
+    #else
+    using random_pool = handle;
+    #endif
+
     using error_code = int;
     constexpr error_code max_error = 4095;
 

@@ -3,23 +3,37 @@
 
 namespace Pico {
 
-    class SecureRandom
+    CONSTRUCTOR
+    SecureRandom::SecureRandom()
     {
-        public:
-            CONSTRUCTOR SecureRandom() : pool("/dev/urandom") {}
-            DESTRUCTOR ~SecureRandom() {
-                pool.close();
-            }
+        pool = Filesystem::File::open("/dev/urandom").file_desc();
+    }
 
-            template <typename T>
-            ssize_t read(T& value)
-            {
-                return pool.read(&value, sizeof(value));
-            }
+    DESTRUCTOR
+    SecureRandom::~SecureRandom()
+    {
+        Syscall::close(pool);
+    }
 
-        private:
-            Filesystem::File pool;
-    };
+    template <typename T>
+    METHOD
+    size_t SecureRandom::read(T& value)
+    {
+        size_t remaining = sizeof(T);
+        char *ptr = static_cast<char *>(value);
+
+        while ( remaining )
+        {
+            ssize_t ret = Syscall::read(pool, ptr, remaining);
+            if ( ret < 0 )
+                continue;
+
+            remaining -= ret;
+            ptr += ret;
+        }
+
+        return sizeof(T);
+    }
 }
 
 #endif

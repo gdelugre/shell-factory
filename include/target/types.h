@@ -1,6 +1,11 @@
 #ifndef GENERIC_TYPES_H_
 #define GENERIC_TYPES_H_
 
+// Empty base optimization.
+class EmptyBaseClass {};
+class EmptyClass : EmptyBaseClass {};
+using EmptyType = EmptyClass;
+
 #if defined(__linux__)
 #include <target/linux/types.h>
 #elif defined(__FreeBSD__)

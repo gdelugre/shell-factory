@@ -4,35 +4,63 @@
 namespace Pico {
 
     #if SYSCALL_EXISTS(getrandom)
-    class SecureRandom
+
+    CONSTRUCTOR SecureRandom::SecureRandom() {}
+    DESTRUCTOR SecureRandom::~SecureRandom() {}
+
+    template <typename T>
+    size_t SecureRandom::read(T& value)
     {
-        public:
-            CONSTRUCTOR SecureRandom() = default;
+        size_t remaining = sizeof(T);
+        char *ptr = static_cast<char *>(value);
 
-            template <typename T>
-            ssize_t read(T& value)
-            {
-                return Syscall::getrandom(&value, sizeof(value), 0);
-            }
-    };
-    #else
-    class SecureRandom
+        while ( remaining )
+        {
+            ssize_t ret = Syscall::getrandom(ptr, remaining, 0);
+            if ( ret < 0 )
+                continue;
+
+            remaining -= ret;
+            ptr += ret;
+        }
+
+        return sizeof(T);
+    }
+
+    #else /* No getrandom syscall, rely on /dev/urandom */
+
+    CONSTRUCTOR
+    SecureRandom::SecureRandom()
     {
-        public:
-            CONSTRUCTOR SecureRandom() : pool("/dev/urandom") {}
-            DESTRUCTOR ~SecureRandom() {
-                pool.close();
-            }
+        pool = Filesystem::File::open("/dev/urandom").file_desc();
+    }
 
-            template <typename T>
-            ssize_t read(T& value)
-            {
-                return pool.read(&value, sizeof(value));
-            }
+    DESTRUCTOR
+    SecureRandom::~SecureRandom()
+    {
+        Syscall::close(pool);
+    }
 
-        private:
-            Filesystem::File pool;
-    };
+    template <typename T>
+    METHOD
+    size_t SecureRandom::read(T& value)
+    {
+        size_t remaining = sizeof(T);
+        char *ptr = static_cast<char *>(value);
+
+        while ( remaining )
+        {
+            ssize_t ret = Syscall::read(pool, ptr, remaining);
+            if ( ret < 0 )
+                continue;
+
+            remaining -= ret;
+            ptr += ret;
+        }
+
+        return sizeof(T);
+    }
+
     #endif
 }
 
