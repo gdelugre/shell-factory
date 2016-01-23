@@ -40,7 +40,13 @@ namespace Pico {
                     region_size = size;
                 }
                 DESTRUCTOR ~Region() {
-                    free();
+                    if ( ptr != nullptr )
+                        unmap();
+                }
+
+                // returns a Region object from an already existing mapped range.
+                FUNCTION Region from(void *ptr, size_t size) {
+                    return Region(NoAlloc{}, ptr, size);
                 }
 
                 METHOD void *   pointer() const { return ptr; }
@@ -61,8 +67,20 @@ namespace Pico {
                 template <typename T>
                 METHOD operator T *() const { return static_cast<T *>(ptr); }
 
+                // Compare with pointer.
+                METHOD bool operator ==(std::nullptr_t) {
+                    return ptr == nullptr;
+                }
+                template <typename T>
+                METHOD bool operator ==(T* p) {
+                    return p == ptr;
+                }
+
             private:
-                METHOD void free() {
+                struct NoAlloc {};
+                CONSTRUCTOR Region(NoAlloc, void *ptr, size_t size) : ptr(ptr), region_size(size) {}
+
+                METHOD void unmap() {
                     Memory::release(ptr, region_size);
                 }
 

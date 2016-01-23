@@ -58,6 +58,14 @@ namespace Pico {
                 METHOD int              change_rights(Rights rights);
                 METHOD int              seek(off_t offset, Seek method);
 
+                METHOD Memory::Region   map(void *base, int prot, size_t size, file_off offset);
+                METHOD Memory::Region   map(void *base, int prot, size_t size) {
+                    return map(base, prot, size, 0);
+                }
+                METHOD Memory::Region   map(void *base = nullptr, int prot = Memory::READ) {
+                    return map(base, prot, size());
+                }
+
                 CONSTRUCTOR             File(const char *path, int flags = READ,
                                              bool create = false, Rights rights = default_rights);
         };

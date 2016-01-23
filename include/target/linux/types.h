@@ -23,6 +23,7 @@ namespace Target {
 
     namespace Filesystem {
         using fs_rights = mode_t;
+        using file_off = off_t;
 
         static constexpr fs_rights USER_READ   = S_IRUSR;
         static constexpr fs_rights USER_WRITE  = S_IWUSR;
