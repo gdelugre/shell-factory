@@ -6,6 +6,9 @@
 
 namespace Pico {
 
+    //
+    // The list of defined channel modes.
+    //
     enum channel_mode
     {
         NO_CHANNEL,
@@ -21,6 +24,9 @@ namespace Pico {
         USE_STDERR,
     };
 
+    //
+    // Static structure holding information for each mode.
+    //
     template <enum channel_mode>
     struct ChannelMode;
 
@@ -44,6 +50,10 @@ namespace Pico {
     DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket,    true);
     DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket,   true);
 
+    //
+    // The channel class definition.
+    // Every channel is a daughter class of the underlying stream it is representing.
+    //
     template <enum channel_mode M>
     struct Channel : ChannelMode<M>::stream_type
     {
@@ -148,7 +158,6 @@ namespace Pico {
 }
 
 namespace Options {
-    using namespace Pico;
 
     #ifndef CHANNEL
     #define CHANNEL USE_STDOUT
@@ -172,17 +181,37 @@ namespace Options {
 
     FUNCTION auto channel()
     {
-        using Mode = ChannelMode<CHANNEL>;
+        using namespace Pico;
+        using SelectedChannel = Channel<CHANNEL>;
 
-        if ( std::is_base_of<Network::Socket, Mode::stream_type>::value )
+        switch ( CHANNEL )
         {
-            uint16_t port = PORT;
-            auto address = Network::ip_address_from_bytes(HOST);
+            case USE_STDOUT:
+            case USE_STDERR:
+                return SelectedChannel();
 
-            return Channel<CHANNEL>(address, port);
+            case TCP_CONNECT:
+            case TCP6_CONNECT:
+            case SCTP_CONNECT:
+            case SCTP6_CONNECT:
+            {
+                auto remote_address = Network::ip_address_from_bytes(HOST);
+                uint16_t remote_port = PORT;
+
+                return SelectedChannel(remote_address, remote_port);
+            }
+
+            case TCP_LISTEN:
+            case TCP6_LISTEN:
+            case SCTP_LISTEN:
+            case SCTP6_LISTEN:
+            {
+                auto local_address = Network::ip_address_from_bytes(HOST);
+                uint16_t local_port = PORT;
+
+                return SelectedChannel(local_address, local_port);
+            }
         }
-        else
-            return Channel<CHANNEL>();
     }
 }
 
