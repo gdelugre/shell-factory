@@ -79,7 +79,7 @@ extern char edata;
 extern char ebss;
 extern char eend;
 
-#include <sizes.h>
+#include <memory.h>
 #include <softfloat.h>
 #include <factory-options.h>
 #include <target/cpu.h>
