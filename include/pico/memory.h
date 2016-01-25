@@ -99,9 +99,15 @@ namespace Pico {
         FUNCTION
         constexpr T expand_char(char c)
         {
-            static_assert(sizeof(T) <= 64, "Word size too big for memset");
-            return (c << 0) | (c << 8) | (c << 16) | (c << 24) |
-                   (c << 32) | (c << 40) | (c << 48) | (c << 56);
+            static_assert(sizeof(T) <= sizeof(uint64_t), "Word size too big for expand_char");
+            return (c << 0) |
+                   (sizeof(T) > 1 ? (static_cast<T>(c) << 8) :  0) |
+                   (sizeof(T) > 2 ? (static_cast<T>(c) << 16) : 0) |
+                   (sizeof(T) > 3 ? (static_cast<T>(c) << 24) : 0) |
+                   (sizeof(T) > 4 ? (static_cast<T>(c) << 32) : 0) |
+                   (sizeof(T) > 5 ? (static_cast<T>(c) << 40) : 0) |
+                   (sizeof(T) > 6 ? (static_cast<T>(c) << 48) : 0) |
+                   (sizeof(T) > 7 ? (static_cast<T>(c) << 56) : 0);
         }
 
         template <typename T>
