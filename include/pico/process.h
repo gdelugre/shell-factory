@@ -40,19 +40,49 @@ namespace Pico {
             template <typename Func>
             FUNCTION int each(Func cb);
 
-            template <enum channel_mode M>
-            NO_RETURN FUNCTION void execute(Channel<M> channel, const char *filename,
+            template <typename T>
+            NO_RETURN FUNCTION void execute(BiStream<T>& stm, const char *filename,
                                             char *const argv[] = nullptr, char *const envp[] = nullptr)
             {
-                channel.dup_to_stdio();
+                BasicStream std_in = Stdio::input();
+                BasicStream std_out = Stdio::output();
+                BasicStream std_err = Stdio::error();
+
+                auto rstream = stm.read_stream();
+                auto wstream = stm.write_stream();
+
+                // Avoid remapping standard IO onto itself.
+                if (rstream != std_in)
+                    rstream.duplicate(std_in);
+
+                if (wstream != std_out && wstream != std_err) {
+                    wstream.duplicate(std_out);
+                    wstream.duplicate(std_err);
+                }
+
+                execute(filename, argv, envp);
+            }
+
+            template <typename T>
+            NO_RETURN FUNCTION void execute(Stream<T>& stm, const char *filename,
+                                            char *const argv[] = nullptr, char *const envp[] = nullptr)
+            {
+                BasicStream std_in = Stdio::input();
+                BasicStream std_out = Stdio::output();
+                BasicStream std_err = Stdio::error();
+
+                stm.duplicate(std_in);
+                stm.duplicate(std_out);
+                stm.duplicate(std_err);
+
                 execute(filename, argv, envp);
             }
 
             NO_RETURN FUNCTION void execute(const char *filename,
                                             char *const argv[] = nullptr, char *const envp[] = nullptr);
 
-            template <enum channel_mode M>
-            FUNCTION Process        spawn(Channel<M> channel, const char *filename,
+            template <typename T>
+            FUNCTION Process        spawn(Stream<T>& stm, const char *filename,
                                           char *const argv[] = nullptr, char *const envp[] = nullptr);
 
             FUNCTION Process        spawn(const char *filename,

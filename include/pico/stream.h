@@ -88,8 +88,19 @@ namespace Pico {
             }
 
             // Streams are compared using their IO ports.
-            METHOD bool operator ==(Stream<Io> stm) {
+            METHOD bool operator ==(Stream<Io> stm) const {
                 return io_port() == stm.io_port();
+            }
+
+            // Comparison returns false on type mismatch.
+            template <typename T>
+            METHOD bool operator ==(Stream<T> stm) const {
+                return false;
+            }
+
+            template <typename T>
+            METHOD bool operator !=(Stream<T> stm) const {
+                return !(*this == stm);
             }
 
             // Stream can be implicitly casted to their IO port.
