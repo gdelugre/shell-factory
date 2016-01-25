@@ -12,7 +12,6 @@
 #include <pico/security.h>
 #include <pico/fs.h>
 #include <pico/socket.h>
-#include <pico/channel.h>
 #include <pico/process.h> 
 #include <pico/debug.h>
 #include <pico/ipc.h>

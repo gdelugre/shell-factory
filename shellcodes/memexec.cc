@@ -1,5 +1,5 @@
 #include <factory.h>
-#include <pico.h>
+#include <channel.h>
 
 namespace Options {
     #if defined(PAYLOAD_SIZE) && (PAYLOAD_SIZE != 0)
