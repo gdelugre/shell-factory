@@ -3,9 +3,6 @@
 
 #include <pico.h>
 
-/* Type traits can be included since they rely exclusively on standard headers and no external linking. */
-#include <type_traits>
-
 namespace Shellcode {
 
     using namespace Pico;
