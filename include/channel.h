@@ -31,25 +31,24 @@ namespace Shellcode {
     template <enum channel_mode>
     struct ChannelMode;
 
-    #define DEFINE_CHANNEL_MODE(mode, type, dupable)            \
+    #define DEFINE_CHANNEL_MODE(mode, type)                     \
         template<>                                              \
         struct ChannelMode<mode>                                \
         {                                                       \
             using stream_type = type;                           \
-            static constexpr bool dupable_to_stdio = dupable;   \
         };                                                      \
 
-    DEFINE_CHANNEL_MODE(NO_CHANNEL,     void,                   false);
-    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>,  false);
-    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>,  false);
-    DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     true);
-    DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    true);
-    DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     true);
-    DEFINE_CHANNEL_MODE(TCP6_LISTEN,    Network::Tcp6Socket,    true);
-    DEFINE_CHANNEL_MODE(SCTP_CONNECT,   Network::SctpSocket,    true);
-    DEFINE_CHANNEL_MODE(SCTP6_CONNECT,  Network::Sctp6Socket,   true);
-    DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket,    true);
-    DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket,   true);
+    DEFINE_CHANNEL_MODE(NO_CHANNEL,     void);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>);
+    DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket);
+    DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket);
+    DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket);
+    DEFINE_CHANNEL_MODE(TCP6_LISTEN,    Network::Tcp6Socket);
+    DEFINE_CHANNEL_MODE(SCTP_CONNECT,   Network::SctpSocket);
+    DEFINE_CHANNEL_MODE(SCTP6_CONNECT,  Network::Sctp6Socket);
+    DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket);
+    DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket);
 
     //
     // The channel class definition.
