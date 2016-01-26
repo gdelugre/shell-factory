@@ -10,25 +10,21 @@ namespace Shellcode {
     //
     // The list of defined channel modes.
     //
-    enum channel_mode
-    {
-        NO_CHANNEL,
-        TCP_CONNECT,
-        TCP_LISTEN,
-        TCP6_CONNECT,
-        TCP6_LISTEN,
-        SCTP_CONNECT,
-        SCTP_LISTEN,
-        SCTP6_CONNECT,
-        SCTP6_LISTEN,
-        USE_STDOUT,
-        USE_STDERR,
-    };
+    #define USE_STDOUT      0
+    #define USE_STDERR      1
+    #define TCP_CONNECT     2
+    #define TCP_LISTEN      3
+    #define TCP6_CONNECT    4
+    #define TCP6_LISTEN     5
+    #define SCTP_CONNECT    6
+    #define SCTP_LISTEN     7
+    #define SCTP6_CONNECT   8
+    #define SCTP6_LISTEN    9
 
     //
     // Static structure holding information for each mode.
     //
-    template <enum channel_mode>
+    template <unsigned>
     struct ChannelMode;
 
     #define DEFINE_CHANNEL_MODE(mode, type)                     \
@@ -38,7 +34,6 @@ namespace Shellcode {
             using stream_type = type;                           \
         };                                                      \
 
-    DEFINE_CHANNEL_MODE(NO_CHANNEL,     void);
     DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>);
     DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>);
     DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket);
@@ -54,11 +49,9 @@ namespace Shellcode {
     // The channel class definition.
     // Every channel is a daughter class of the underlying stream it is representing.
     //
-    template <enum channel_mode M>
+    template <unsigned M>
     struct Channel : ChannelMode<M>::stream_type
     {
-        static_assert(M != NO_CHANNEL, "Cannot instanciate channel: no mode specified");
-
         CONSTRUCTOR Channel();
 
         template <enum Network::AddressType T>
@@ -171,34 +164,27 @@ namespace Options {
         using namespace Shellcode;
         using SelectedChannel = Channel<CHANNEL>;
 
-        switch ( CHANNEL )
-        {
-            case USE_STDOUT:
-            case USE_STDERR:
-                return SelectedChannel();
+        // No parameter required for standard IOs.
+        #if (CHANNEL == USE_STDOUT) || (CHANNEL == USE_STDERR)
+            return SelectedChannel();
 
-            case TCP_CONNECT:
-            case TCP6_CONNECT:
-            case SCTP_CONNECT:
-            case SCTP6_CONNECT:
-            {
-                auto remote_address = Pico::Network::ip_address_from_bytes(HOST);
-                uint16_t remote_port = PORT;
+        // Connect-back channels require a remote address/port.
+        #elif (CHANNEL == TCP_CONNECT) || (CHANNEL == TCP6_CONNECT) || (CHANNEL == SCTP_CONNECT) || (CHANNEL == SCTP6_CONNECT)
+            auto remote_address = Pico::Network::ip_address_from_bytes(HOST);
+            uint16_t remote_port = PORT;
 
-                return SelectedChannel(remote_address, remote_port);
-            }
+            return SelectedChannel(remote_address, remote_port);
 
-            case TCP_LISTEN:
-            case TCP6_LISTEN:
-            case SCTP_LISTEN:
-            case SCTP6_LISTEN:
-            {
-                auto local_address = Pico::Network::ip_address_from_bytes(HOST);
-                uint16_t local_port = PORT;
+        // Listen channels require a local address/port.
+        #elif (CHANNEL == TCP_LISTEN) || (CHANNEL == TCP6_LISTEN) || (CHANNEL == SCTP_LISTEN) || (CHANNEL == SCTP6_LISTEN)
+            auto local_address = Pico::Network::ip_address_from_bytes(HOST);
+            uint16_t local_port = PORT;
 
-                return SelectedChannel(local_address, local_port);
-            }
-        }
+            return SelectedChannel(local_address, local_port);
+
+        #else
+        #error "No channel mode is selected."
+        #endif
     }
 }
 
