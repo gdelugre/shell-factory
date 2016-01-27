@@ -194,12 +194,6 @@ namespace Pico {
 
             METHOD ReadStream read_stream() const { return ReadStream(this->io.read_file_desc()); }
             METHOD WriteStream write_stream() const { return WriteStream(this->io.write_file_desc()); }
-
-            template <typename T>
-            METHOD void duplicate2(Stream<T>& r, Stream<T>& w) {
-                this->read_stream().duplicate(r);
-                this->write_stream().duplicate(w);
-            }
     };
 }
 
