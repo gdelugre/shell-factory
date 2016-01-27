@@ -30,14 +30,12 @@ namespace Pico {
         {
             public:
                 CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE) {
-                    size = round_up_page_size(size);
                     ptr = Memory::allocate(size, prot);
-                    region_size = size;
+                    region_size = round_up_page_size(size);
                 }
                 CONSTRUCTOR Region(void *base, size_t size = page_size(), int prot = READ | WRITE) {
-                    size = round_up_page_size(size);
                     ptr = Memory::allocate(base, size, prot);
-                    region_size = size;
+                    region_size = round_up_page_size(size);
                 }
                 DESTRUCTOR ~Region() {
                     if ( ptr != nullptr )
