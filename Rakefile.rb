@@ -211,7 +211,7 @@ def target_to_source(target)
 end
 
 def compile(target, triple, output_dir, *opts)
-    common_opts = %w{CHANNEL HOST PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE}
+    common_opts = %w{CHANNEL RHOST LHOST HOST RPORT LPORT PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
@@ -298,7 +298,7 @@ def compile(target, triple, output_dir, *opts)
 
     cflags += INCLUDE_DIRS.map{|d| "-I#{d}"}
     defines = defines.map{|k,v|
-        v = IPAddr.new(v).to_define if k == 'HOST'
+        v = IPAddr.new(v).to_define if %w{HOST RHOST LHOST}.include?(k)
         "-D#{k}=#{v}"
     }
 
@@ -402,9 +402,9 @@ task :help do
  #{'Shellcode customization options:'.color(:cyan)}
 
     #{'CHANNEL:'.color(:green)}        Shellcode communication channel.
-                    Supported options: NO_CHANNEL, TCP_CONNECT, TCP_LISTEN, TCP6_CONNECT, TCP6_LISTEN, SCTP_CONNECT, SCTP_LISTEN, SCTP6_CONNECT, SCTP6_LISTEN, USE_STDOUT, USE_STDERR
-    #{'HOST:'.color(:green)}           Remote host or local address for socket bind.
-    #{'PORT:'.color(:green)}           Remote port or local port for socket bind.
+                    Supported options: {TCP,SCTP}[6]_{CONNECT,LISTEN}, UDP[6]_CONNECT, USE_STDOUT, USE_STDERR
+    #{'[R,L]HOST:'.color(:green)}      Remote host or local address for socket bind.
+    #{'[R,L]PORT:'.color(:green)}      Remote port or local port for socket bind.
     #{'FORK_ON_ACCEPT:'.color(:green)} Keeps listening when accepting connections.
     #{'REUSE_ADDR:'.color(:green)}     Bind sockets with SO_REUSEADDR.
     #{'HEAP_BASE:'.color(:green)}      Base address for heap allocations.

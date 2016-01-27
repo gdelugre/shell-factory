@@ -102,7 +102,7 @@ namespace Pico {
                 METHOD int bind(Address<T> addr);
 
                 template <enum AddressType T>
-                METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr);
+                METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr = false);
         };
 
         // TODO: recvfrom / sendto
