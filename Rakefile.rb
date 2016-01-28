@@ -211,7 +211,7 @@ def target_to_source(target)
 end
 
 def compile(target, triple, output_dir, *opts)
-    common_opts = %w{CHANNEL RHOST LHOST HOST RPORT LPORT PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE}
+    common_opts = %w{CHANNEL RHOST LHOST HOST RPORT LPORT PORT NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE NO_ERROR_CHECKS}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
@@ -381,34 +381,35 @@ task :help do
 
  #{'Compilation options:'.color(:cyan)}
 
-    #{'CC:'.color(:green)}             Let you choose the compiler. Only supported are g++ and clang++.
-    #{'LD:'.color(:green)}             Let you choose the linker. Supported values are "bfd" and "gold".
-    #{'TRIPLE:'.color(:green)}         Cross compilation target. For example: "aarch64-linux-gnu".
-    #{'ARCH'.color(:green)}            Specify a specific architecture to compile to (e.g. armv7-r).
-    #{'CPU'.color(:green)}             Specify a specific CPU to compile to (e.g. cortex-a15).
-    #{'CFLAGS:'.color(:green)}         Add custom flags to the compiler. For example "-m32".
-    #{'SYSROOT:'.color(:green)}        Use the specified directory as the filesystem root for finding headers.
-    #{'NO_BUILTIN:'.color(:green)}     Does not use the compiler builtins for common memory operations.
-    #{'OUTPUT_LIB:'.color(:green)}     Compiles to a shared library instead of a standard executable.
-    #{'OUTPUT_DEBUG:'.color(:green)}   Instructs the compiler to emit an assembly file and debug symbols.
-    #{'OUTPUT_STRIP:'.color(:green)}   Strip symbols from output file.
-    #{'OUTPUT_HEX:'.color(:green)}     Prints the resulting shellcode as an hexadecimal string.
-    #{'VERBOSE:'.color(:green)}        Set to 1 for verbose compilation commands.
-    #{'WITH_WARNINGS:'.color(:green)}  Set to 1 to enable compiler warnings.
-    #{'NO_ASSERTS:'.color(:green)}     Set to 1 to disable runtime asserts.
-    #{'RELAX_INLINE:'.color(:green)}   Set to 1, 2 or 3 to let the compiler uninline some functions.
-    #{'STACK_REALIGN:'.color(:green)}  Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
+    #{'CC:'.color(:green)}                 Let you choose the compiler. Only supported are g++ and clang++.
+    #{'LD:'.color(:green)}                 Let you choose the linker. Supported values are "bfd" and "gold".
+    #{'TRIPLE:'.color(:green)}             Cross compilation target. For example: "aarch64-linux-gnu".
+    #{'ARCH'.color(:green)}                Specify a specific architecture to compile to (e.g. armv7-r).
+    #{'CPU'.color(:green)}                 Specify a specific CPU to compile to (e.g. cortex-a15).
+    #{'CFLAGS:'.color(:green)}             Add custom flags to the compiler. For example "-m32".
+    #{'SYSROOT:'.color(:green)}            Use the specified directory as the filesystem root for finding headers.
+    #{'NO_BUILTIN:'.color(:green)}         Does not use the compiler builtins for common memory operations.
+    #{'OUTPUT_LIB:'.color(:green)}         Compiles to a shared library instead of a standard executable.
+    #{'OUTPUT_DEBUG:'.color(:green)}       Instructs the compiler to emit an assembly file and debug symbols.
+    #{'OUTPUT_STRIP:'.color(:green)}       Strip symbols from output file.
+    #{'OUTPUT_HEX:'.color(:green)}         Prints the resulting shellcode as an hexadecimal string.
+    #{'VERBOSE:'.color(:green)}            Set to 1 for verbose compilation commands.
+    #{'WITH_WARNINGS:'.color(:green)}      Set to 1 to enable compiler warnings.
+    #{'RELAX_INLINE:'.color(:green)}       Set to 1, 2 or 3 to let the compiler uninline some functions.
+    #{'STACK_REALIGN:'.color(:green)}      Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
 
  #{'Shellcode customization options:'.color(:cyan)}
 
-    #{'CHANNEL:'.color(:green)}        Shellcode communication channel.
-                    Supported options: {TCP,SCTP}[6]_{CONNECT,LISTEN}, UDP[6]_CONNECT, USE_STDOUT, USE_STDERR
-    #{'[R,L]HOST:'.color(:green)}      Remote host or local address for socket bind.
-    #{'[R,L]PORT:'.color(:green)}      Remote port or local port for socket bind.
-    #{'FORK_ON_ACCEPT:'.color(:green)} Keeps listening when accepting connections.
-    #{'REUSE_ADDR:'.color(:green)}     Bind sockets with SO_REUSEADDR.
-    #{'HEAP_BASE:'.color(:green)}      Base address for heap allocations.
-    #{'HEAP_SIZE:'.color(:green)}      Size of heap, defaults to 64k.
+    #{'CHANNEL:'.color(:green)}            Shellcode communication channel.
+                        Supported options: {TCP,SCTP}[6]_{CONNECT,LISTEN}, UDP[6]_CONNECT, USE_STDOUT, USE_STDERR
+    #{'[R,L]HOST:'.color(:green)}          Remote host or local address for socket bind.
+    #{'[R,L]PORT:'.color(:green)}          Remote port or local port for socket bind.
+    #{'FORK_ON_ACCEPT:'.color(:green)}     Keeps listening when accepting connections.
+    #{'REUSE_ADDR:'.color(:green)}         Bind sockets with SO_REUSEADDR.
+    #{'HEAP_BASE:'.color(:green)}          Base address for heap allocations.
+    #{'HEAP_SIZE:'.color(:green)}          Size of heap, defaults to 64k.
+    #{'NO_ASSERTS:'.color(:green)}         Set to 1 to disable runtime asserts.
+    #{'NO_ERROR_CHECKS:'.color(:green)}    Set to 1 to short-circuit error checks (more compact, less stable).
 
     USAGE
 

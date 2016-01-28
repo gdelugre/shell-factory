@@ -31,6 +31,12 @@
 #define OPT_HEAP_SIZE 64_KB
 #endif
 
+#if !defined(NO_ERROR_CHECKS) || (NO_ERROR_CHECKS == 0)
+#define OPT_NO_ERROR_CHECKS false
+#else
+#define OPT_NO_ERROR_CHECKS true
+#endif
+
 namespace Options {
 
     constexpr static bool fork_on_accept = OPT_FORK_ON_ACCEPT;
@@ -38,6 +44,7 @@ namespace Options {
     constexpr static bool use_builtins = OPT_USE_BUILTINS;
     static void *heap_address = OPT_HEAP_BASE;
     constexpr static size_t heap_size = OPT_HEAP_SIZE;
+    constexpr static bool disable_error_checks = OPT_NO_ERROR_CHECKS;
 }
 
 #undef OPT_FORK_ON_ACCEPT
