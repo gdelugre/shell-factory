@@ -54,10 +54,8 @@ namespace Target {
     FUNCTION
     constexpr bool is_error(T err)
     {
-        if ( Options::disable_error_checks )
-            return false;
-
-        return (reinterpret_cast<unsigned long>(err) >= static_cast<unsigned long>(-max_error));
+        return Options::disable_error_checks ? false :
+               (reinterpret_cast<unsigned long>(err) >= static_cast<unsigned long>(-max_error));
     }
 }
 
