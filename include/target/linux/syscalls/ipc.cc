@@ -12,7 +12,7 @@ namespace Syscall {
 
     SYSTEM_CALL int pipe(int pipefd[2]);
     SYSTEM_CALL int shmget(key_t, size_t, int);
-    SYSTEM_CALL int shmat(int, const void *, int);
+    SYSTEM_CALL void *shmat(int, const void *, int);
     SYSTEM_CALL int shmdt(const void *);
     SYSTEM_CALL int shmctl(int, int, struct shmid_ds *);
 
@@ -29,7 +29,7 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
-    int shmat(int shmid, const void *shmaddr, int shmflg)
+    void *shmat(int shmid, const void *shmaddr, int shmflg)
     {
         return DO_SYSCALL(shmat, shmid, shmaddr, shmflg);
     }
