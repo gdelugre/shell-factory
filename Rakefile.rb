@@ -283,6 +283,13 @@ def compile(target, triple, output_dir, *opts)
         cflags << "-mcpu=#{ENV['CPU']}"
     end
 
+    if ENV['32BIT'].to_i == 1
+        cflags << '-m32'
+        if target_triple.os =~ /cygwin|w32|w64/
+            cflags << '-Wl,--format=pe-i386' << '-Wl,--oformat=pei-i386'
+        end
+    end
+
     unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
@@ -396,6 +403,10 @@ task :help do
     #{'VERBOSE:'.color(:green)}            Set to 1 for verbose compilation commands.
     #{'WITH_WARNINGS:'.color(:green)}      Set to 1 to enable compiler warnings.
     #{'RELAX_INLINE:'.color(:green)}       Set to 1, 2 or 3 to let the compiler uninline some functions.
+
+ #{'Target specific options:'.color(:cyan)}
+
+    #{'32BIT:'.color(:green)}              Set to 1 to compile for a 32-bit environment.
     #{'STACK_REALIGN:'.color(:green)}      Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
 
  #{'Shellcode customization options:'.color(:cyan)}
