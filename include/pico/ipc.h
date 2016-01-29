@@ -15,8 +15,14 @@ namespace Pico {
             public:
                 using Rights = Filesystem::Rights;
                 using shm_handle = Target::Memory::shm_handle;
+                static constexpr auto default_rights = Target::Memory::default_shm_rights;
 
-                CONSTRUCTOR SharedRegion(const char *name, void *base, size_t size, int prot, Rights rights);
+                CONSTRUCTOR SharedRegion(const char *name, void *base, size_t size,
+                                         int prot = READ|WRITE, Rights rights = default_rights);
+                CONSTRUCTOR SharedRegion(const char *name, size_t size,
+                                         int prot = READ|WRITE, Rights rights = default_rights)
+                            : SharedRegion(name, nullptr, size, prot, rights) {}
+
                 DESTRUCTOR ~SharedRegion();
 
                 // Automatic pointer cast.
