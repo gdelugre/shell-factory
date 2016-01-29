@@ -3,6 +3,7 @@
 
 #include <linux/types.h>
 #include <sys/stat.h>
+#include <sys/ipc.h>
 
 namespace Target {
 
@@ -41,6 +42,13 @@ namespace Target {
                                                          OTHER_READ|OTHER_WRITE;
     }
 
+    namespace Memory {
+        using shm_handle = int;
+    }
+
+    //
+    // random_pool corresponds to the file descriptor of /dev/urandom if getrandom is not available.
+    //
     #if SYSCALL_EXISTS(getrandom)
     using random_pool = EmptyType;
     #else
