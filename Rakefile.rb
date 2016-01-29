@@ -71,6 +71,7 @@ OUTPUT_DIR = "bins"
 SHELLCODE_DIR = "shellcodes"
 INCLUDE_DIRS = %w{include}
 LD_SCRIPT_ELF = File.join(File.dirname(__FILE__), "factory-elf.lds")
+LD_SCRIPT_PE = File.join(File.dirname(__FILE__), "factory-pe.lds")
 OUTPUT_SECTIONS = %w{.text .rodata .data}
 CFLAGS = %W{-std=c++1y
             -Wall
@@ -92,6 +93,7 @@ COMPILER_CFLAGS =
     /^g\+\+|gcc/ =>
         %w{-fno-toplevel-reorder
            -finline-functions
+           -fno-leading-underscore
            -flto
            -nodefaultlibs
            -Os
@@ -126,12 +128,18 @@ OS_CFLAGS =
            -static
           },
 
+    /cygwin|w32|w64/ =>
+        %W{-Wl,-T#{LD_SCRIPT_PE}
+           -Wl,-N
+           -Wl,--gc-sections
+        },
+
     /none/ =>
         %W{-Wl,-T#{LD_SCRIPT_ELF}
            -Wl,--gc-sections
            -Wl,-N
            -U__STDC_HOSTED__
-          }
+        }
 }
 
 # Architecture-dependent flags.
@@ -145,12 +153,12 @@ FILE_EXT =
 {
     :exec => {
         /darwin/ => 'macho',
-        /win/ => 'exe',
+        /cygwin|w32|w64/ => 'exe',
         /.*/ => 'elf'
     },
     :shared => {
         /darwin/ => 'dylib',
-        /win/ => 'dll',
+        /cygwin|w32|w64/ => 'dll',
         /.*/ => 'so'
     }
 }
