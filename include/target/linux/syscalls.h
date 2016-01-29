@@ -4,6 +4,20 @@
 #define SYSCALL_NAME_TO_NUM(name) __NR_##name
 #define SYSCALL_EXISTS(name) defined(__NR_##name)
 
+namespace Target {
+
+    using error_code = int;
+    constexpr error_code max_error = 4095;
+
+    template <typename T>
+    FUNCTION
+    constexpr bool is_error(T err)
+    {
+        return Options::disable_error_checks ? false :
+               (unsigned long)(err) >= (unsigned long)(-max_error);
+    }
+}
+
 #if defined(__i386__)
 #include <target/linux/i386/syscall_abi.h>
 #elif defined(__amd64__)

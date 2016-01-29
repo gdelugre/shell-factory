@@ -3,7 +3,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/errno.h>
 
 namespace Target {
 
@@ -43,21 +42,6 @@ namespace Target {
     }
 
     using random_pool = handle;
-
-    using error_code = int;
-    constexpr error_code max_error = ELAST;
-
-    template <typename T>
-    FUNCTION
-    constexpr bool is_error(T err)
-    {
-        if ( Options::disable_error_checks )
-            return false;
-
-        return Options::disable_error_checks ? false :
-               (reinterpret_cast<unsigned long>(err) > 0 &&
-                reinterpret_cast<unsigned long>(err) <= static_cast<unsigned long>(max_error));
-    }
 }
 
 #endif

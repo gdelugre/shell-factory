@@ -1,8 +1,25 @@
 #ifndef FREEBSD_SYSCALL_ABI_H_
 #define FREEBSD_SYSCALL_ABI_H_
 
+#include <sys/errno.h>
+
 #define SYSCALL_NAME_TO_NUM(name) SYS_##name
 #define SYSCALL_EXISTS(name) defined(SYS_##name)
+
+namespace Target {
+
+    using error_code = int;
+    constexpr error_code max_error = ELAST;
+
+    template <typename T>
+    FUNCTION
+    constexpr bool is_error(T err)
+    {
+        return Options::disable_error_checks ? false :
+               (unsigned long)(err) > 0 &&
+               (unsigned long)(err) <= (unsigned long)(max_error);
+    }
+}
 
 #if defined(__amd64__)
 #include <target/freebsd/amd64/syscall_abi.h>

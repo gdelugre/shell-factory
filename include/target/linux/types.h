@@ -54,17 +54,6 @@ namespace Target {
     #else
     using random_pool = handle;
     #endif
-
-    using error_code = int;
-    constexpr error_code max_error = 4095;
-
-    template <typename T>
-    FUNCTION
-    constexpr bool is_error(T err)
-    {
-        return Options::disable_error_checks ? false :
-               (reinterpret_cast<unsigned long>(err) >= static_cast<unsigned long>(-max_error));
-    }
 }
 
 #endif
