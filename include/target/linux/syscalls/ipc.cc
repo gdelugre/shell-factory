@@ -31,7 +31,7 @@ namespace Syscall {
     SYSTEM_CALL
     void *shmat(int shmid, const void *shmaddr, int shmflg)
     {
-        return DO_SYSCALL(shmat, shmid, shmaddr, shmflg);
+        return (void *) DO_SYSCALL(shmat, shmid, shmaddr, shmflg);
     }
 
     SYSTEM_CALL
