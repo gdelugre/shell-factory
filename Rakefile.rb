@@ -93,6 +93,7 @@ COMPILER_CFLAGS =
     /^g\+\+|gcc/ =>
         %w{-fno-toplevel-reorder
            -finline-functions
+           -fno-jump-tables
            -fno-leading-underscore
            -flto
            -nodefaultlibs
