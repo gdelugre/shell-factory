@@ -11,7 +11,7 @@ namespace Pico {
 
     namespace Memory {
 
-        class SharedRegion {
+        class SharedRegion : BaseRegion {
             public:
                 using Rights = Filesystem::Rights;
                 using shm_handle = Target::Memory::shm_handle;
@@ -28,15 +28,7 @@ namespace Pico {
 
                 DESTRUCTOR ~SharedRegion();
 
-                // Automatic pointer cast.
-                template <typename T>
-                METHOD operator T *() const { return static_cast<T *>(ptr); }
-
-                METHOD size_t size() const { return region_size; }
-
             private:
-                void *ptr;
-                size_t region_size;
                 shm_handle shm_obj;
         };
     }

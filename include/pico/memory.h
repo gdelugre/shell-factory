@@ -17,6 +17,7 @@ namespace Pico {
         }
         FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, bool can_move = true);
         FUNCTION void   release(void *ptr, size_t size);
+        FUNCTION int    set_protection(void *ptr, size_t, int prot);
 
         FUNCTION size_t round_up_page_size(size_t size)
         {
@@ -26,39 +27,17 @@ namespace Pico {
             return nr_pages * page_size;
         }
 
-        class Region
+        class BaseRegion
         {
             public:
-                CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE) {
-                    ptr = Memory::allocate(size, prot);
+                CONSTRUCTOR BaseRegion(void *address, size_t size) {
+                    ptr = address;
                     region_size = round_up_page_size(size);
                 }
-                CONSTRUCTOR Region(void *base, size_t size = page_size(), int prot = READ | WRITE) {
-                    ptr = Memory::allocate(base, size, prot);
-                    region_size = round_up_page_size(size);
-                }
-                DESTRUCTOR ~Region() {
-                    if ( ptr != nullptr )
-                        unmap();
-                }
-
-                // returns a Region object from an already existing mapped range.
-                FUNCTION Region from(void *ptr, size_t size) {
-                    return Region(NoAlloc{}, ptr, size);
-                }
-
                 METHOD void *   pointer() const { return ptr; }
                 METHOD size_t   size() const { return region_size; }
-
-                METHOD int      resize(size_t new_size, bool can_move = true) {
-                    new_size = round_up_page_size(new_size);
-                    void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
-                    if ( new_ptr == nullptr )
-                        return -1;
-
-                    ptr = new_ptr;
-                    region_size = new_size;
-                    return 0;
+                METHOD int      set_protection(int prot) {
+                    return Memory::set_protection(ptr, region_size, prot);
                 }
 
                 // Automatic pointer cast.
@@ -74,16 +53,47 @@ namespace Pico {
                     return p == ptr;
                 }
 
+            protected:
+                void *ptr;
+                size_t region_size;
+        };
+
+        class Region : public BaseRegion
+        {
+            public:
+                CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE)
+                    : BaseRegion(Memory::allocate(size, prot), size) {}
+                CONSTRUCTOR Region(void *base, size_t size = page_size(), int prot = READ | WRITE)
+                    : BaseRegion(Memory::allocate(base, size, prot), size) {}
+
+                DESTRUCTOR ~Region() {
+                    if ( ptr != nullptr )
+                        unmap();
+                }
+
+                // returns a Region object from an already existing mapped range.
+                FUNCTION Region from(void *ptr, size_t size) {
+                    return Region(NoAlloc{}, ptr, size);
+                }
+
+                METHOD int      resize(size_t new_size, bool can_move = true) {
+                    new_size = round_up_page_size(new_size);
+                    void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
+                    if ( new_ptr == nullptr )
+                        return -1;
+
+                    ptr = new_ptr;
+                    region_size = new_size;
+                    return 0;
+                }
+
             private:
                 struct NoAlloc {};
-                CONSTRUCTOR Region(NoAlloc, void *ptr, size_t size) : ptr(ptr), region_size(size) {}
+                CONSTRUCTOR Region(NoAlloc, void *ptr, size_t size) : BaseRegion(ptr, size) {}
 
                 METHOD void unmap() {
                     Memory::release(ptr, region_size);
                 }
-
-                void *ptr;
-                size_t region_size;
         };
 
         template <typename T>

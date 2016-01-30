@@ -44,7 +44,7 @@ namespace Pico {
             ptr = result;
             region_size = Memory::round_up_page_size(size);
 
-            Syscall::mprotect(ptr, region_size, mmap_prot(prot));
+            set_protection(ptr, region_size, prot);
         }
 
         DESTRUCTOR SharedRegion::~SharedRegion()

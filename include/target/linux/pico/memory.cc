@@ -54,6 +54,12 @@ namespace Pico {
         {
             Syscall::munmap(ptr, size);
         }
+
+        METHOD
+        int set_protection(void *ptr, size_t size, int prot)
+        {
+            return Syscall::mprotect(ptr, size, mmap_prot(prot));
+        }
     }
 }
 
