@@ -1,5 +1,5 @@
-#ifndef MEMORY_H_
-#define MEMORY_H_
+#ifndef MEMOPS_H_
+#define MEMOPS_H_
 
 #include <cstddef>
 
