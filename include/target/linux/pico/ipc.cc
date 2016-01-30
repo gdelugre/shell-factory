@@ -42,8 +42,10 @@ namespace Pico {
 
         DESTRUCTOR SharedRegion::~SharedRegion()
         {
-            if ( ptr != nullptr )
+            if ( ptr != nullptr ) {
                 Syscall::shmdt(ptr);
+                Syscall::shmctl(shm_obj, IPC_RMID, nullptr);
+            }
         }
     }
 }
