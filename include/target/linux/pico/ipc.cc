@@ -23,14 +23,26 @@ namespace Pico {
                    (pico_prot & Memory::EXEC ? SHM_EXEC : 0);
         }
 
+        template <size_t N>
+        METHOD
         constexpr key_t ftok(const char *name)
         {
-            return (*name ? (*name) ^ (1000003 * ftok(name +1)) : 0);
+            return name[N] ^ (1000003 * ftok<N-1>(name));
         }
 
-        CONSTRUCTOR SharedRegion::SharedRegion(const char *name, void *base, size_t size, int prot, Rights rights)
+        template <>
+        METHOD
+        constexpr key_t ftok<size_t(-1)>(const char *name)
         {
-            key_t key = ftok(name);
+            return 0;
+        }
+
+        template <int N>
+        CONSTRUCTOR SharedRegion::SharedRegion(const char (&name)[N],
+                                               void *base, size_t size,
+                                               int prot, Rights rights)
+        {
+            key_t key = ftok<N>(name); // Compile-time hash of input name.
 
             shm_obj = Syscall::shmget(key, size, IPC_CREAT | rights.value);
             void *result = Syscall::shmat(shm_obj, base, shm_prot(prot));

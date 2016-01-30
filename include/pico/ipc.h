@@ -17,9 +17,12 @@ namespace Pico {
                 using shm_handle = Target::Memory::shm_handle;
                 static constexpr auto default_rights = Target::Memory::default_shm_rights;
 
-                CONSTRUCTOR SharedRegion(const char *name, void *base, size_t size,
+                template <int N>
+                CONSTRUCTOR SharedRegion(const char (&name)[N], void *base, size_t size,
                                          int prot = READ|WRITE, Rights rights = default_rights);
-                CONSTRUCTOR SharedRegion(const char *name, size_t size,
+
+                template <int N>
+                CONSTRUCTOR SharedRegion(const char (&name)[N], size_t size,
                                          int prot = READ|WRITE, Rights rights = default_rights)
                             : SharedRegion(name, nullptr, size, prot, rights) {}
 
