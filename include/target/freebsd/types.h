@@ -41,6 +41,15 @@ namespace Target {
                                                          OTHER_READ|OTHER_WRITE;
     }
 
+    namespace Memory {
+        using shm_handle = int;
+        using shm_rights = mode_t;
+
+        static constexpr shm_rights default_shm_rights = Filesystem::USER_READ |
+                                                         Filesystem::USER_WRITE |
+                                                         Filesystem::USER_EXEC;
+    }
+
     using random_pool = handle;
 }
 
