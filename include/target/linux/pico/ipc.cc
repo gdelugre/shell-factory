@@ -45,7 +45,7 @@ namespace Pico {
             key_t key = ftok<N>(name); // Compile-time hash of input name.
 
             shm_obj = Syscall::shmget(key, size, IPC_CREAT | rights.value);
-            void *result = Syscall::shmat(shm_obj, base, shm_prot(prot));
+            void *result = Syscall::shmat(shm_obj, base, shm_prot(prot) | SHM_RND);
             if ( Target::is_error(result) )
                 ptr = nullptr;
             else
