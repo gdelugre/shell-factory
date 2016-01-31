@@ -34,6 +34,7 @@ namespace Syscall {
     #endif
     SYSTEM_CALL long            ptrace(enum __ptrace_request, pid_t, void *, void *);
     SYSTEM_CALL pid_t           wait4(pid_t, int *, int, struct rusage *);
+    SYSTEM_CALL int             waitid(idtype_t, id_t, siginfo_t *, int, struct rusage *);
     SYSTEM_CALL int             tkill(pid_t, int);
     SYSTEM_CALL int             kill(pid_t, int);
     NO_RETURN SYSTEM_CALL void  exit(int);
@@ -135,9 +136,9 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
-    int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options)
+    int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options, struct rusage *rusage)
     {
-        return DO_SYSCALL(waitid, idtype, id, infop, options);
+        return DO_SYSCALL(waitid, idtype, id, infop, options, rusage);
     }
 
     SYSTEM_CALL
