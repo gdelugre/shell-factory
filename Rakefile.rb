@@ -348,11 +348,19 @@ def generate_shellcode(object_file, target, triple, output_dir)
     output_file = output_dir.join("#{target_name}.#{triple_info.arch}-#{triple_info.os}.bin")
 
     # Extract shellcode.
-    triple += '-' unless triple.empty?
-    sections = OUTPUT_SECTIONS.map{|s| "-j #{s}"}.join(' ')
-    sh "#{triple}objcopy -O binary #{sections} #{object_file} #{output_file}" do |ok, res|
-        STDERR.puts
-        show_error("Cannot extract shellcode from #{object_file}") unless ok
+    if triple_info.os =~ /darwin/
+        segments = %w{__TEXT __DATA}.map{|s| "-S #{s}"}.join(' ')
+        sh "#{File.dirname(__FILE__)}/tools/mach-o-extract #{segments} #{object_file} #{output_file}" do |ok, res|
+            STDERR.puts
+            show_error("Cannot extract shellcode from #{object_file}") unless ok
+        end
+    else
+        triple += '-' unless triple.empty?
+        sections = OUTPUT_SECTIONS.map{|s| "-j #{s}"}.join(' ')
+        sh "#{triple}objcopy -O binary #{sections} #{object_file} #{output_file}" do |ok, res|
+            STDERR.puts
+            show_error("Cannot extract shellcode from #{object_file}") unless ok
+        end
     end
 
     # Read shellcode.

@@ -1,0 +1,315 @@
+#!/usr/bin/env ruby -w
+
+=begin
+
+    OS X does not provide an 'objcopy' tool for manipulating mach-o binaries.
+    mach-o-extract provides the same feature as using: objcopy -O binary -j <sections> <output>
+
+=end
+
+require 'optparse'
+
+class MachO
+    class Error < Exception; end
+
+    class LoadCommand
+        module Type
+            SEGMENT     = 0x1
+            SEGMENT_64  = 0x19
+        end
+
+        def initialize(cmd, size, endian, io)
+            @cmd, @size, @endian, @io = cmd, size, endian, io
+            parse_load_command
+        end
+
+        def segment?
+            return (@cmd == Type::SEGMENT or @cmd == Type::SEGMENT_64)
+        end
+
+        private
+
+        def parse_load_command
+            @io.pos += @size
+        end
+
+        def self.parse(io, endian)
+            hdr_size = 8
+            raise Error, "Truncated Mach-O load command header" if io.size < io.pos + hdr_size
+
+            fmt = (endian == :little) ? 'V2' : 'N2'
+            cmd, size = io.read(hdr_size).unpack(fmt)
+
+            raise Error, "Invalid load command size" if size < hdr_size
+            raise Error, "Truncated Mach-O load command" if io.size < io.pos + size
+
+            size -= hdr_size
+
+            case cmd
+            when Type::SEGMENT then Segment32.new(cmd, size, endian, io)
+            when Type::SEGMENT_64 then Segment64.new(cmd, size, endian, io)
+            else
+                LoadCommand.new(cmd, size, endian, io)
+            end
+        end
+    end
+
+    class Section
+        attr_reader :name, :address, :size, :offset
+
+        module Type
+            REGULAR     = 0
+            ZEROFILL    = 1
+            CSTRING     = 2
+        end
+
+        def initialize(io, endian)
+            @io, @endian = io, endian
+            parse_section
+        end
+
+        def type
+            @flags & 0xff
+        end
+
+        def zero?
+            @size == 0 or self.type == Type::ZEROFILL
+        end
+
+        def read
+            return (0.chr * @size) if self.zero?
+
+            pos = @io.pos
+            begin
+                raise Error, "Invalid file offset #{@offset} for section #{@name}" if @offset >= @io.size
+                raise Error, "Invalid section size #{@size}" if @offset + @size >= @io.size
+
+                @io.pos = @offset
+                return @io.read(@size)
+            ensure
+                @io.pos = pos
+            end 
+        end
+    end
+
+    class Section32 < Section
+        private
+        def parse_section
+            hdr_size = 16 + 16 + 9 * 4
+            raise Error, "Truncated section header" if @io.size < @io.pos + hdr_size
+
+            fmt = (@endian == :little) ? "Z16Z16V9" : "Z16Z16N9"
+            @name, @segment_name, @address, @size,
+            @offset, @align, @reloff, @nreloc, @flags, _, _ = @io.read(hdr_size).unpack(fmt)
+        end
+    end
+
+    class Section64 < Section
+        private
+        def parse_section
+            hdr_size = 16 + 16 + 2 * 8 + 8 * 4
+            raise Error, "Truncated section header" if @io.size < @io.pos + hdr_size
+
+            fmt = (@endian == :little) ? "Z16Z16Q<2V8" : "Z16Z16Q>2N8"
+            @name, @segname, @address, @size,
+            @offset, @align, @reloff, @nreloc, @flags, _, _, _ = @io.read(hdr_size).unpack(fmt)
+        end
+    end
+
+    class Segment < LoadCommand
+        attr_reader :name
+
+        def each_section(&b)
+            @sections.each(&b)
+        end
+
+        def read
+            pos = @io.pos
+            begin
+                raise Error, "Invalid file offset #{@fileoff} for segment #{@name}" if @fileoff >= @io.size
+                raise Error, "Invalid segment size #{@filesize}" if @fileoff + @filesize >= @io.size
+
+                @io.pos = @fileoff
+                return @io.read(@filesize)
+            ensure
+                @io.pos = pos
+            end
+        end
+    end
+
+    class Segment32 < Segment
+        private
+        def parse_segment
+            hdr_size = 16 + 8 * 4
+            raise Error, "Truncated segment header" if @io.size < @io.pos + hdr_size
+
+            fmt = (@endian == :little) ? "Z16V8" : "Z16N8"
+            @name, @vmaddr, @vmsize, @fileoff, @filesize, 
+            @maxprot, @initprot, @nsects, @flags = @io.read(hdr_size).unpack(fmt)
+
+            parse_sections
+        end
+
+        def parse_sections
+            @sections = []
+            @nsects.times do
+                @sections.push Section32.new(@io, @endian)
+            end
+        end
+        alias :parse_load_command :parse_segment
+    end
+
+    class Segment64 < Segment
+        private
+        def parse_segment
+            hdr_size = 16 + 8 * 4 + 4 * 4
+            raise Error, "Truncated segment header" if @io.size < @io.pos + hdr_size
+
+            fmt = (@endian == :little) ? "Z16Q<4V4" : "Z16Q>4N4"
+            @name, @vmaddr, @vmsize, @fileoff, @filesize, 
+            @maxprot, @initprot, @nsects, @flags = @io.read(hdr_size).unpack(fmt)
+
+            parse_sections
+        end
+
+        def parse_sections
+            @sections = []
+            @nsects.times do
+                @sections.push Section64.new(@io, @endian)
+            end
+        end
+        alias :parse_load_command :parse_segment
+    end
+
+    FAT_MAGIC    = 0xcafebabe
+    FAT_CIGAM    = 0xbebafeca
+    MACH32_MAGIC = 0xfeedface
+    MACH32_CIGAM = 0xcefaedfe
+    MACH64_MAGIC = 0xfeedfacf
+    MACH64_CIGAM = 0xcffaedfe
+
+    def initialize(path)
+        @io = File.open(path, 'r')
+
+        magic = @io.read(4).unpack('V')[0]
+        case magic
+        when FAT_MAGIC, FAT_CIGAM then raise Error, "Fat binaries are not supported"
+        when MACH32_MAGIC then @type, @endian = :mach32, :little
+        when MACH64_MAGIC then @type, @endian = :mach64, :little
+        when MACH32_CIGAM then @type, @endian = :mach32, :big
+        when MACH64_CIGAM then @type, @endian = :mach64, :big
+        else
+            raise Error, "Invalid file magic: #{[magic].pack('V').unpack('H*')[0]}"
+        end
+
+        parse_mach_header
+        parse_load_commands
+    end
+
+    def each_command(&b)
+        @commands.each(&b)
+    end
+
+    def each_segment(&b)
+        self.each_command.select{|cmd| cmd.segment?}.each(&b)
+    end
+
+    private
+
+    def parse_mach_header
+        case @type
+        when :mach32 then parse_mach32_header
+        when :mach64 then parse_mach64_header
+        end
+    end
+
+    def parse_mach32_header
+        hdr_size = 24
+        raise Error, "Truncated Mach-O header" if @io.size < @io.pos + hdr_size
+
+        fmt = (@endian == :little) ? 'V6' : 'N6'
+        @cpu, @cpu_subtype, @filetype, @ncmds, @sizeofcmds, @flags = @io.read(hdr_size).unpack(fmt)
+    end
+
+    def parse_mach64_header
+        hdr_size = 28
+        raise Error, "Truncated Mach-O header" if @io.size < @io.pos + hdr_size
+
+        fmt = (@endian == :little) ? 'V6' : 'N6'
+        @cpu, @cpu_subtype, @filetype, @ncmds, @sizeofcmds, @flags, _ = @io.read(hdr_size).unpack(fmt)
+    end
+
+    def parse_load_commands
+        @commands = []
+        @ncmds.times do
+            @commands.push LoadCommand.parse(@io, @endian)
+        end
+    end
+end
+
+class CommandLineParser
+    def self.parse(args)
+        options = {
+            segments: [],
+            sections: [],
+        }
+
+        parser = OptionParser.new do |opts|
+            opts.banner = "Usage: #{File.basename(__FILE__)} [OPTIONS] <INPUT FILE> <OUTPUT FILE>"
+            opts.separator ""
+            opts.separator "Options:"
+
+            opts.on('-S', '--segment NAME', 'Select segment for output.') do |segname|
+                options[:segments].push(segname)
+            end
+
+            opts.on('-s', '--section NAME', 'Select section for output.') do |sectname|
+                options[:sections].push(sectname)
+            end
+
+            opts.on_tail('-h', '--help', "Show this help message.") do
+                puts opts
+                exit 
+            end
+        end
+
+        parser.parse!(args)
+        options
+    end
+end
+
+options = CommandLineParser.parse(ARGV)
+if options[:segments].empty? and options[:sections].empty?
+    abort "No sections or segments selected."
+end
+
+abort "Missing input filename." if ARGV.empty?
+input_path = ARGV.shift
+
+abort "Missing output filename." if ARGV.empty?
+output_path = ARGV.shift
+
+begin
+    # Parse the input Mach-O binary.
+    macho = MachO.new(input_path)
+
+    # Output selected sections/segments to the output file.
+    File.open(output_path, 'wb') do |output|
+
+        base_address = nil
+        macho.each_segment do |segment|
+            segment.each_section do |section|
+                next unless options[:sections].include?(section.name) or options[:segments].include?(segment.name)
+                next if section.zero?
+
+                base_address ||= section.address
+                output_off = (section.address - base_address)
+
+                output.seek(output_off)
+                output.write(section.read)
+            end
+        end
+    end
+rescue
+    abort "#{$!.class}: #{$!.message} (#{$!.backtrace.first})"
+end
