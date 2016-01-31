@@ -26,7 +26,7 @@ namespace Syscall {
     #if SYSCALL_EXISTS(execveat)
     NO_RETURN SYSTEM_CALL int   execveat(int, const char *, char *const[], char *const[], int);
     #endif
-    SYSTEM_CALL long            clone(unsigned long, void *, void *, void *, void *);
+    SYSTEM_CALL_INLINE long     clone(unsigned long, void *, void *, void *, void *);
     SYSTEM_CALL int             prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
     #if SYSCALL_EXISTS(setitimer)
     SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
@@ -78,7 +78,11 @@ namespace Syscall {
     }
     #endif
 
-    SYSTEM_CALL
+    //
+    // clone has the ability to change the child stack.
+    // It must be always be inlined since it cannot return from another stack.
+    //
+    SYSTEM_CALL_INLINE
     long clone(unsigned long flags, void *child_stack, void *ptid, void *tls, void *ctid)
     {
         return DO_SYSCALL(clone, flags, child_stack, ptid, tls, ctid);
