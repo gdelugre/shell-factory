@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include <linux/sched.h>
 #include <linux/limits.h>
@@ -131,6 +132,12 @@ namespace Syscall {
     pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage)
     {
         return DO_SYSCALL(wait4, pid, status, options, rusage);
+    }
+
+    SYSTEM_CALL
+    int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options)
+    {
+        return DO_SYSCALL(waitid, idtype, id, infop, options);
     }
 
     SYSTEM_CALL
