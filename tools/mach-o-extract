@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/env ruby
 
 =begin
 
@@ -88,7 +88,7 @@ class MachO
                 return @io.read(@size)
             ensure
                 @io.pos = pos
-            end 
+            end
         end
     end
 
@@ -144,7 +144,7 @@ class MachO
             raise Error, "Truncated segment header" if @io.size < @io.pos + hdr_size
 
             fmt = (@endian == :little) ? "Z16V8" : "Z16N8"
-            @name, @vmaddr, @vmsize, @fileoff, @filesize, 
+            @name, @vmaddr, @vmsize, @fileoff, @filesize,
             @maxprot, @initprot, @nsects, @flags = @io.read(hdr_size).unpack(fmt)
 
             parse_sections
@@ -166,7 +166,7 @@ class MachO
             raise Error, "Truncated segment header" if @io.size < @io.pos + hdr_size
 
             fmt = (@endian == :little) ? "Z16Q<4V4" : "Z16Q>4N4"
-            @name, @vmaddr, @vmsize, @fileoff, @filesize, 
+            @name, @vmaddr, @vmsize, @fileoff, @filesize,
             @maxprot, @initprot, @nsects, @flags = @io.read(hdr_size).unpack(fmt)
 
             parse_sections
@@ -269,7 +269,7 @@ class CommandLineParser
 
             opts.on_tail('-h', '--help', "Show this help message.") do
                 puts opts
-                exit 
+                exit
             end
         end
 
