@@ -3,11 +3,12 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/umtx.h>
 
 namespace Target {
 
     /* File descriptors. */
-    using handle = int; 
+    using handle = int;
 
     namespace Security {
         using user_id = uid_t;
@@ -51,6 +52,8 @@ namespace Target {
     }
 
     using random_pool = handle;
+
+    using mutex_t = struct umtx;
 }
 
 #endif

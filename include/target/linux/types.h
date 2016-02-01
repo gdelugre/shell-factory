@@ -1,6 +1,7 @@
 #ifndef LINUX_TYPES_H_
 #define LINUX_TYPES_H_
 
+#include <cstdint>
 #include <linux/types.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
@@ -59,6 +60,8 @@ namespace Target {
     #else
     using random_pool = handle;
     #endif
+
+    using mutex_t = int;
 }
 
 #endif

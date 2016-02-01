@@ -68,6 +68,21 @@ namespace Pico {
         private:
             T value;
     };
+
+    class Mutex
+    {
+        using mutex_t = Target::mutex_t;
+
+        public:
+            CONSTRUCTOR Mutex();
+            METHOD int lock();
+            METHOD int lock(struct timespec timeout);
+            METHOD int try_lock();
+            METHOD int unlock();
+
+        private:
+            mutex_t mutex_obj;
+    };
 }
 
 /* 

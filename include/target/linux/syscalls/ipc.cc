@@ -3,6 +3,7 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/time.h>
 
 #if SYSCALL_EXISTS(ipc)
 #define SEMOP        1
@@ -29,6 +30,7 @@ namespace Syscall {
     SYSTEM_CALL void *shmat(int, const void *, int);
     SYSTEM_CALL int shmdt(const void *);
     SYSTEM_CALL int shmctl(int, int, struct shmid_ds *);
+    SYSTEM_CALL int futex(int *, int, int, const struct timespec *, int *, int);
 
     SYSTEM_CALL
     int pipe(int pipefd[2])
@@ -79,6 +81,12 @@ namespace Syscall {
         #else
         return DO_SYSCALL(ipc, SHMCTL, shmid, cmd, 0, buf);
         #endif
+    }
+
+    SYSTEM_CALL
+    int futex(int *uaddr, int futex_op, int val, const struct timespec *timeout, int *uaddr2, int val3)
+    {
+        return DO_SYSCALL(futex, uaddr, futex_op, val, timeout, uaddr2, val3);
     }
 }
 
