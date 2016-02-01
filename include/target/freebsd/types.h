@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <machine/atomic.h>
 #include <sys/umtx.h>
 
 namespace Target {
