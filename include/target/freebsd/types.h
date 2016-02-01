@@ -3,8 +3,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <machine/atomic.h>
-#include <sys/umtx.h>
 
 namespace Target {
 
@@ -54,7 +52,7 @@ namespace Target {
 
     using random_pool = handle;
 
-    using mutex_t = struct umtx;
+    using mutex_t = unsigned long;
 }
 
 #endif

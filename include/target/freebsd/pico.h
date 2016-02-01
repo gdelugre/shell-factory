@@ -5,6 +5,7 @@
 #include <target/freebsd/syscalls.h>
 
 /* Target implementation. */
+#include "pico/concurrency.cc"
 #include "pico/memory.cc"
 #include "pico/stream.cc"
 #include "pico/fs.cc"

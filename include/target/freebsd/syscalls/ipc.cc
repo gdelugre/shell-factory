@@ -16,6 +16,7 @@ namespace Syscall {
     SYSTEM_CALL void *shmat(int, const void *, int);
     SYSTEM_CALL int shmdt(const void *);
     SYSTEM_CALL int shmctl(int, int, struct shmid_ds *);
+    SYSTEM_CALL int _umtx_op(void *, int ,u_long, void *, void *);
 
     SYSTEM_CALL
     int pipe(int pipefd[2])
@@ -61,6 +62,12 @@ namespace Syscall {
         #else
         return DO_SYSCALL(shmsys, 4, shmid, cmd, buf);
         #endif
+    }
+
+    SYSTEM_CALL
+    int _umtx_op(void *obj, int op, u_long val, void *uaddr, void *uaddr2)
+    {
+        return DO_SYSCALL(_umtx_op, obj, op, val, uaddr, uaddr2);
     }
 }
 
