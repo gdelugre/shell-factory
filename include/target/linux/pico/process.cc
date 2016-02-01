@@ -174,10 +174,13 @@ namespace Pico {
         return (sighandler_t) old_act.sa_restorer;
     }
 
+    //
+    // XXX: Doesn't work.
+    //
     METHOD
     int Thread::wait(int *status)
     {
-        return Syscall::wait4(tid, status, 0, nullptr);
+        return Syscall::wait4(tid, status, __WCLONE, nullptr);
     }
 
     METHOD
