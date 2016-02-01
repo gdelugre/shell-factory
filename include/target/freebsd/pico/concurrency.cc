@@ -24,7 +24,7 @@ namespace Pico {
         while ( try_lock() != 0 ) {
             int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAIT, UMTX_OWNED, nullptr, nullptr);
             if ( Target::is_error(ret) ) {
-                if (ret == -EAGAIN)
+                if (ret == EINTR)
                     continue;
                 return -1;
             }
@@ -41,7 +41,7 @@ namespace Pico {
         while ( try_lock() != 0 ) {
             int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAIT, UMTX_OWNED, nullptr, &timeout);
             if ( Target::is_error(ret) ) {
-                if (ret == -EAGAIN)
+                if (ret == EINTR)
                     continue;
                 return -1;
             }
