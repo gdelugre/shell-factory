@@ -84,6 +84,23 @@ namespace Pico {
             unsigned nr_waiters = 0;
             mutex_t mutex_obj;
     };
+
+    class CriticalSection
+    {
+        public:
+            CONSTRUCTOR CriticalSection(Mutex& mutex) : mutex(mutex)
+            {
+                mutex.lock();
+            }
+
+            DESTRUCTOR ~CriticalSection()
+            {
+                mutex.unlock();
+            }
+
+        private:
+            Mutex& mutex;
+    };
 }
 
 /* 

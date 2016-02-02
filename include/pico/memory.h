@@ -434,6 +434,7 @@ namespace Pico {
             METHOD size_t allocated_objects() const { return nr_objects; }
 
         private:
+            Mutex mutex;
             Memory::Region chunks;
             size_t heap_size;
             size_t total_size;
@@ -478,6 +479,8 @@ namespace Pico {
     METHOD
     void *Heap::allocate(size_t count)
     {
+        CriticalSection critical(mutex);
+
         size_t needed_size = sizeof(Chunk) + count;
 
         // Big chunks are allocated into separate memory areas.
@@ -491,6 +494,7 @@ namespace Pico {
             total_size += alloc_size;
 
             void *ptr = chunk + 1;
+
             return ptr;
         }
 
@@ -519,6 +523,8 @@ namespace Pico {
         if ( ptr == nullptr )
             return;
 
+        CriticalSection critical(mutex);
+
         struct Chunk *chunk = reinterpret_cast<Chunk *>(static_cast<char *>(ptr) - sizeof(Chunk));
         size_t used_size = sizeof(Chunk) + chunk->size;
 
@@ -531,6 +537,7 @@ namespace Pico {
 
             nr_objects--;
             total_size -= used_size;
+
             return;
         }
 
