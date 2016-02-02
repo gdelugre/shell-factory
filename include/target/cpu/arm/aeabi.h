@@ -7,6 +7,12 @@ extern "C" {
 
     #if defined(__ARM_EABI__)
     EXPORT_ABI_FUNCTION
+    void __aeabi_memcpy(void *dest, const void *src, size_t n)
+    {
+        memcpy(dest, src, n);
+    }
+
+    EXPORT_ABI_FUNCTION
     int32_t __aeabi_idiv(int32_t dividend, int32_t divisor)
     {
         return __divsi3(dividend, divisor);
