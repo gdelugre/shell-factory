@@ -1,6 +1,8 @@
 #ifndef PICOLIB_CONCURRENCY_IMPL_H_
 #define PICOLIB_CONCURRENCY_IMPL_H_
 
+#include <sys/umtx.h>
+
 namespace Pico {
 
     static constexpr int UMTX_FREE     = 0;
