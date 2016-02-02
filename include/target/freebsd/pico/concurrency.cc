@@ -3,17 +3,18 @@
 
 namespace Pico {
 
+    static constexpr int UMTX_FREE     = 0;
     static constexpr int UMTX_OWNED    = 1;
 
     CONSTRUCTOR
-    Mutex::Mutex() : mutex_obj(UMTX_UNOWNED) {}
+    Mutex::Mutex() : mutex_obj(UMTX_FREE) {}
 
     METHOD
     int Mutex::try_lock()
     {
         Atomic<mutex_t *> guard(&mutex_obj);
 
-        return guard.compare_exchange(UMTX_UNOWNED, UMTX_OWNED) ? 0 : -1;
+        return guard.compare_exchange(UMTX_FREE, UMTX_OWNED) ? 0 : -1;
     }
 
     METHOD
@@ -61,7 +62,7 @@ namespace Pico {
     {
         Atomic<mutex_t *> guard(&mutex_obj);
 
-        if ( guard.compare_exchange(UMTX_OWNED, UMTX_UNOWNED) ) {
+        if ( guard.compare_exchange(UMTX_OWNED, UMTX_FREE) ) {
             if ( *nr_waiters > 0 ) {
                 int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAKE, 1, nullptr, nullptr);
                 if ( Target::is_error(ret) )
