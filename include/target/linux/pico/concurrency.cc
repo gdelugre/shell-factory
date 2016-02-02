@@ -26,7 +26,10 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         while ( try_lock() != 0 ) {
+            nr_waiters++;
             int ret = Syscall::futex(&mutex_obj, FUTEX_WAIT, FUTEX_OWNED, nullptr, nullptr, 0);
+            nr_waiters--;
+
             if ( Target::is_error(ret) ) {
                 if (ret == -EAGAIN)
                     continue;
@@ -43,7 +46,10 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         while ( try_lock() != 0 ) {
+            nr_waiters++;
             int ret = Syscall::futex(&mutex_obj, FUTEX_WAIT, FUTEX_OWNED, &timeout, nullptr, 0);
+            nr_waiters--;
+
             if ( Target::is_error(ret) ) {
                 if (ret == -EAGAIN)
                     continue;
@@ -60,9 +66,11 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         if ( guard.compare_exchange(FUTEX_OWNED, FUTEX_UNOWNED) ) {
-            int ret = Syscall::futex(&mutex_obj, FUTEX_WAKE, 1, nullptr, nullptr, 0);
-            if ( Target::is_error(ret) )
-                return -1;
+            if ( nr_waiters > 0 ) {
+                int ret = Syscall::futex(&mutex_obj, FUTEX_WAKE, 1, nullptr, nullptr, 0);
+                if ( Target::is_error(ret) )
+                    return -1;
+            }
         }
 
         return 0;

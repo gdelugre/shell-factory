@@ -22,7 +22,10 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         while ( try_lock() != 0 ) {
+            nr_waiters++;
             int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAIT, UMTX_OWNED, nullptr, nullptr);
+            nr_waiters--;
+
             if ( Target::is_error(ret) ) {
                 if (ret == EINTR)
                     continue;
@@ -39,7 +42,10 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         while ( try_lock() != 0 ) {
+            nr_waiters++;
             int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAIT, UMTX_OWNED, nullptr, &timeout);
+            nr_waiters--;
+
             if ( Target::is_error(ret) ) {
                 if (ret == EINTR)
                     continue;
@@ -56,9 +62,11 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         if ( guard.compare_exchange(UMTX_OWNED, UMTX_UNOWNED) ) {
-            int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAKE, 1, nullptr, nullptr);
-            if ( Target::is_error(ret) )
-                return -1;
+            if ( nr_waiters > 0 ) {
+                int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAKE, 1, nullptr, nullptr);
+                if ( Target::is_error(ret) )
+                    return -1;
+            }
         }
 
         return 0;

@@ -81,6 +81,7 @@ namespace Pico {
             METHOD int unlock();
 
         private:
+            unsigned nr_waiters = 0;
             mutex_t mutex_obj;
     };
 }
