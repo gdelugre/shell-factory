@@ -38,6 +38,10 @@ namespace Pico {
                 return __sync_fetch_and_sub(ptr, 1);
             }
 
+            METHOD T& operator *() {
+                return *ptr;
+            }
+
         private:
             T *ptr;
     };
@@ -65,6 +69,10 @@ namespace Pico {
                 return __sync_fetch_and_sub(&value, 1);
             }
 
+            METHOD T& operator *() {
+                return value;
+            }
+
         private:
             T value;
     };
@@ -81,7 +89,7 @@ namespace Pico {
             METHOD int unlock();
 
         private:
-            unsigned nr_waiters = 0;
+            Atomic<unsigned> nr_waiters = 0;
             mutex_t mutex_obj;
     };
 

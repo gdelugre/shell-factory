@@ -66,7 +66,7 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         if ( guard.compare_exchange(FUTEX_OWNED, FUTEX_UNOWNED) ) {
-            if ( nr_waiters > 0 ) {
+            if ( *nr_waiters > 0 ) {
                 int ret = Syscall::futex(&mutex_obj, FUTEX_WAKE, 1, nullptr, nullptr, 0);
                 if ( Target::is_error(ret) )
                     return -1;

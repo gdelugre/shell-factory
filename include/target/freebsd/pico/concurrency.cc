@@ -62,7 +62,7 @@ namespace Pico {
         Atomic<mutex_t *> guard(&mutex_obj);
 
         if ( guard.compare_exchange(UMTX_OWNED, UMTX_UNOWNED) ) {
-            if ( nr_waiters > 0 ) {
+            if ( *nr_waiters > 0 ) {
                 int ret = Syscall::_umtx_op(&mutex_obj, UMTX_OP_WAKE, 1, nullptr, nullptr);
                 if ( Target::is_error(ret) )
                     return -1;
