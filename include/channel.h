@@ -22,6 +22,8 @@ namespace Shellcode {
     #define SCTP6_LISTEN    9
     #define UDP_CONNECT     10
     #define UDP6_CONNECT    11
+    #define REUSE_SOCKET    12
+    #define REUSE_FILE      13
 
     //
     // Static structure holding information for each mode.
@@ -48,6 +50,8 @@ namespace Shellcode {
     DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket);
     DEFINE_CHANNEL_MODE(UDP_CONNECT,    Network::UdpSocket);
     DEFINE_CHANNEL_MODE(UDP6_CONNECT,   Network::Udp6Socket);
+    DEFINE_CHANNEL_MODE(REUSE_SOCKET,   Network::Socket);
+    DEFINE_CHANNEL_MODE(REUSE_FILE,     BasicStream);
 
     //
     // The channel class definition.
@@ -57,6 +61,8 @@ namespace Shellcode {
     struct Channel : ChannelMode<M>::stream_type
     {
         CONSTRUCTOR Channel();
+
+        CONSTRUCTOR Channel(int fd);
 
         template <enum Network::AddressType T>
         CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
@@ -163,6 +169,14 @@ namespace Shellcode {
     {
         static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
     }
+
+    template <>
+    CONSTRUCTOR
+    Channel<REUSE_SOCKET>::Channel(int fd) : Socket(fd) {}
+
+    template <>
+    CONSTRUCTOR
+    Channel<REUSE_FILE>::Channel(int fd) : BasicStream(fd) {}
 }
 
 namespace Options {
@@ -185,6 +199,10 @@ namespace Options {
      */
     #ifndef PORT
     #define PORT            0
+    #endif
+
+    #ifndef HANDLE
+    #define HANDLE          -1
     #endif
 
     FUNCTION auto channel()
@@ -233,6 +251,11 @@ namespace Options {
             uint16_t remote_port = RPORT;
 
             return SelectedChannel(local_address, local_port, remote_address, remote_port);
+
+        #elif (CHANNEL == REUSE_SOCKET) || (CHANNEL == REUSE_FILE)
+            static_assert(HANDLE != -1, "Requires a HANDLE parameter.");
+            Target::handle desc = HANDLE;
+            return SelectedChannel(desc);
 
         #else
         #error "No channel mode is selected."
