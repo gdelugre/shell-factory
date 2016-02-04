@@ -1,6 +1,7 @@
 #ifndef PICOLIB_CONCURRENCY_IMPL_H_
 #define PICOLIB_CONCURRENCY_IMPL_H_
 
+#include <machine/atomic.h>
 #include <sys/umtx.h>
 
 namespace Pico {
