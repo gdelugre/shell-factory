@@ -136,7 +136,14 @@ namespace Pico {
         }
 
         CONSTRUCTOR
-        Socket::Socket(int domain, int type, int protocol) : Socket( Syscall::socket(domain, type, protocol) ) {}
+        Socket::Socket(int domain, int type, int protocol)
+        {
+            int fd = Syscall::socket(domain, type, protocol);
+            if ( Target::is_error(fd) )
+                fd = Target::invalid_handle;
+
+            io = SocketIO(fd);
+        }
 
         METHOD
         int Socket::get(int level, int optname, void *val, unsigned *len)
@@ -209,6 +216,9 @@ namespace Pico {
         {
             do {
                 int client_fd = Syscall::accept(this->file_desc(), nullptr, 0);
+                if ( Target::is_error(client_fd) )
+                    continue;
+
                 if ( Fork )
                 {
                     if ( Syscall::fork() == 0 )
@@ -250,7 +260,7 @@ namespace Pico {
         SingleIO UnixStreamSocket::recv_io()
         {
             char dummy;
-            int fd                           = -1;
+            int fd                           = Target::invalid_handle;
             struct msghdr msg                = {};
             char buf[CMSG_SPACE(sizeof(fd))] = {0};
             struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
@@ -260,7 +270,7 @@ namespace Pico {
             msg.msg_control = buf;
             msg.msg_controllen = sizeof(buf);
 
-            if ( Syscall::recvmsg(this->file_desc(), &msg, 0) == -1 )
+            if ( Target::is_error(Syscall::recvmsg(this->file_desc(), &msg, 0)) )
                 return SingleIO(fd);
 
             for ( struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);

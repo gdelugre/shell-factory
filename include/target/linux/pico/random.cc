@@ -17,7 +17,7 @@ namespace Pico {
         while ( remaining )
         {
             ssize_t ret = Syscall::getrandom(ptr, remaining, 0);
-            if ( ret < 0 )
+            if ( Target::is_error(ret) )
                 continue;
 
             remaining -= ret;
@@ -51,7 +51,7 @@ namespace Pico {
         while ( remaining )
         {
             ssize_t ret = Syscall::read(pool, ptr, remaining);
-            if ( ret < 0 )
+            if ( Target::is_error(ret) )
                 continue;
 
             remaining -= ret;
