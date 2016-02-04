@@ -8,6 +8,7 @@ namespace Target {
 
     /* File descriptors. */
     using handle = int;
+    constexpr static handle invalid_handle = -1;
 
     namespace Security {
         using user_id = uid_t;

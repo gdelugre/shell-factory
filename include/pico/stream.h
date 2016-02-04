@@ -55,6 +55,9 @@ namespace Pico {
             METHOD bool operator ==(SingleIO io) {
                 return file_desc() == io.file_desc();
             }
+            METHOD bool is_invalid() const {
+                return fd == Target::invalid_handle;
+            }
 
         protected:
             handle fd;
@@ -123,6 +126,7 @@ namespace Pico {
             METHOD handle file_desc() { return io.file_desc(); }
             METHOD int close() { return io.close(); }
             METHOD int close_on_exec() { return io.close_on_exec(); }
+            METHOD bool is_invalid() const { return io.is_invalid(); }
 
             template <typename T>
             METHOD void duplicate(Stream<T>& s);
@@ -159,7 +163,7 @@ namespace Pico {
             // Should not be called. Undefined behavior.
             METHOD handle file_desc() const {
                 assert(true);
-                return -1;
+                return Target::invalid_handle;
             }
 
             METHOD handle read_file_desc() const {
@@ -173,6 +177,9 @@ namespace Pico {
             }
             METHOD bool operator ==(DuplexIO io) {
                 return rx == io.read_file_desc() && tx == io.write_file_desc();
+            }
+            METHOD bool is_invalid() const {
+                return rx.is_invalid() || tx.is_invalid();
             }
 
         private:
