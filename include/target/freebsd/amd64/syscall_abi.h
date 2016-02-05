@@ -30,4 +30,17 @@
 #define SYSCALL_SET_ARG_6(value) SYSCALL_ARG_BIND_REGISTER(6, "r9", value)
 #define SYSCALL_SET_ARG_7(value) static_assert(false, "Too many arguments for this architecture.")
 
+#if !defined(NO_ERROR_CHECKS) || (NO_ERROR_CHECKS == 0)
+#define SYSCALL_HANDLE_ERROR(result)            \
+    asm volatile (                              \
+        "jnc 1f;"                               \
+        "mov %0, %%rdi;"                        \
+        "callq %P[set_error];"                  \
+        "1:;"                                   \
+        :: "r" (result),                        \
+           [set_error] "X"(Target::set_error)   \
+    );                                          \
+
+#endif
+
 #endif

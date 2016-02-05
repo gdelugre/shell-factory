@@ -1,6 +1,8 @@
 #ifndef GENERIC_SYSCALL_ABI_H_
 #define GENERIC_SYSCALL_ABI_H_
 
+#define SYSCALL_HANDLE_ERROR(result)
+
 #define SYSCALL_ARG_BIND_REGISTER(i, reg, value)                        \
     register auto __arg##i asm (reg) = value;                           \
 
@@ -18,6 +20,8 @@
         : "memory", "cc"                                                \
     );                                                                  \
     asm volatile ("" ::: SYSCALL_CLOBBERED_REGISTERS );                 \
+                                                                        \
+    SYSCALL_HANDLE_ERROR(__sys_result);                                 \
                                                                         \
     __sys_result;                                                       \
 })                                                                      \
