@@ -30,6 +30,9 @@
 #define SYSCALL_SET_ARG_6(value) SYSCALL_ARG_BIND_REGISTER(6, "r9", value)
 #define SYSCALL_SET_ARG_7(value) static_assert(false, "Too many arguments for this architecture.")
 
+//
+// The FreeBSD kernel sets the carry flag to 1 on error.
+//
 #if !defined(NO_ERROR_CHECKS) || (NO_ERROR_CHECKS == 0)
 #define SYSCALL_HANDLE_ERROR(result)            \
     asm volatile (                              \

@@ -175,6 +175,9 @@ namespace Pico {
             else
                 fd = Syscall::open(path, open_flags(flags));
 
+            if ( Target::is_error(fd) )
+                fd = Target::invalid_handle;
+
             io = BasicIO(fd);
         }
 
@@ -218,6 +221,8 @@ namespace Pico {
         Directory::Directory(const char *path)
         {
             fd = Syscall::open(path, O_RDONLY | O_DIRECTORY);
+            if ( Target::is_error(fd) )
+                fd = Target::invalid_handle;
         }
 
         METHOD
@@ -237,8 +242,8 @@ namespace Pico {
         int Directory::each(const char *path, Func proc)
         {
             Directory dir(path);
-            if ( dir.file_desc() < 0 )
-                return dir.file_desc();
+            if ( dir.is_invalid() )
+                return -1;
 
             int ret = dir.list(proc);
 
@@ -261,8 +266,8 @@ namespace Pico {
                 if ( ret == 0 )
                     break;
 
-                if ( ret < 0 )
-                    return ret;
+                if ( Target::is_error(ret) )
+                    return -1;
 
                 read_size += ret;
                 region.resize(region.size() * 2);
