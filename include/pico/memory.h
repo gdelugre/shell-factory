@@ -498,15 +498,12 @@ namespace Pico {
             return ptr;
         }
 
-        Chunk *chunk = static_cast<Chunk *>( find_free_space(needed_size) );
-        if ( chunk == nullptr )
+        Chunk *chunk;
+        while ( (chunk = static_cast<Chunk *>(find_free_space(needed_size))) == nullptr )
         {
             // No free space available, grow the heap.
             if ( grow(needed_size) != 0 )
                 return nullptr;
-
-            // Retry.
-            return allocate(count);
         }
 
         chunk->type = STANDARD_CHUNK;
