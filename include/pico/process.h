@@ -63,6 +63,14 @@ namespace Pico {
                 execute(filename, argv, envp);
             }
 
+            template <typename ...T>
+            NO_RETURN FUNCTION void execute(const char *filename, T... args)
+            {
+                char *const argv[] = { const_cast<char *>(args)..., nullptr };
+
+                execute(filename, argv);
+            }
+
             template <typename T>
             NO_RETURN FUNCTION void execute(Stream<T>& stm, const char *filename,
                                             char *const argv[] = nullptr, char *const envp[] = nullptr)
