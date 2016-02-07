@@ -85,6 +85,7 @@ CFLAGS = %W{-std=c++1y
             -fomit-frame-pointer
             -ffunction-sections
             -fdata-sections
+            -fno-stack-protector
             -nostdlib
          }
 
