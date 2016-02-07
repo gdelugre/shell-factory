@@ -20,7 +20,7 @@
 
 #error "This architecture is not supported."
 
-#define SYSCALL_CLOBBERED_REGISTERS "$1", "$3", \
+#define SYSCALL_CLOBBERED_REGISTERS "$1", "$3", "$4", "$5", "$6", "$7", \
     "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "$24", "$25", "hi", "lo"
 #define SYSCALL_NUMBER_REGISTER "$2"
 #define SYSCALL_RESULT_REGISTER "$2"
