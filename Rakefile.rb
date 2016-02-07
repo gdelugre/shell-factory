@@ -300,6 +300,15 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
+    if ENV['IMAGEBASE']
+        base_addr = ENV['IMAGEBASE']
+        if target_triple.os =~ /darwin/
+            cflags << "-Wl,-segaddr" << "-Wl,__TEXT" << "-Wl,#{base_addr}"
+        else
+            cflags << "-Ttext=#{base_addr}"
+        end
+    end
+
     unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
@@ -421,6 +430,7 @@ task :help do
     #{'VERBOSE:'.color(:green)}            Set to 1 for verbose compilation commands.
     #{'WITH_WARNINGS:'.color(:green)}      Set to 1 to enable compiler warnings.
     #{'RELAX_INLINE:'.color(:green)}       Set to 1, 2 or 3 to let the compiler uninline some functions.
+    #{'IMAGEBASE:'.color(:green)}          Address where code is executed (for ELF and Mach-O).
 
  #{'Target specific options:'.color(:cyan)}
 
