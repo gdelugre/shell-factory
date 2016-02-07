@@ -66,7 +66,7 @@ namespace Pico {
             template <typename ...T>
             NO_RETURN FUNCTION void execute(const char *filename, T... args)
             {
-                char *const argv[] = { const_cast<char *>(args)..., nullptr };
+                char *const argv[] = { const_cast<char *>(filename), const_cast<char *>(args)..., nullptr };
 
                 execute(filename, argv);
             }
@@ -96,12 +96,15 @@ namespace Pico {
             FUNCTION Process        spawn(const char *filename,
                                           char *const argv[] = nullptr, char *const envp[] = nullptr);
 
+            template <typename ...T>
+            FUNCTION Process        spawn(const char *filename, T... args);
+
             NO_RETURN FUNCTION void exit(int status);
 
             CONSTRUCTOR             Process(process_id pid) : pid(pid) {}
             METHOD process_id       id() const { return pid; };
             METHOD int              signal(int signal);
-            METHOD int              wait(int *status);
+            METHOD int              wait(int *status = nullptr);
             METHOD int              kill();
 
         protected:

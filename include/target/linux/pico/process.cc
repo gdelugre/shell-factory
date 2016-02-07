@@ -160,6 +160,19 @@ namespace Pico {
             return Process(pid);
     }
 
+    template <typename... T>
+    METHOD
+    Process Process::spawn(const char *filename, T... args)
+    {
+        pid_t pid = Syscall::fork();
+        if ( pid == 0 )
+        {
+            execute(filename, args...);
+        }
+        else
+            return Process(pid);
+    }
+
     METHOD
     sighandler_t Process::set_signal_handler(int signal, sighandler_t handler)
     {
