@@ -56,7 +56,7 @@ namespace Pico {
                 METHOD Rights           rights();
                 METHOD int              change_owner(Owner owner);
                 METHOD int              change_rights(Rights rights);
-                METHOD int              seek(off_t offset, Seek method);
+                METHOD int              seek(off_t offset, Seek method = Seek::BEGIN);
 
                 METHOD Memory::Region   map(void *base, int prot, size_t size, file_off offset);
                 METHOD Memory::Region   map(void *base, int prot, size_t size) {
