@@ -90,6 +90,14 @@ namespace Pico {
                 return io.out(ptr, count);
             }
 
+            // Allow writing of string literals with no size argument.
+            // Used for quick string printing, like Stdio::output().write("Hello world!\n");
+            template <unsigned N>
+            METHOD ssize_t write(const char (&str)[N])
+            {
+                return io.out(str, N-1);
+            }
+
             // Streams are compared using their IO ports.
             METHOD bool operator ==(Stream<Io> stm) const {
                 return io_port() == stm.io_port();
