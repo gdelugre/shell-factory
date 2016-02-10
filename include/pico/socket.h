@@ -105,7 +105,13 @@ namespace Pico {
                 METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr = false);
         };
 
-        // TODO: recvfrom / sendto
+        class SequencedSocket : public Socket
+        {
+            public:
+                using Socket::Socket;
+                CONSTRUCTOR SequencedSocket(int domain, int protocol) : Socket(domain, SOCK_SEQPACKET, protocol) {}
+        };
+
         class DatagramSocket : public Socket
         {
             public:
