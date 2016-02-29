@@ -13,6 +13,7 @@
 #include <pico/fs.h>
 #include <pico/socket.h>
 #include <pico/process.h> 
+#include <pico/terminal.h>
 #include <pico/debug.h>
 #include <pico/ipc.h>
 #include <pico/random.h>

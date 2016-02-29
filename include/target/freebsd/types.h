@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <termios.h>
 
 namespace Target {
 
@@ -54,6 +55,7 @@ namespace Target {
     using random_pool = handle;
 
     using mutex_t = unsigned long;
+    using terminal_settings = struct termios;
 }
 
 #endif

@@ -5,6 +5,7 @@
 #include <linux/types.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
+#include <asm-generic/termios.h>
 
 namespace Target {
 
@@ -63,6 +64,7 @@ namespace Target {
     #endif
 
     using mutex_t = int;
+    using terminal_settings = struct termios;
 }
 
 #endif
