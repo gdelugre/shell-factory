@@ -10,8 +10,8 @@ namespace Pico {
             using BasicStream::BasicStream;
 
             struct Size {
-                unsigned rows;
-                unsigned cols;
+                unsigned short rows;
+                unsigned short cols;
             };
 
             METHOD Size size();
