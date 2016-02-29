@@ -46,6 +46,7 @@ namespace Syscall {
     SYSTEM_CALL int     fcntl(int, int, void *);
     SYSTEM_CALL int     ioctl(int, unsigned long);
     SYSTEM_CALL int     ioctl(int, unsigned long, void *);
+    SYSTEM_CALL int     ioctl(int, unsigned long, long);
 
     SYSTEM_CALL
     int open(const char *path, int flags)
@@ -233,10 +234,19 @@ namespace Syscall {
         return DO_SYSCALL(ioctl, fd, request);
     }
 
+    /*
+     * See above comment for fcntl.
+     */
     SYSTEM_CALL
     int ioctl(int fd, unsigned long request, void *arg)
     {
         return DO_SYSCALL(ioctl, fd, request, arg);
+    }
+
+    SYSTEM_CALL
+    int ioctl(int fd, unsigned long request, long arg)
+    {
+        return ioctl(fd, request, reinterpret_cast<void *>(arg));
     }
 }
 
