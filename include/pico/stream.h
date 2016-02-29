@@ -131,7 +131,7 @@ namespace Pico {
             METHOD_NOINLINE int printf(const char *format, ...);
             METHOD int vprintf(const char *format, va_list ap);
             METHOD Io  io_port() const { return io; }
-            METHOD handle file_desc() { return io.file_desc(); }
+            METHOD handle file_desc() const { return io.file_desc(); }
             METHOD int close() { return io.close(); }
             METHOD int close_on_exec() { return io.close_on_exec(); }
             METHOD bool is_invalid() const { return io.is_invalid(); }
