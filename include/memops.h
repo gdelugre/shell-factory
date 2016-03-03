@@ -68,7 +68,7 @@ T *tmemmove(T *dest, const T *src, size_t n)
 
 template <typename T>
 FUNCTION
-T *tmemset(T *s, int c, size_t n)
+T *tmemset(T *s, T c, size_t n)
 {
     T *dptr = s;
 
@@ -76,6 +76,21 @@ T *tmemset(T *s, int c, size_t n)
         dptr[i] = c;
 
     return s;
+}
+
+template <typename T>
+FUNCTION PURE
+int tmemcmp(const T *s1, const T *s2, size_t n)
+{
+    for ( size_t i = 0; i < n; i++ )
+    {
+        if ( s1[i] < s2[i] )
+            return -1;
+        else if ( s1[i] > s2[i] )
+            return +1;
+    }
+
+    return 0;
 }
 
 //
@@ -122,7 +137,7 @@ extern "C" {
     EXPORT_ABI_FUNCTION
     void *memset(void *s, int c, size_t n)
     {
-        return tmemset(static_cast<char *>(s), c, n);
+        return tmemset(static_cast<char *>(s), (char) c, n);
     }
 
     EXPORT_ABI_FUNCTION
@@ -141,6 +156,22 @@ extern "C" {
     size_t wcslen(const wchar_t *s)
     {
         return tstrlen(s);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    int memcmp(const void *s1, const void *s2, size_t n)
+    {
+        return tmemcmp(
+            static_cast<const char *>(s1),
+            static_cast<const char *>(s2),
+            n
+        );
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    int wmemcmp(const wchar_t *s1, const wchar_t *s2, size_t n)
+    {
+        return tmemcmp(s1, s2, n);
     }
 }
 

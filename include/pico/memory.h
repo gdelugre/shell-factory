@@ -125,10 +125,7 @@ namespace Pico {
             T *bdest = static_cast<T *>(dest);
             const T *bsrc = static_cast<const T *>(src);
 
-            for ( size_t i = 0; i < n / sizeof(T); i++ )
-                bdest[i] = bsrc[i];
-
-            return dest;
+            return tmemcpy(bdest, bsrc, n / sizeof(T));
         }
 
         template <typename T>
@@ -138,10 +135,7 @@ namespace Pico {
             T *bdest = static_cast<T *>(dest);
             T word = expand_char<T>(c);
 
-            for ( size_t i = 0; i < n / sizeof(T); i++ )
-                bdest[i] = word;
-
-            return dest;
+            return tmemset(bdest, word, n / sizeof(T));
         }
 
         template <typename T>
@@ -151,12 +145,7 @@ namespace Pico {
             const T *bs1 = static_cast<const T *>(s1);
             const T *bs2 = static_cast<const T *>(s2);
 
-            for ( size_t i = 0; i < n / sizeof(T); i++ )
-                if ( bs1[i] < bs2[i] )
-                    return -1;
-                else
-                    return +1;
-            return 0;
+            return tmemcmp(bs1, bs2, n / sizeof(T));
         }
 
         FUNCTION
