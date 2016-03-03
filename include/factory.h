@@ -27,6 +27,7 @@
 #define SYSTEM_CALL_INLINE static __attribute__((always_inline))
 #define UNUSED __attribute__((unused))
 #define USED __attribute__((used))
+#define PURE __attribute__((pure))
 #define BUILTIN(func) __builtin_ ## func
 
 #define STRINGIZE(x) #x

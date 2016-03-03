@@ -69,7 +69,7 @@ extern "C" {
         return s;
     }
 
-    EXPORT_ABI_FUNCTION
+    EXPORT_ABI_FUNCTION PURE
     size_t strlen(const char *s)
     {
         size_t len = 0;

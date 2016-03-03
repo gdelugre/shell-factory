@@ -10,7 +10,7 @@ namespace Pico {
         constexpr int EXEC   = (1 << 2);
         constexpr int STACK  = (1 << 3);
 
-        FUNCTION size_t page_size();
+        FUNCTION PURE size_t page_size();
         FUNCTION void * allocate(void *base, size_t size, int prot);
         FUNCTION void * allocate(size_t size, int prot) {
             return allocate(nullptr, size, prot);
@@ -19,7 +19,7 @@ namespace Pico {
         FUNCTION void   release(void *ptr, size_t size);
         FUNCTION int    set_protection(void *ptr, size_t, int prot);
 
-        FUNCTION size_t round_up_page_size(size_t size)
+        FUNCTION PURE size_t round_up_page_size(size_t size)
         {
             size_t page_size = Memory::page_size();
             size_t nr_pages = (size + page_size - 1) / page_size;
@@ -145,7 +145,7 @@ namespace Pico {
         }
 
         template <typename T>
-        FUNCTION
+        FUNCTION PURE
         int compare_block(const void *s1, const void *s2, size_t n)
         {
             const T *bs1 = static_cast<const T *>(s1);
@@ -178,7 +178,7 @@ namespace Pico {
             return set_block<uint8_t>(s, c, n);
         }
 
-        FUNCTION
+        FUNCTION PURE
         int compare(const void *s1, const void *s2, size_t n)
         {
             if ( Options::use_builtins )
