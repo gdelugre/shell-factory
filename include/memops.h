@@ -39,6 +39,36 @@ size_t tstrlen(T *s)
 
 template <typename T>
 FUNCTION
+T *tstrcpy(T *__restrict__ dest, const T *__restrict__ src)
+{
+    T c;
+    size_t i = 0;
+
+    while ( (c = src[i]) != 0 )
+        dest[i++] = c;
+
+    dest[i] = 0;
+    return dest;
+}
+
+template <typename T>
+FUNCTION
+T *tstrncpy(T *__restrict__ dest, const T *__restrict__ src, size_t n)
+{
+    T c;
+    size_t i = 0;
+
+    while ( i < n && (c = src[i]) != 0 )
+        dest[i++] = c;
+
+    while ( i < n )
+        dest[i++] = 0;
+
+    return dest;
+}
+
+template <typename T>
+FUNCTION
 T *tmemcpy(T *__restrict__ dest, const T *__restrict__ src, size_t n)
 {
     T *dptr = dest;
@@ -147,18 +177,6 @@ extern "C" {
     }
 
     EXPORT_ABI_FUNCTION PURE
-    size_t strlen(const char *s)
-    {
-        return tstrlen(s);
-    }
-
-    EXPORT_ABI_FUNCTION PURE
-    size_t wcslen(const wchar_t *s)
-    {
-        return tstrlen(s);
-    }
-
-    EXPORT_ABI_FUNCTION PURE
     int memcmp(const void *s1, const void *s2, size_t n)
     {
         return tmemcmp(
@@ -172,6 +190,42 @@ extern "C" {
     int wmemcmp(const wchar_t *s1, const wchar_t *s2, size_t n)
     {
         return tmemcmp(s1, s2, n);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    size_t strlen(const char *s)
+    {
+        return tstrlen(s);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    size_t wcslen(const wchar_t *s)
+    {
+        return tstrlen(s);
+    }
+
+    EXPORT_ABI_FUNCTION
+    char *strcpy(char *__restrict__ dest, const char *__restrict__ src)
+    {
+        return tstrcpy(dest, src);
+    }
+
+    EXPORT_ABI_FUNCTION
+    wchar_t *wcscpy(wchar_t *__restrict__ dest, const wchar_t *src)
+    {
+        return tstrcpy(dest, src);
+    }
+
+    EXPORT_ABI_FUNCTION
+    char *strncpy(char *__restrict__ dest, const char *__restrict__ src, size_t n)
+    {
+        return tstrncpy(dest, src, n);
+    }
+
+    EXPORT_ABI_FUNCTION
+    wchar_t *wcsncpy(wchar_t *__restrict__ dest, const wchar_t *__restrict__ src, size_t n)
+    {
+        return tstrncpy(dest, src, n);
     }
 }
 
