@@ -68,6 +68,52 @@ T *tstrncpy(T *__restrict__ dest, const T *__restrict__ src, size_t n)
 }
 
 template <typename T>
+FUNCTION PURE
+int tstrcmp(const T *s1, const T *s2)
+{
+    T c1, c2;
+    size_t i = 0;
+
+    while ( (c1 = s1[i]) && (c2 = s2[i]) )
+    {
+        if ( c1 != c2 )
+            break;
+
+        i++;
+    }
+
+    if ( c1 < c2 )
+        return -1;
+    else if ( c1 > c2 )
+        return +1;
+
+    return 0;
+}
+
+template <typename T>
+FUNCTION PURE
+int tstrncmp(const T *s1, const T *s2, size_t n)
+{
+    T c1, c2;
+    size_t i = 0;
+
+    while ( i < n && (c1 = s1[i]) && (c2 = s2[i]) )
+    {
+        if ( c1 != c2 )
+            break;
+
+        i++;
+    }
+
+    if ( c1 < c2 )
+        return -1;
+    else if ( c1 > c2 )
+        return +1;
+
+    return 0;
+}
+
+template <typename T>
 FUNCTION
 T *tmemcpy(T *__restrict__ dest, const T *__restrict__ src, size_t n)
 {
@@ -226,6 +272,30 @@ extern "C" {
     wchar_t *wcsncpy(wchar_t *__restrict__ dest, const wchar_t *__restrict__ src, size_t n)
     {
         return tstrncpy(dest, src, n);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    int strcmp(const char *s1, const char *s2)
+    {
+        return tstrcmp(s1, s2);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    int strncmp(const char *s1, const char *s2, size_t n)
+    {
+        return tstrncmp(s1, s2, n);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    int wcscmp(const wchar_t *s1, const wchar_t *s2)
+    {
+        return tstrcmp(s1, s2);
+    }
+
+    EXPORT_ABI_FUNCTION PURE
+    int wcsncmp(const wchar_t *s1, const wchar_t *s2, size_t n)
+    {
+        return tstrncmp(s1, s2, n);
     }
 }
 
