@@ -309,6 +309,11 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
+    if ENV['CODE_MODEL']
+        cmodel = ENV['CODE_MODEL']
+        cflags << "-mcmodel=#{cmodel}"
+    end
+
     unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
@@ -436,11 +441,13 @@ task :help do
 
     #{'32BIT:'.color(:green)}              Set to 1 to compile for a 32-bit environment.
     #{'STACK_REALIGN:'.color(:green)}      Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
+    #{'CODE_MODEL:'.color(:green)}         Set target code model (tiny, small, large), AArch64 only.
 
  #{'Shellcode customization options:'.color(:cyan)}
 
     #{'CHANNEL:'.color(:green)}            Shellcode communication channel.
-                        Supported options: {TCP,SCTP}[6]_{CONNECT,LISTEN}, UDP[6]_CONNECT, USE_STDOUT, USE_STDERR, REUSE_SOCKET, REUSE_FILE
+                        Supported options: {TCP,SCTP}[6]_{CONNECT,LISTEN}, UDP[6]_CONNECT,
+                                           USE_STDOUT, USE_STDERR, REUSE_SOCKET, REUSE_FILE
     #{'[R,L]HOST:'.color(:green)}          Remote host or local address for socket bind.
     #{'[R,L]PORT:'.color(:green)}          Remote port or local port for socket bind.
     #{'HANDLE:'.color(:green)}             File descriptor (for REUSE_SOCKET and REUSE_FILE only).
