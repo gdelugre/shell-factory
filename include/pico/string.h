@@ -5,11 +5,106 @@
 
 namespace Pico {
 
+    template <typename T>
+    class _BasicString
+    {
+        public:
+            template <unsigned N>
+            CONSTRUCTOR _BasicString(const T (&src)[N])
+            {
+                chars = const_cast<char *>(src);
+                max_size = size = N;
+            }
+
+            CONSTRUCTOR _BasicString() : _BasicString("") {}
+            CONSTRUCTOR _BasicString(size_t buffer_size)
+            {
+                chars = new T[buffer_size];
+                chars[0] = 0;
+                needs_dealloc = true;
+
+                size = 0;
+                max_size = buffer_size;
+            }
+
+            CONSTRUCTOR _BasicString(T* src)
+            {
+                chars = src;
+                max_size = size = length(chars) + 1;
+            }
+
+            CONSTRUCTOR _BasicString(T* src, size_t buffer_size)
+            {
+                chars = src;
+                chars[buffer_size - 1] = '\0';
+
+                max_size = buffer_size;
+                size = length(chars) + 1;
+            }
+
+            DESTRUCTOR ~_BasicString()
+            {
+                if ( needs_dealloc )
+                    delete chars;
+            }
+
+            METHOD size_t length() const { return size - 1; }
+            METHOD T& operator[](unsigned index) const {
+                assert(index < size);
+                return chars[index];
+            }
+
+            METHOD _BasicString<T>& operator =(_BasicString<T> const& str);
+
+            // Static functions.
+            template <unsigned N>
+            FUNCTION PURE size_t length(const T (&s)[N]) { return N-1; }
+            FUNCTION PURE size_t length(T *s);
+            FUNCTION PURE bool equals(const T *s1, const T *s2);
+
+        private:
+            T *chars;
+            size_t size;
+            size_t max_size;
+            bool needs_dealloc = false;
+    };
+
+    template <>
+    METHOD PURE size_t _BasicString<char>::length(char *s)
+    {
+        if ( Options::use_builtins )
+           return BUILTIN(strlen)(s);
+
+        return tstrlen(s);
+    }
+
+    template <typename T>
+    METHOD PURE size_t _BasicString<T>::length(T *s)
+    {
+        return tstrlen(s);
+    }
+
+    template <>
+    METHOD bool _BasicString<char>::equals(const char *s1, const char *s2)
+    {
+        if ( Options::use_builtins )
+            return BUILTIN(strcmp)(s1, s2) == 0;
+
+        return tstrcmp(s1, s2) == 0;
+    }
+
+    template <typename T>
+    METHOD bool _BasicString<T>::equals(const T *s1, const T *s2)
+    {
+        return tstrcmp(s1, s2) == 0;
+    }
+
     template <typename T = char>
     class BasicString {
         public:
             CONSTRUCTOR BasicString(T *str) : chars(str) {}
             METHOD size_t length();
+
             METHOD BasicString<T>& copy(BasicString<T> const& src);
             METHOD BasicString<T>& copy(BasicString<T> const& src, size_t max_size);
             METHOD BasicString<T>& concat(BasicString<T> const& src);
@@ -37,23 +132,14 @@ namespace Pico {
         }
         #endif
 
-        size_t len = 0;
-        while ( chars[len] )
-            len++;
-        return len;
+        return tstrlen(chars);
     }
 
     template <typename T>
     METHOD
     BasicString<T>& BasicString<T>::copy(BasicString<T> const& src)
     {
-        T c;
-        unsigned i = 0;
-
-        while ( (c = src[i]) != 0 )
-            chars[i++] = c;
-
-        chars[i] = 0;
+        tstrcpy(chars, src.chars);
         return *this;
     }
 
@@ -61,13 +147,7 @@ namespace Pico {
     METHOD
     BasicString<T>& BasicString<T>::copy(BasicString<T> const& src, size_t max_size)
     {
-        T c;
-        unsigned i = 0;
-
-        while ( max_size-- && (c = src[i]) != 0 )
-            chars[i++] = c;
-
-        chars[i] = 0;
+        tstrncpy(chars, src, max_size);
         return *this;
     }
 
