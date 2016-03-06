@@ -12,7 +12,7 @@ namespace Pico {
             template <unsigned N>
             CONSTRUCTOR BasicString(const T (&src)[N])
             {
-                chars = const_cast<char *>(src);
+                chars = const_cast<T *>(src);
                 max_size = size = N;
             }
 
@@ -56,6 +56,8 @@ namespace Pico {
                 return chars[index];
             }
 
+            template <unsigned N>
+            METHOD BasicString<T>& operator =(const T (&str)[N]);
             METHOD BasicString<T>& operator =(BasicString<T> const& str);
             METHOD bool operator ==(BasicString<T> const& other) const;
 
@@ -68,11 +70,48 @@ namespace Pico {
             FUNCTION T *copy(T *dest, const T *src, size_t n);
 
         private:
+            METHOD size_t free_space() const { return max_size - size; }
+
             T *chars;
             size_t size;
             size_t max_size;
             bool needs_dealloc = false;
     };
+
+    // Copy assignment constructors.
+    template <typename T>
+    template <unsigned N>
+    METHOD
+    BasicString<T>& BasicString<T>::operator =(const T (&str)[N])
+    {
+        if ( needs_dealloc )
+            delete chars;
+
+        chars = const_cast<T *>(str);
+        max_size = size = N;
+
+        return *this;
+    }
+
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::operator =(BasicString<T> const& str)
+    {
+        if ( max_size < str.length() + 1 )
+        {
+            if ( needs_dealloc )
+                delete chars;
+
+            chars = new T[str.length() + 1];
+            max_size = str.length() + 1;
+            needs_dealloc = true;
+        }
+
+        BasicString<T>::copy(chars, str.pointer());
+        size = str.length() + 1;
+
+        return *this;
+    }
 
     template <typename T>
     METHOD
