@@ -6,18 +6,18 @@
 namespace Pico {
 
     template <typename T>
-    class _BasicString
+    class BasicString
     {
         public:
             template <unsigned N>
-            CONSTRUCTOR _BasicString(const T (&src)[N])
+            CONSTRUCTOR BasicString(const T (&src)[N])
             {
                 chars = const_cast<char *>(src);
                 max_size = size = N;
             }
 
-            CONSTRUCTOR _BasicString() : _BasicString("") {}
-            CONSTRUCTOR _BasicString(size_t buffer_size)
+            CONSTRUCTOR BasicString() : BasicString("") {}
+            CONSTRUCTOR BasicString(size_t buffer_size)
             {
                 chars = new T[buffer_size];
                 chars[0] = 0;
@@ -27,13 +27,13 @@ namespace Pico {
                 max_size = buffer_size;
             }
 
-            CONSTRUCTOR _BasicString(T* src)
+            CONSTRUCTOR BasicString(T* src)
             {
                 chars = src;
                 max_size = size = length(chars) + 1;
             }
 
-            CONSTRUCTOR _BasicString(T* src, size_t buffer_size)
+            CONSTRUCTOR BasicString(T* src, size_t buffer_size)
             {
                 chars = src;
                 chars[buffer_size - 1] = '\0';
@@ -42,25 +42,30 @@ namespace Pico {
                 size = length(chars) + 1;
             }
 
-            DESTRUCTOR ~_BasicString()
+            DESTRUCTOR ~BasicString()
             {
                 if ( needs_dealloc )
                     delete chars;
             }
 
+            METHOD T *pointer() const { return chars; }
             METHOD size_t length() const { return size - 1; }
+
             METHOD T& operator[](unsigned index) const {
                 assert(index < size);
                 return chars[index];
             }
 
-            METHOD _BasicString<T>& operator =(_BasicString<T> const& str);
+            METHOD BasicString<T>& operator =(BasicString<T> const& str);
+            METHOD bool operator ==(BasicString<T> const& other) const;
 
             // Static functions.
             template <unsigned N>
             FUNCTION PURE size_t length(const T (&s)[N]) { return N-1; }
             FUNCTION PURE size_t length(T *s);
             FUNCTION PURE bool equals(const T *s1, const T *s2);
+            FUNCTION T *copy(T *dest, const T *src);
+            FUNCTION T *copy(T *dest, const T *src, size_t n);
 
         private:
             T *chars;
@@ -69,8 +74,16 @@ namespace Pico {
             bool needs_dealloc = false;
     };
 
+    template <typename T>
+    METHOD
+    bool BasicString<T>::operator ==(BasicString<T> const& other) const
+    {
+        return BasicString<T>::equals(chars, other.chars);
+    }
+
     template <>
-    METHOD PURE size_t _BasicString<char>::length(char *s)
+    METHOD PURE
+    size_t BasicString<char>::length(char *s)
     {
         if ( Options::use_builtins )
            return BUILTIN(strlen)(s);
@@ -79,13 +92,15 @@ namespace Pico {
     }
 
     template <typename T>
-    METHOD PURE size_t _BasicString<T>::length(T *s)
+    METHOD PURE
+    size_t BasicString<T>::length(T *s)
     {
         return tstrlen(s);
     }
 
     template <>
-    METHOD bool _BasicString<char>::equals(const char *s1, const char *s2)
+    METHOD
+    bool BasicString<char>::equals(const char *s1, const char *s2)
     {
         if ( Options::use_builtins )
             return BUILTIN(strcmp)(s1, s2) == 0;
@@ -94,103 +109,48 @@ namespace Pico {
     }
 
     template <typename T>
-    METHOD bool _BasicString<T>::equals(const T *s1, const T *s2)
+    METHOD
+    bool BasicString<T>::equals(const T *s1, const T *s2)
     {
         return tstrcmp(s1, s2) == 0;
     }
 
-    template <typename T = char>
-    class BasicString {
-        public:
-            CONSTRUCTOR BasicString(T *str) : chars(str) {}
-            METHOD size_t length();
+    template <>
+    METHOD
+    char *BasicString<char>::copy(char *dest, const char *src)
+    {
+        if ( Options::use_builtins )
+            return BUILTIN(strcpy)(dest, src);
 
-            METHOD BasicString<T>& copy(BasicString<T> const& src);
-            METHOD BasicString<T>& copy(BasicString<T> const& src, size_t max_size);
-            METHOD BasicString<T>& concat(BasicString<T> const& src);
-            METHOD BasicString<T>& concat(BasicString<T> const& src, size_t max_size);
+        return tstrcpy(dest, src);
+    }
 
-            METHOD T& operator[](unsigned index) const { return chars[index]; }
-            METHOD bool operator ==(BasicString<T> const& other);
-            METHOD T* pointer() const { return chars; }
-            METHOD BasicString<T>& operator =(BasicString<T> const& str) { return copy(str); }
+    template <typename T>
+    METHOD
+    T *BasicString<T>::copy(T *dest, const T *src)
+    {
+        return tstrcpy(dest, src);
+    }
 
-        private:
-            T *chars;
-    };
+    template <>
+    METHOD
+    char *BasicString<char>::copy(char *dest, const char *src, size_t n)
+    {
+        if ( Options::use_builtins )
+           return BUILTIN(strncpy)(dest, src, n);
+
+        return tstrncpy(dest, src, n);
+    }
+
+    template <typename T>
+    METHOD
+    T *BasicString<T>::copy(T *dest, const T *src, size_t n)
+    {
+        return tstrncpy(dest, src, n);
+    }
 
     using String = BasicString<char>;
     using WideString = BasicString<wchar_t>;
-
-    template <typename T>
-    METHOD
-    size_t BasicString<T>::length()
-    {
-        #if defined(__i386__) || defined(__amd64__)
-        if ( Options::use_builtins ) {
-           return BUILTIN(strlen)(chars); // Optimize to repnz
-        }
-        #endif
-
-        return tstrlen(chars);
-    }
-
-    template <typename T>
-    METHOD
-    BasicString<T>& BasicString<T>::copy(BasicString<T> const& src)
-    {
-        tstrcpy(chars, src.chars);
-        return *this;
-    }
-
-    template <typename T>
-    METHOD
-    BasicString<T>& BasicString<T>::copy(BasicString<T> const& src, size_t max_size)
-    {
-        tstrncpy(chars, src, max_size);
-        return *this;
-    }
-
-    template <typename T>
-    METHOD
-    BasicString<T>& BasicString<T>::concat(BasicString<T> const& src)
-    {
-        BasicString<T>(chars + length()).copy(src);
-
-        return *this;
-    }
-
-    template <typename T>
-    METHOD
-    BasicString<T>& BasicString<T>::concat(BasicString<T> const& src, size_t max_size)
-    {
-        size_t length = this->length();
-
-        if ( max_size > length )
-            BasicString<T>(chars + length).copy(src, max_size - length);
-
-        return *this;
-    }
-
-    template <typename T>
-    METHOD
-    bool BasicString<T>::operator ==(BasicString<T> const& other)
-    {
-        T c1, c2;
-        unsigned i = 0;
-
-        do
-        {
-            c1 = chars[i];
-            c2 = other[i];
-            i++;
-
-            if ( c1 != c2 )
-                break;
-        } while ( c1 && c2 );
-
-        return ( c1 == c2 );
-    }
 
     static constexpr bool isdigit(char c)
     {

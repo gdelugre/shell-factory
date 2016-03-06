@@ -90,7 +90,7 @@ namespace Pico {
             if ( Syscall::sysctl(mib, 4, &ki, &size, nullptr, 0) != 0 )
                 return -1;
 
-            if ( String(proc_name) == ki.ki_comm ) {
+            if ( String::equals(proc_name, ki.ki_comm) ) {
                 result = proc.id();
                 return 1;
             }
@@ -120,7 +120,7 @@ namespace Pico {
             if ( Syscall::sysctl(mib, 4, &path, &size, nullptr, 0) != 0 )
                 return -1;
 
-            if ( String(exe_path) == path ) {
+            if ( String::equals(exe_path, path) ) {
                 result = proc.id();
                 return 1;
             }

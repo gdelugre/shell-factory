@@ -59,7 +59,7 @@ namespace Pico {
             comm[n - 1] = '\0';
             comm_file.close();
 
-            if ( String(proc_name) == comm )
+            if ( String::equals(proc_name, comm) )
             {
                 result = proc.id();
                 return 1;
@@ -86,7 +86,7 @@ namespace Pico {
                 return 0;
 
             exe[n] = '\0';
-            if ( String(exe_path) == exe )
+            if ( String::equals(exe_path, exe) )
             {
                 result = proc.id();
                 return 1;
