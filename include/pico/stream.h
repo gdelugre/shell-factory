@@ -9,6 +9,11 @@ namespace Pico {
 
     using handle = Target::handle;
 
+    // Forward String declarations.
+    template <typename T>
+    class BasicString;
+    using String = BasicString<char>;
+
     class SingleIO;
     class IO
     {
@@ -97,6 +102,8 @@ namespace Pico {
             {
                 return io.out(str, N-1);
             }
+
+            METHOD ssize_t write(String const& str);
 
             // Streams are compared using their IO ports.
             METHOD bool operator ==(Stream<Io> stm) const {

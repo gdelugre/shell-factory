@@ -60,6 +60,8 @@ namespace Pico {
             METHOD BasicString<T>& operator =(const T (&str)[N]);
             METHOD BasicString<T>& operator =(BasicString<T> const& str);
             METHOD bool operator ==(BasicString<T> const& other) const;
+            METHOD BasicString<T>& operator +=(BasicString<T> const& str);
+            METHOD BasicString<T> operator +(BasicString const& str);
 
             // Static functions.
             template <unsigned N>
@@ -68,6 +70,8 @@ namespace Pico {
             FUNCTION PURE bool equals(const T *s1, const T *s2);
             FUNCTION T *copy(T *dest, const T *src);
             FUNCTION T *copy(T *dest, const T *src, size_t n);
+            FUNCTION T *concat(T *dest, const T *src);
+            FUNCTION T *concat(T *dest, const T *src, size_t n);
 
         private:
             METHOD size_t free_space() const { return max_size - size; }
@@ -111,6 +115,45 @@ namespace Pico {
         size = str.length() + 1;
 
         return *this;
+    }
+
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::operator +=(BasicString<T> const& str)
+    {
+        size_t total_length = this->length() + str.length();
+
+        if ( max_size < total_length - 1 )
+        {
+            T *old_chars = chars;
+
+            chars = new T[total_length + 1];
+            max_size = total_length + 1;
+
+            BasicString<T>::copy(chars, old_chars);
+
+            if ( needs_dealloc )
+                delete old_chars;
+
+            needs_dealloc = true;
+        }
+
+        BasicString<T>::concat(chars, str.pointer());
+        size += str.length();
+
+        return *this;
+    }
+
+    template <typename T>
+    METHOD
+    BasicString<T> BasicString<T>::operator +(BasicString<T> const& str)
+    {
+        String result(this->length() + str.length() + 1);
+
+        result = *this;
+        result += str;
+
+        return result;
     }
 
     template <typename T>
@@ -186,6 +229,40 @@ namespace Pico {
     T *BasicString<T>::copy(T *dest, const T *src, size_t n)
     {
         return tstrncpy(dest, src, n);
+    }
+
+    template <>
+    METHOD
+    char *BasicString<char>::concat(char *dest, const char *src)
+    {
+        if ( Options::use_builtins )
+            return BUILTIN(strcat)(dest, src);
+
+        return tstrcat(dest, src);
+    }
+
+    template <typename T>
+    METHOD
+    T *BasicString<T>::concat(T *dest, const T *src)
+    {
+        return tstrcat(dest, src);
+    }
+
+    template <>
+    METHOD
+    char *BasicString<char>::concat(char *dest, const char *src, size_t n)
+    {
+        if ( Options::use_builtins )
+            return BUILTIN(strncat)(dest, src, n);
+
+        return tstrncat(dest, src, n);
+    }
+
+    template <typename T>
+    METHOD
+    T *BasicString<T>::concat(T *dest, const T *src, size_t n)
+    {
+        return tstrncat(dest, src, n);
     }
 
     using String = BasicString<char>;
@@ -480,6 +557,13 @@ namespace Pico {
 
         int count = vformat(*this, format, ap, output_func);
         return count;
+    }
+
+    template <typename Io>
+    METHOD
+    ssize_t Stream<Io>::write(String const& str)
+    {
+        return write(str.pointer(), str.length());
     }
 }
 

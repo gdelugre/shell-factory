@@ -68,6 +68,30 @@ T *tstrncpy(T *__restrict__ dest, const T *__restrict__ src, size_t n)
 }
 
 template <typename T>
+FUNCTION
+T *tstrcat(T *__restrict__ dest, const T *__restrict__ src)
+{
+    tstrcpy(dest + tstrlen(dest), src);
+
+    return dest;
+}
+
+template <typename T>
+FUNCTION
+T *tstrncat(T *__restrict__ dest, const T *__restrict__ src, size_t n)
+{
+    T c, *ptr = dest + tstrlen(dest);
+    size_t i = 0;
+
+    while ( i < n && (c = src[i]) != 0 )
+        ptr[i++] = c;
+
+    ptr[i] = 0;
+
+    return dest;
+}
+
+template <typename T>
 FUNCTION PURE
 int tstrcmp(const T *s1, const T *s2)
 {
@@ -257,7 +281,7 @@ extern "C" {
     }
 
     EXPORT_ABI_FUNCTION
-    wchar_t *wcscpy(wchar_t *__restrict__ dest, const wchar_t *src)
+    wchar_t *wcscpy(wchar_t *__restrict__ dest, const wchar_t *__restrict__ src)
     {
         return tstrcpy(dest, src);
     }
@@ -272,6 +296,30 @@ extern "C" {
     wchar_t *wcsncpy(wchar_t *__restrict__ dest, const wchar_t *__restrict__ src, size_t n)
     {
         return tstrncpy(dest, src, n);
+    }
+
+    EXPORT_ABI_FUNCTION
+    char *strcat(char *__restrict__ dest, const char *__restrict__ src)
+    {
+        return tstrcat(dest, src);
+    }
+
+    EXPORT_ABI_FUNCTION
+    wchar_t *wcscat(wchar_t *__restrict__ dest, const wchar_t *__restrict__ src)
+    {
+        return tstrcat(dest, src);
+    }
+
+    EXPORT_ABI_FUNCTION
+    char *strncat(char *__restrict__ dest, const char *__restrict__ src, size_t n)
+    {
+        return tstrncat(dest, src, n);
+    }
+
+    EXPORT_ABI_FUNCTION
+    wchar_t *wcsncat(wchar_t *__restrict__ dest, const wchar_t *__restrict__ src, size_t n)
+    {
+        return tstrncat(dest, src, n);
     }
 
     EXPORT_ABI_FUNCTION PURE
