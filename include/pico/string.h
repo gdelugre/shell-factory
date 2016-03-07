@@ -23,7 +23,7 @@ namespace Pico {
                 chars[0] = 0;
                 needs_dealloc = true;
 
-                size = 0;
+                size = 1;
                 max_size = buffer_size;
             }
 
@@ -36,7 +36,7 @@ namespace Pico {
             CONSTRUCTOR BasicString(T* src, size_t buffer_size)
             {
                 chars = src;
-                chars[buffer_size - 1] = '\0';
+                chars[buffer_size - 1] = 0;
 
                 max_size = buffer_size;
                 size = length(chars) + 1;
