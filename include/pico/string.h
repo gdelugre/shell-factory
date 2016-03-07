@@ -62,6 +62,8 @@ namespace Pico {
             METHOD bool operator ==(BasicString<T> const& other) const;
             METHOD BasicString<T>& operator +=(BasicString<T> const& str);
             METHOD BasicString<T> operator +(BasicString const& str);
+            METHOD BasicString<T>& operator *=(unsigned count);
+            METHOD BasicString<T> operator *(unsigned count);
 
             // Static functions.
             template <unsigned N>
@@ -75,12 +77,40 @@ namespace Pico {
 
         private:
             METHOD size_t free_space() const { return max_size - size; }
+            METHOD void resize(size_t new_size);
 
             T *chars;
-            size_t size;
-            size_t max_size;
+            size_t size;        // Current characters length (including the null character).
+            size_t max_size;    // Maximum characters length (including the null character).
             bool needs_dealloc = false;
     };
+
+    template <typename T>
+    METHOD
+    void BasicString<T>::resize(size_t new_size)
+    {
+        // Truncating.
+        if ( new_size <= max_size )
+        {
+            max_size = new_size;
+            chars[max_size - 1] = 0;
+
+            if ( size > new_size )
+                size = new_size;
+
+            return;
+        }
+
+        // Expanding.
+        T *old_chars = chars;
+        chars = new T[new_size];
+        BasicString<T>::copy(chars, old_chars);
+
+        if ( needs_dealloc )
+            delete old_chars;
+
+        needs_dealloc = true;
+    }
 
     // Copy assignment constructors.
     template <typename T>
@@ -123,19 +153,9 @@ namespace Pico {
     {
         size_t total_length = this->length() + str.length();
 
-        if ( max_size < total_length - 1 )
+        if ( max_size < total_length + 1 )
         {
-            T *old_chars = chars;
-
-            chars = new T[total_length + 1];
-            max_size = total_length + 1;
-
-            BasicString<T>::copy(chars, old_chars);
-
-            if ( needs_dealloc )
-                delete old_chars;
-
-            needs_dealloc = true;
+            resize(total_length + 1);
         }
 
         BasicString<T>::concat(chars, str.pointer());
@@ -152,6 +172,38 @@ namespace Pico {
 
         result = *this;
         result += str;
+
+        return result;
+    }
+
+    template <typename T>
+    METHOD
+    BasicString<T>& BasicString<T>::operator *=(unsigned count)
+    {
+        size_t total_length = this->length() * count;
+
+        if ( max_size < total_length + 1 )
+        {
+            resize(total_length + 1);
+        }
+
+        for ( size_t i = 0; i < count; i++ )
+            BasicString<T>::concat(chars, chars, this->length());
+
+        size = total_length + 1;
+        chars[total_length] = 0;
+
+        return *this;
+    }
+
+    template <typename T>
+    METHOD
+    BasicString<T> BasicString<T>::operator *(unsigned count)
+    {
+        String result(this->length() * count + 1);
+
+        for ( size_t i = 0; i < count; i++ )
+            result += *this;
 
         return result;
     }
