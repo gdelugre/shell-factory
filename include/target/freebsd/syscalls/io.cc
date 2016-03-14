@@ -15,8 +15,12 @@
  */
 namespace Syscall {
 
+    #if SYSCALL_EXISTS(openat)
+    SYSTEM_CALL int     openat(int, const char *, int);
+    SYSTEM_CALL int     openat(int, const char *, int, mode_t);
+    #endif
     SYSTEM_CALL int     open(const char *, int);
-    SYSTEM_CALL int     create(const char *, int, mode_t);
+    SYSTEM_CALL int     open(const char *, int, mode_t);
     SYSTEM_CALL int     access(const char *, int);
     SYSTEM_CALL int     dup(int);
     SYSTEM_CALL int     dup2(int, int);
@@ -48,6 +52,20 @@ namespace Syscall {
     SYSTEM_CALL int     ioctl(int, unsigned long, void *);
     SYSTEM_CALL int     ioctl(int, unsigned long, long);
 
+    #if SYSCALL_EXISTS(openat)
+    SYSTEM_CALL
+    int openat(int dirfd, const char *path, int flags)
+    {
+        return DO_SYSCALL(openat, dirfd, path, flags);
+    }
+
+    SYSTEM_CALL
+    int openat(int dirfd, const char *path, int flags, mode_t mode)
+    {
+        return DO_SYSCALL(openat, dirfd, path, flags, mode);
+    }
+    #endif
+
     SYSTEM_CALL
     int open(const char *path, int flags)
     {
@@ -55,9 +73,9 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
-    int create(const char *path, int flags, mode_t mode)
+    int open(const char *path, int flags, mode_t mode)
     {
-        return DO_SYSCALL(openat, AT_FDCWD, path, flags | O_CREAT, mode);
+        return DO_SYSCALL(open, path, flags, mode);
     }
 
     SYSTEM_CALL

@@ -171,7 +171,7 @@ namespace Pico {
             int fd;
 
             if ( create )
-                fd = Syscall::create(path, open_flags(flags), rights.value);
+                fd = Syscall::open(path, open_flags(flags) | O_CREAT, rights.value);
             else
                 fd = Syscall::open(path, open_flags(flags));
 
