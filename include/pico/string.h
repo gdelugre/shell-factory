@@ -320,14 +320,44 @@ namespace Pico {
     using String = BasicString<char>;
     using WideString = BasicString<wchar_t>;
 
+    static constexpr bool isascii(char c)
+    {
+        return ( c >= 0 && c < 0x80 );
+    }
+
+    static constexpr bool isprint(char c)
+    {
+        return ( c >= ' ' && c <= '~' );
+    }
+
+    static constexpr bool iscntrl(char c)
+    {
+        return isascii(c) && !isprint(c);
+    }
+
     static constexpr bool isdigit(char c)
     {
-        return (c >= '0' && c <= '9');
+        return ( c >= '0' && c <= '9' );
+    }
+
+    static constexpr bool isxdigit(char c)
+    {
+        return isdigit(c) || ( c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f' );
+    }
+
+    static constexpr bool isblank(char c)
+    {
+        return ( c == ' ' || c == '\t' );
     }
 
     static constexpr bool isspace(char c)
     {
-        return (c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v');
+        return ( c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v' );
+    }
+
+    static constexpr bool isgraph(char c)
+    {
+        return isprint(c) && !isspace(c);
     }
 
     static constexpr bool islower(char c)
@@ -348,6 +378,11 @@ namespace Pico {
     static constexpr bool isalnum(char c)
     {
         return isalpha(c) || isdigit(c);
+    }
+
+    static constexpr bool ispunct(char c)
+    {
+        return isgraph(c) && !isalnum(c);
     }
 
     static constexpr char toupper(char c)
