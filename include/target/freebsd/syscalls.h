@@ -1,5 +1,5 @@
-#ifndef FREEBSD_SYSCALL_ABI_H_
-#define FREEBSD_SYSCALL_ABI_H_
+#ifndef FREEBSD_SYSCALLS_H_
+#define FREEBSD_SYSCALLS_H_
 
 #include <sys/errno.h>
 
