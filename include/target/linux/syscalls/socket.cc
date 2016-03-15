@@ -16,7 +16,7 @@ namespace Syscall {
     //
     #if SYSCALL_EXISTS(socketcall)
 
-        SYSTEM_CALL int socketcall(int num, long *args)
+        SYSTEM_CALL int socketcall(int num, long *args);
 
         SYSTEM_CALL
         int socketcall(int num, long *args)
