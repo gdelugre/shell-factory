@@ -38,6 +38,17 @@ namespace Syscall {
     {
         return DO_SYSCALL(getcwd, buf, size);
     }
+
+    //
+    // Some architectures have renamed select as _newselect.
+    //
+    #if !SYSCALL_EXISTS(select) && SYSCALL_EXISTS(_newselect)
+    SYSTEM_CALL
+    int select(int nfds, fd_set *reads_fds, fd_set *write_fds, fd_set *except_fds, struct timeval *timeout)
+    {
+        return DO_SYSCALL(_newselect, nfds, read_fds, write_fds, except_fds, timeout);
+    }
+    #endif
 }
 
 #endif

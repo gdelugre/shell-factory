@@ -180,19 +180,13 @@ namespace Syscall {
         return DO_SYSCALL(poll, fds, nfds, timeout);
     }
 
+    #if SYSCALL_EXISTS(select)
     SYSTEM_CALL
     int select(int nfds, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, struct timeval *timeout)
     {
-        #if SYSCALL_EXISTS(select)
         return DO_SYSCALL(select, nfds, read_fds, write_fds, except_fds, timeout);
-        #else
-        //
-        // Some architectures on Linux have renamed select as _newselect.
-        // The system call appears to remain POSIX compliant though.
-        //
-        return DO_SYSCALL(_newselect, nfds, read_fds, write_fds, except_fds, timeout);
-        #endif
     }
+    #endif
 
     SYSTEM_CALL
     ssize_t readlink(const char *pathname, char *buf, size_t bufsiz)
