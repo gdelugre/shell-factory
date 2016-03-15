@@ -88,12 +88,16 @@ namespace Syscall {
         return DO_SYSCALL(rt_sigaction, signum, act, oact, sigsetsize);
     }
 
-    // POSIX wrapper.
+    //
+    // POSIX wrapper around rt_sigaction in case it does not exist.
+    //
+    #if !SYSCALL_EXISTS(sigaction)
     SYSTEM_CALL
     int sigaction(int signum, const struct sigaction *act, struct sigaction *oact)
     {
         return rt_sigaction(signum, act, oact, sizeof(sigset_t));
     }
+    #endif
 
     NO_RETURN SYSTEM_CALL
     void exit_group(int status)
