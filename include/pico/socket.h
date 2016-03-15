@@ -1,6 +1,8 @@
 #ifndef PICOLIB_SOCKET_H_
 #define PICOLIB_SOCKET_H_
 
+#include <netinet/in.h>
+
 namespace Pico {
 
     namespace Network {
