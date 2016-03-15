@@ -32,9 +32,16 @@ namespace Target {
 #error "No syscall ABI defined for this architecture."
 #endif
 
-/* Syscall definitions */
+// Error definitions.
+#include <errno.h>
+
+// Syscall definitions.
 #include <sys/syscall.h>
 
+// Common POSIX system calls.
+#include <target/posix/syscalls.h>
+
+// FreeBSD specific system calls.
 #include "syscalls/sys.cc"
 #include "syscalls/io.cc"
 #include "syscalls/process.cc"
