@@ -46,6 +46,5 @@ namespace Target {
 #include "syscalls/io.cc"
 #include "syscalls/process.cc"
 #include "syscalls/ipc.cc"
-#include "syscalls/security.cc"
 
 #endif

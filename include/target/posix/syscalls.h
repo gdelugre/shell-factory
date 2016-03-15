@@ -6,8 +6,6 @@
 #include "syscalls/memory.cc"
 #include "syscalls/socket.cc"
 #include "syscalls/ipc.cc"
-/*
 #include "syscalls/security.cc"
-*/
 
 #endif
