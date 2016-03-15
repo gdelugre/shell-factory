@@ -2,73 +2,89 @@
 #define SYSCALL_IPC_H_
 
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
 
 /*
- * System calls defined in this file.
+ * This file defines FreeBSD specific system calls (i.e. not POSIX).
  */
 namespace Syscall {
 
-    SYSTEM_CALL int pipe(int[2]);
-    SYSTEM_CALL int shmget(key_t, size_t, int);
-    SYSTEM_CALL void *shmat(int, const void *, int);
-    SYSTEM_CALL int shmdt(const void *);
-    SYSTEM_CALL int shmctl(int, int, struct shmid_ds *);
     SYSTEM_CALL int _umtx_op(void *, int ,u_long, void *, void *);
-
-    SYSTEM_CALL
-    int pipe(int pipefd[2])
-    {
-        return DO_SYSCALL(pipe, pipefd);
-    }
-
-    SYSTEM_CALL
-    int shmget(key_t key, size_t size, int shmflg)
-    {
-        #if SYSCALL_EXISTS(shmget)
-        return DO_SYSCALL(shmget, key, size, shmflg);
-        #else
-        return DO_SYSCALL(shmsys, 3, key, size, shmflg);
-        #endif
-    }
-
-    SYSTEM_CALL
-    void *shmat(int shmid, const void *shmaddr, int shmflg)
-    {
-        #if SYSCALL_EXISTS(shmat)
-        return (void *) DO_SYSCALL(shmat, shmid, shmaddr, shmflg);
-        #else
-        return (void *) DO_SYSCALL(shmsys, 0, shmid, shmaddr, shmflg);
-        #endif
-    }
-
-    SYSTEM_CALL
-    int shmdt(const void *shmaddr)
-    {
-        #if SYSCALL_EXISTS(shmdt)
-        return DO_SYSCALL(shmdt, shmaddr);
-        #else
-        return DO_SYSCALL(shmsys, 2, shmaddr);
-        #endif
-    }
-
-    SYSTEM_CALL
-    int shmctl(int shmid, int cmd, struct shmid_ds *buf)
-    {
-        #if SYSCALL_EXISTS(shmctl)
-        return DO_SYSCALL(shmctl, shmid, cmd, buf);
-        #else
-        return DO_SYSCALL(shmsys, 4, shmid, cmd, buf);
-        #endif
-    }
+    #if SYSCALL_EXISTS(shmsys)
+    SYSTEM_CALL int shmsys(int, int, int, int);
+    SYSTEM_CALL int shmsys(int, int, const void *, int);
+    SYSTEM_CALL int shmsys(int, const void *);
+    SYSTEM_CALL int shmsys(int, int, int, struct shmid_ds *);
+    #endif
 
     SYSTEM_CALL
     int _umtx_op(void *obj, int op, u_long val, void *uaddr, void *uaddr2)
     {
         return DO_SYSCALL(_umtx_op, obj, op, val, uaddr, uaddr2);
     }
+
+    //
+    // Common entry point for shared memory operations.
+    //
+    #if SYSCALL_EXISTS(shmsys)
+
+        SYSTEM_CALL
+        int shmsys(int which, int a2, int a3, int a4)
+        {
+            return DO_SYSCALL(shmsys, which, a2, a3, a4);
+        }
+
+        SYSTEM_CALL
+        int shmsys(int which, int a2, const void *a3, int a4)
+        {
+            return DO_SYSCALL(shmsys, which, a2, a3, a4);
+        }
+
+        SYSTEM_CALL
+        int shmsys(int which, const void *a2)
+        {
+            return DO_SYSCALL(shmsys, which, a2);
+        }
+
+        SYSTEM_CALL
+        int shmsys(int which, int a2, int a3, struct shmid_ds *buf)
+        {
+            return DO_SYSCALL(shmsys, which, a2, a3, buf);
+        }
+
+        #if !SYSCALL_EXISTS(shmget)
+        SYSTEM_CALL
+        int shmget(key_t key, size_t size, int shmflg)
+        {
+            return shmsys(3, key, size, shmflg);
+        }
+        #endif
+
+        #if !SYSCALL_EXISTS(shmat)
+        SYSTEM_CALL
+        void *shmat(int shmid, const void *shmaddr, int shmflg)
+        {
+            return (void *) shmsys(0, shmid, smdaddr, shmflg);
+        }
+        #endif
+
+        #if !SYSCALL_EXISTS(shmdt)
+        SYSTEM_CALL
+        int shmdt(const void *shmaddr)
+        {
+            return shmsys(2, shmaddr);
+        }
+        #endif
+
+        #if !SYSCALL_EXISTS(shmctl)
+        SYSTEM_CALL
+        int shmctl(int shmid, int cmd, struct shmid_ds *buf)
+        {
+            return shmsys(4, shmid ,cmd, buf);
+        }
+        #endif
+
+    #endif // SYSCALL_EXISTS(shmsys)
 }
 
 #endif
