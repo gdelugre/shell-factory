@@ -1,74 +1,36 @@
 #ifndef SYSCALL_PROCESS_H_
 #define SYSCALL_PROCESS_H_
 
-#include <factory.h>
-
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-#include <signal.h>
 #include <linux/sched.h>
 #include <linux/limits.h>
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 #include <sys/prctl.h>
-#include <sys/time.h>
 
 /*
- * System calls defined in this file.
+ * This file defines Linux specific system calls (i.e. not POSIX).
  */
 namespace Syscall {
 
-    SYSTEM_CALL pid_t           getpid(void);
-    SYSTEM_CALL pid_t           getppid(void);
     SYSTEM_CALL pid_t           gettid(void);
-    SYSTEM_CALL pid_t           fork(void);
-    NO_RETURN SYSTEM_CALL int   execve(const char *, char *const[], char *const[]);
     #if SYSCALL_EXISTS(execveat)
     NO_RETURN SYSTEM_CALL int   execveat(int, const char *, char *const[], char *const[], int);
     #endif
     SYSTEM_CALL_INLINE long     clone(unsigned long, void *, void *, void *, void *);
     SYSTEM_CALL int             prctl(int, unsigned long, unsigned long, unsigned long, unsigned long);
-    #if SYSCALL_EXISTS(setitimer)
-    SYSTEM_CALL int             setitimer(int, const struct itimerval *, struct itimerval *);
-    #endif
     SYSTEM_CALL long            ptrace(enum __ptrace_request, pid_t, void *, void *);
     SYSTEM_CALL pid_t           wait4(pid_t, int *, int, struct rusage *);
     SYSTEM_CALL int             waitid(idtype_t, id_t, siginfo_t *, int, struct rusage *);
     SYSTEM_CALL int             tkill(pid_t, int);
-    SYSTEM_CALL int             kill(pid_t, int);
-    NO_RETURN SYSTEM_CALL void  exit(int);
+    SYSTEM_CALL int             rt_sigaction(int, const struct sigaction *, struct sigaction *, size_t);
+    SYSTEM_CALL int             sigaction(int, const struct sigaction *, struct sigaction *);
     NO_RETURN SYSTEM_CALL void  exit_group(int);
-
-    SYSTEM_CALL
-    pid_t getpid(void)
-    {
-        return DO_SYSCALL(getpid);
-    }
-
-    SYSTEM_CALL
-    pid_t getppid(void)
-    {
-        return DO_SYSCALL(getppid);
-    }
 
     SYSTEM_CALL
     pid_t gettid(void)
     {
         return DO_SYSCALL(gettid);
-    }
-
-    SYSTEM_CALL
-    pid_t fork(void)
-    {
-        return DO_SYSCALL(fork);
-    }
-
-    NO_RETURN SYSTEM_CALL
-    int execve(const char *filename, char *const argv[], char *const envp[])
-    {
-        DO_SYSCALL(execve, filename, argv, envp);
-        __builtin_unreachable();
     }
 
     #if SYSCALL_EXISTS(execveat)
@@ -96,33 +58,6 @@ namespace Syscall {
         return DO_SYSCALL(prctl, option, arg2, arg3, arg4, arg5);
     }
 
-    #if SYSCALL_EXISTS(setitimer)
-    SYSTEM_CALL
-    int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
-    {
-        return DO_SYSCALL(setitimer, which, value, ovalue);
-    }
-    #endif
-
-    SYSTEM_CALL
-    unsigned int alarm(unsigned int seconds)
-    {
-        #if SYSCALL_EXISTS(alarm)
-        return DO_SYSCALL(alarm, seconds);
-        #else
-        struct itimerval itv = { {0,0}, {0,0} };
-
-        itv.it_value.tv_sec = seconds;
-        return Syscall::setitimer(ITIMER_REAL, &itv, &itv);
-        #endif
-    }
-
-    SYSTEM_CALL
-    int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
-    {
-        return DO_SYSCALL(rt_sigaction, signum, act, oldact, 8);
-    }
-
     SYSTEM_CALL
     long ptrace(enum __ptrace_request request, pid_t pid, void *addr, void *data)
     {
@@ -148,16 +83,16 @@ namespace Syscall {
     }
 
     SYSTEM_CALL
-    int kill(pid_t pid, int sig)
+    int rt_sigaction(int signum, const struct sigaction *act, struct sigaction *oact, size_t sigsetsize)
     {
-        return DO_SYSCALL(kill, pid, sig);
+        return DO_SYSCALL(rt_sigaction, signum, act, oact, sigsetsize);
     }
 
-    NO_RETURN SYSTEM_CALL
-    void exit(int status)
+    // POSIX wrapper.
+    SYSTEM_CALL
+    int sigaction(int signum, const struct sigaction *act, struct sigaction *oact)
     {
-        DO_SYSCALL(exit, status);
-        __builtin_unreachable();
+        return rt_sigaction(signum, act, oact, sizeof(sigset_t));
     }
 
     NO_RETURN SYSTEM_CALL
