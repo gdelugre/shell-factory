@@ -38,15 +38,36 @@ namespace Pico {
         void *resize(void *ptr, size_t old_size, size_t new_size, bool can_move)
         {
             void *base;
+            size_t size;
 
-            if ( can_move )
+            // Round up sizes to a page boundary.
+            old_size = round_up_page_size(old_size);
+            new_size = round_up_page_size(new_size);
+
+            // No change needed.
+            if ( old_size == new_size )
+                return ptr;
+
+            // Shrinking the area.
+            if ( new_size < old_size ) {
+                void *free_base = static_cast<uint8_t *>(ptr) + new_size;
+
+                release(free_base, old_size - new_size);
+                return ptr;
+            }
+
+            // Expanding the area.
+            if ( can_move ) {
                 base = nullptr; 
+                size = new_size;
+            }
             else {
-                base = static_cast<uint8_t *>(ptr) + round_up_page_size(old_size);
+                base = static_cast<uint8_t *>(ptr) + old_size;
+                size = new_size - old_size;
             }
                 
             // TODO: handle prot parameter.
-            void *new_ptr = allocate(nullptr, new_size, Memory::READ | Memory::WRITE);
+            void *new_ptr = allocate(base, size, Memory::READ | Memory::WRITE);
             if ( Target::is_error(new_ptr) )
                 return nullptr;
 
