@@ -16,7 +16,7 @@ namespace Pico {
                 max_size = size = N;
             }
 
-            CONSTRUCTOR BasicString() : BasicString("") {}
+            CONSTRUCTOR BasicString();
             CONSTRUCTOR BasicString(size_t buffer_size)
             {
                 chars = new T[buffer_size];
@@ -77,7 +77,6 @@ namespace Pico {
             FUNCTION T *concat(T *dest, const T *src, size_t n);
 
         private:
-            METHOD size_t free_space() const { return max_size - size; }
             METHOD void resize(size_t new_size);
 
             T *chars;
@@ -88,6 +87,22 @@ namespace Pico {
 
     using String = BasicString<char>;
     using WideString = BasicString<wchar_t>;
+
+    template <>
+    CONSTRUCTOR
+    BasicString<char>::BasicString()
+    {
+        chars = const_cast<char *>("");
+        max_size = size = 1;
+    }
+
+    template <>
+    CONSTRUCTOR
+    BasicString<wchar_t>::BasicString()
+    {
+        chars = const_cast<wchar_t *>(L"");
+        max_size = size = 1;
+    }
 
     template <typename T>
     METHOD
