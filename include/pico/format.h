@@ -81,9 +81,16 @@ namespace Pico {
                         break;
                     }
 
+                    case 'i':
                     case 'd':
+                    case 'u':
                     {
-                        unsigned long param_word = va_arg(ap, unsigned long);
+                        int param_word = va_arg(ap, int);
+                        if ( c != 'u' && param_word < 0 ) {
+                            output(dest, "-", 1);
+                            param_word = -param_word;
+                        }
+
                         result += format_ltoa(dest, param_word, 10, false, pad, pad_sz, output);
                         break;
                     }
