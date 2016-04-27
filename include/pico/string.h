@@ -50,6 +50,7 @@ namespace Pico {
 
             METHOD T *pointer() const { return chars; }
             METHOD size_t length() const { return size - 1; }
+            METHOD bool empty() const { return length() == 0; }
 
             METHOD T& operator[](unsigned index) const {
                 assert(index < size);
