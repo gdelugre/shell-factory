@@ -135,7 +135,10 @@ namespace Pico {
     METHOD
     ssize_t BasicIO::in(void *ptr, size_t count)
     {
-        return Syscall::read(fd, ptr, count);
+        ssize_t nr_bytes = Syscall::read(fd, ptr, count);
+
+        m_eof = (count > 0 && nr_bytes == 0);
+        return nr_bytes;
     }
 
     METHOD

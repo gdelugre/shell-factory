@@ -55,6 +55,7 @@ namespace Pico {
             CONSTRUCTOR SingleIO() = default;
             CONSTRUCTOR SingleIO(handle fd) : fd(fd) {}
             METHOD handle file_desc() const { return fd; }
+            METHOD bool eof() const { return m_eof; }
             METHOD int close();
             METHOD int close_on_exec();
             METHOD bool operator ==(SingleIO io) {
@@ -66,6 +67,7 @@ namespace Pico {
 
         protected:
             handle fd;
+            bool m_eof = false;
     };
 
     class BasicIO : public SingleIO
@@ -93,6 +95,10 @@ namespace Pico {
 
             METHOD ssize_t write(const void *ptr, size_t count) {
                 return io.out(ptr, count);
+            }
+
+            METHOD bool eof() const {
+                return io.eof();
             }
 
             // Allow writing of string literals with no size argument.
@@ -195,6 +201,9 @@ namespace Pico {
             }
             METHOD bool is_invalid() const {
                 return rx.is_invalid() || tx.is_invalid();
+            }
+            METHOD bool eof() const {
+                return rx.eof();
             }
 
         private:
