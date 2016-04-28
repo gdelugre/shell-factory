@@ -45,7 +45,7 @@ namespace Pico {
             DESTRUCTOR ~BasicString()
             {
                 if ( needs_dealloc )
-                    delete chars;
+                    delete[] chars;
             }
 
             METHOD T *pointer() const { return chars; }
@@ -126,7 +126,7 @@ namespace Pico {
         BasicString<T>::copy(chars, old_chars);
 
         if ( needs_dealloc )
-            delete old_chars;
+            delete[] old_chars;
 
         needs_dealloc = true;
     }
@@ -138,7 +138,7 @@ namespace Pico {
     BasicString<T>& BasicString<T>::operator =(const T (&str)[N])
     {
         if ( needs_dealloc )
-            delete chars;
+            delete[] chars;
 
         chars = const_cast<T *>(str);
         max_size = size = N;
@@ -153,7 +153,7 @@ namespace Pico {
         if ( max_size < str.length() + 1 )
         {
             if ( needs_dealloc )
-                delete chars;
+                delete[] chars;
 
             chars = new T[str.length() + 1];
             max_size = str.length() + 1;
