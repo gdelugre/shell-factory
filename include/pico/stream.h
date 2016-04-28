@@ -134,11 +134,30 @@ namespace Pico {
                 size_t nr_read;
 
                 for ( nr_read = 0; n > 0 && nr_read < n - 1; nr_read++, ptr++ ) {
-                    if ( read(ptr, 1) < 0 || *ptr == delim )
+                    size_t ret = read(ptr, 1);
+
+                    if ( ret < 0 || this->eof() || *ptr == delim )
                         break;
                 }
                 *ptr = '\0';
                 return nr_read;
+            }
+
+            template <typename T = char>
+            METHOD BasicString<T> readline(T delim = '\n') {
+                BasicString<T> str;
+                T chr[2] = {0, 0};
+
+                while ( true ) {
+                    ssize_t ret = read(&chr[0], sizeof(T));
+
+                    if ( ret < 0 || this->eof() || *chr == delim )
+                        break;
+
+                    str += chr;
+                }
+
+                return str;
             }
 
             METHOD_NOINLINE int printf(const char *format, ...);
