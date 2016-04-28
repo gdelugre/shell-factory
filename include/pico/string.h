@@ -42,6 +42,28 @@ namespace Pico {
                 size = length(chars) + 1;
             }
 
+            //
+            // Copy constructor.
+            //
+            CONSTRUCTOR BasicString(BasicString<T>& o)
+            {
+                chars = new T[o.max_size];
+                needs_dealloc = true;
+
+                BasicString<T>::copy(chars, o.chars);
+                size = o.size;
+                max_size = o.max_size;
+            }
+
+            //
+            // Move constructor.
+            //
+            CONSTRUCTOR BasicString(BasicString<T>&& o) : chars(o.chars), needs_dealloc(o.needs_dealloc), size(o.size), max_size(o.max_size)
+            {
+                o.chars = nullptr;
+                o.size = o.max_size = 0;
+            }
+
             DESTRUCTOR ~BasicString()
             {
                 if ( needs_dealloc )
