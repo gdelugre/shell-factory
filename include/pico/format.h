@@ -87,7 +87,7 @@ namespace Pico {
                     {
                         int param_word = va_arg(ap, int);
                         if ( c != 'u' && param_word < 0 ) {
-                            output(dest, "-", 1);
+                            result += output(dest, "-", 1);
                             param_word = -param_word;
                         }
 
