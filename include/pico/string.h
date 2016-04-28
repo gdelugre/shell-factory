@@ -33,13 +33,14 @@ namespace Pico {
                 max_size = size = length(chars) + 1;
             }
 
-            CONSTRUCTOR BasicString(T* src, size_t buffer_size)
+            CONSTRUCTOR BasicString(T* src, size_t buffer_size, bool auto_free = false)
             {
                 chars = src;
                 chars[buffer_size - 1] = 0;
 
                 max_size = buffer_size;
                 size = length(chars) + 1;
+                needs_dealloc = auto_free;
             }
 
             //
@@ -97,6 +98,7 @@ namespace Pico {
             FUNCTION T *copy(T *dest, const T *src, size_t n);
             FUNCTION T *concat(T *dest, const T *src);
             FUNCTION T *concat(T *dest, const T *src, size_t n);
+            FUNCTION __attribute__((format (printf, 1, 2))) BasicString<T> sprintf(const char *format, ...);
 
         private:
             METHOD void resize(size_t new_size);

@@ -177,6 +177,9 @@ namespace Pico {
         char *output = str;
         int count = vformat(output, max_size, format, ap, output_func);
 
+        if ( max_size == 0 )
+            return count;
+
         if ( count >= max_size )
             str[max_size] = '\0';
         else
@@ -257,6 +260,26 @@ namespace Pico {
     ssize_t Stream<Io>::write(String const& str)
     {
         return write(str.pointer(), str.length());
+    }
+
+    template <>
+    METHOD_NOINLINE
+    String BasicString<char>::sprintf(const char *format, ...)
+    {
+        size_t str_sz;
+        va_list ap, aq;
+
+        va_start(ap, format);
+        va_copy(aq, ap);
+        str_sz = vsnprintf(nullptr, 0, format, ap);
+        va_end(ap);
+
+        char *buf = new char[str_sz + 1];
+
+        vsnprintf(buf, str_sz + 1, format, aq);
+        va_end(aq);
+
+        return String(buf, str_sz + 1, true);
     }
 }
 
