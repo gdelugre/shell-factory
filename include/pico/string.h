@@ -83,6 +83,11 @@ namespace Pico {
                 return chars[index];
             }
 
+            template <unsigned N>
+            METHOD Array<BasicString<T>, N> split(T delim = ' ');
+            METHOD BasicString<T> rstrip(T white = ' ') const;
+            METHOD BasicString<T> lstrip(T white = ' ') const;
+            METHOD BasicString<T> strip(T white = ' ') { return (*this).lstrip(white).rstrip(white); }
             METHOD BasicString<T> slice(int start, size_t len) const;
 
             template <unsigned N>
@@ -117,6 +122,74 @@ namespace Pico {
 
     using String = BasicString<char>;
     using WideString = BasicString<wchar_t>;
+
+    template <typename T>
+    METHOD BasicString<T> BasicString<T>::lstrip(T white) const
+    {
+        size_t count = 0;
+
+        for ( size_t i = 0; i < length(); i++ )
+        {
+            if ( chars[i] != white )
+                break;
+
+            count++;
+        }
+
+        return slice(count, length() - count);
+    }
+
+    template <typename T>
+    METHOD BasicString<T> BasicString<T>::rstrip(T white) const
+    {
+        size_t count = 0;
+
+        for ( size_t i = 0; i < length(); i++ )
+        {
+            if ( chars[length() - 1 - i] != white )
+                break;
+
+            count++;
+        }
+
+        return slice(0, length() - count);
+    }
+
+    template <typename T>
+    template <unsigned N>
+    METHOD
+    Array<BasicString<T>, N> BasicString<T>::split(T delim)
+    {
+        Array<BasicString<T>, N> array;
+        size_t count = 0;
+        BasicString<T> trimmed = this->strip(delim);
+        int i, pos = 0;
+
+        for ( i = 0; i < trimmed.length(); i++ )
+        {
+            if ( trimmed[i] != delim )
+                continue;
+
+            array[count++] = trimmed.slice(pos, i - pos);
+
+            while ( trimmed[i] == delim && i < trimmed.length() )
+                i++;
+
+            pos = i;
+
+            if ( i < trimmed.length() && count == N - 1 ) {
+                array[N - 1] = trimmed.slice(pos, trimmed.length() - pos);
+                i = pos = trimmed.length();
+                count++;
+                break;
+            }
+        }
+
+        if ( count < N && pos < trimmed.length())
+            array[count] = trimmed.slice(pos, i - pos);
+
+        return array;
+    }
 
     template <typename T>
     METHOD
