@@ -7,6 +7,7 @@
 // Pico class headers.
 #include <pico/concurrency.h>
 #include <pico/memory.h>
+#include <pico/collections.h>
 #include <pico/string.h>
 #include <pico/stream.h>
 #include <pico/format.h>
