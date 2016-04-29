@@ -103,6 +103,10 @@ namespace Pico {
                 return io.eof();
             }
 
+            METHOD bool error() const {
+                return io.error();
+            }
+
             // Allow writing of string literals with no size argument.
             // Used for quick string printing, like Stdio::output().write("Hello world!\n");
             template <unsigned N>
@@ -160,6 +164,16 @@ namespace Pico {
                 }
 
                 return str;
+            }
+
+            template <typename Func, typename T = char>
+            METHOD void each_line(Func cb, T delim = '\n') {
+                while ( !eof() && !error() ) {
+                    BasicString<T> str = readline(delim);
+
+                    if ( cb(str) != 0 )
+                        break;
+                }
             }
 
             METHOD_NOINLINE int printf(const char *format, ...);
