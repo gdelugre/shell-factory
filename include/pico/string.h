@@ -87,8 +87,10 @@ namespace Pico {
             METHOD Array<BasicString<T>, N> split(T delim = ' ');
             METHOD BasicString<T> rstrip(T white = ' ') const;
             METHOD BasicString<T> lstrip(T white = ' ') const;
-            METHOD BasicString<T> strip(T white = ' ') { return (*this).lstrip(white).rstrip(white); }
+            METHOD BasicString<T> strip(T white = ' ') const { return (*this).lstrip(white).rstrip(white); }
             METHOD BasicString<T> slice(int start, size_t len) const;
+            METHOD bool startswith(BasicString<T> const& prefix) const;
+            METHOD bool endswith(BasicString<T> const& suffix) const;
 
             template <unsigned N>
             METHOD BasicString<T>& operator =(const T (&str)[N]);
@@ -104,6 +106,8 @@ namespace Pico {
             template <unsigned N>
             FUNCTION PURE size_t length(const T (&s)[N]) { return N-1; }
             FUNCTION PURE size_t length(T *s);
+            FUNCTION PURE int compare(const T *s1, const T *s2);
+            FUNCTION PURE int compare(const T *s1, const T *s2, size_t n);
             FUNCTION PURE bool equals(const T *s1, const T *s2);
             FUNCTION T *copy(T *dest, const T *src);
             FUNCTION T *copy(T *dest, const T *src, size_t n);
@@ -122,6 +126,23 @@ namespace Pico {
 
     using String = BasicString<char>;
     using WideString = BasicString<wchar_t>;
+
+    template <>
+    CONSTRUCTOR
+    BasicString<char>::BasicString()
+    {
+        chars = const_cast<char *>("");
+        max_size = size = 1;
+    }
+
+    template <>
+    CONSTRUCTOR
+    BasicString<wchar_t>::BasicString()
+    {
+        chars = const_cast<wchar_t *>(L"");
+        max_size = size = 1;
+    }
+
 
     template <typename T>
     METHOD BasicString<T> BasicString<T>::lstrip(T white) const
@@ -210,20 +231,24 @@ namespace Pico {
         return BasicString<T>(substr, len + 1, true);
     }
 
-    template <>
-    CONSTRUCTOR
-    BasicString<char>::BasicString()
+    template <typename T>
+    METHOD
+    bool BasicString<T>::startswith(BasicString<T> const& prefix) const
     {
-        chars = const_cast<char *>("");
-        max_size = size = 1;
+        if ( prefix.length() > this->length() )
+            return false;
+
+        return BasicString<T>::compare(chars, prefix.chars, prefix.length());
     }
 
-    template <>
-    CONSTRUCTOR
-    BasicString<wchar_t>::BasicString()
+    template <typename T>
+    METHOD
+    bool BasicString<T>::endswith(BasicString<T> const& suffix) const
     {
-        chars = const_cast<wchar_t *>(L"");
-        max_size = size = 1;
+        if ( suffix.length() > this->length() )
+            return false;
+
+        return BasicString<T>::compare(chars + length() - suffix.length(), suffix.chars, suffix.length());
     }
 
     template <typename T>
@@ -375,19 +400,43 @@ namespace Pico {
 
     template <>
     METHOD
-    bool BasicString<char>::equals(const char *s1, const char *s2)
+    int BasicString<char>::compare(const char *s1, const char *s2)
     {
         if ( Options::use_builtins )
-            return BUILTIN(strcmp)(s1, s2) == 0;
+            return BUILTIN(strcmp)(s1, s2);
 
-        return tstrcmp(s1, s2) == 0;
+        return tstrcmp(s1, s2);
+    }
+
+    template <typename T>
+    METHOD
+    int BasicString<T>::compare(const T *s1, const T *s2)
+    {
+        return tstrcmp(s1, s2);
+    }
+
+    template <>
+    METHOD
+    int BasicString<char>::compare(const char *s1, const char *s2, size_t n)
+    {
+        if ( Options::use_builtins )
+            return BUILTIN(strncmp)(s1, s2, n);
+
+        return tstrncmp(s1, s2, n);
+    }
+
+    template <typename T>
+    METHOD
+    int BasicString<T>::compare(const T *s1, const T *s2, size_t n)
+    {
+        return tstrcmp(s1, s2, n);
     }
 
     template <typename T>
     METHOD
     bool BasicString<T>::equals(const T *s1, const T *s2)
     {
-        return tstrcmp(s1, s2) == 0;
+        return BasicString<T>::compare(s1, s2) == 0;
     }
 
     template <>
