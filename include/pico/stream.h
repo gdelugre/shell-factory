@@ -56,6 +56,7 @@ namespace Pico {
             CONSTRUCTOR SingleIO(handle fd) : fd(fd) {}
             METHOD handle file_desc() const { return fd; }
             METHOD bool eof() const { return b_eof; }
+            METHOD bool error() const { return b_error; }
             METHOD int close();
             METHOD int close_on_exec();
             METHOD bool operator ==(SingleIO io) {
@@ -68,6 +69,7 @@ namespace Pico {
         protected:
             handle fd;
             bool b_eof = false;
+            bool b_error = false;
     };
 
     class BasicIO : public SingleIO

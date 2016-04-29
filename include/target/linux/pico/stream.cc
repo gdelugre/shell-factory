@@ -136,6 +136,10 @@ namespace Pico {
     ssize_t BasicIO::in(void *ptr, size_t count)
     {
         ssize_t nr_bytes = Syscall::read(fd, ptr, count);
+        if ( Target::is_error(nr_bytes) ) {
+            b_error = true;
+            return -1;
+        }
 
         b_eof = (count > 0 && nr_bytes == 0);
         return nr_bytes;
@@ -144,7 +148,13 @@ namespace Pico {
     METHOD
     ssize_t BasicIO::out(const void *ptr, size_t count)
     {
-        return Syscall::write(fd, ptr, count);
+        ssize_t nr_bytes = Syscall::write(fd, ptr, count);
+        if ( Target::is_error(nr_bytes) ) {
+            b_error = true;
+            return -1;
+        }
+
+        return nr_bytes;
     }
 
     template <typename Io>
