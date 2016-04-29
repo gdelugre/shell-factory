@@ -137,7 +137,7 @@ namespace Pico {
     {
         ssize_t nr_bytes = Syscall::read(fd, ptr, count);
 
-        m_eof = (count > 0 && nr_bytes == 0);
+        b_eof = (count > 0 && nr_bytes == 0);
         return nr_bytes;
     }
 
