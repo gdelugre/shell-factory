@@ -75,10 +75,15 @@ namespace Pico {
             METHOD size_t length() const { return size - 1; }
             METHOD bool empty() const { return length() == 0; }
 
-            METHOD T& operator[](unsigned index) const {
-                assert(index < size);
+            METHOD T& operator[](int index) const {
+                if ( index < 0 )
+                    index = length() + index;
+
+                assert(index < length());
                 return chars[index];
             }
+
+            METHOD BasicString<T> slice(int start, size_t len) const;
 
             template <unsigned N>
             METHOD BasicString<T>& operator =(const T (&str)[N]);
@@ -88,6 +93,7 @@ namespace Pico {
             METHOD BasicString<T> operator +(BasicString const& str);
             METHOD BasicString<T>& operator *=(unsigned count);
             METHOD BasicString<T> operator *(unsigned count);
+            METHOD BasicString<T> operator ()(int start, size_t len) const { return this->slice(start, len); }
 
             // Static functions.
             template <unsigned N>
@@ -111,6 +117,25 @@ namespace Pico {
 
     using String = BasicString<char>;
     using WideString = BasicString<wchar_t>;
+
+    template <typename T>
+    METHOD
+    BasicString<T> BasicString<T>::slice(int start, size_t len) const
+    {
+        if ( start < 0 )
+            start = length() + start;
+
+        assert(start >= 0 && start < length());
+
+        if ( start + len >= length() )
+            len = length() - start;
+
+        T *substr = new T[len + 1];
+        BasicString<T>::copy(substr, chars + start, len);
+        substr[len] = '\0';
+
+        return BasicString<T>(substr, len + 1, true);
+    }
 
     template <>
     CONSTRUCTOR
