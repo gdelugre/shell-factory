@@ -422,6 +422,7 @@ namespace Pico {
             METHOD size_t used_space() const { return total_size - free_space(); }
             METHOD size_t allocated_objects() const { return nr_objects; }
             FUNCTION size_t entry_size(void *ptr);
+            FUNCTION Heap& global();
 
         private:
             Mutex mutex;
@@ -552,8 +553,11 @@ namespace Pico {
         return chunk->size;
     }
 
-    FUNCTION
-    Heap& global_heap()
+    //
+    // Returns the default global Heap.
+    //
+    METHOD
+    Heap& Heap::global()
     {
         static Heap default_heap;
 
@@ -567,12 +571,12 @@ namespace Pico {
 
 void *operator new(size_t count)
 {
-    return Pico::global_heap().allocate(count);
+    return Pico::Heap::global().allocate(count);
 }
 
 void *operator new[](size_t count)
 {
-    return Pico::global_heap().allocate(count);
+    return Pico::Heap::global().allocate(count);
 }
 
 void *operator new(size_t count, void *ptr)
@@ -589,22 +593,22 @@ void *operator new[](size_t count, void *ptr)
 
 void operator delete(void *ptr) noexcept
 {
-    return Pico::global_heap().free(ptr);
+    return Pico::Heap::global().free(ptr);
 }
 
 void operator delete[](void *ptr) noexcept
 {
-    return Pico::global_heap().free(ptr);
+    return Pico::Heap::global().free(ptr);
 }
 
 void operator delete(void *ptr, size_t size) noexcept
 {
-    return Pico::global_heap().free(ptr, size);
+    return Pico::Heap::global().free(ptr, size);
 }
 
 void operator delete[](void *ptr, size_t size) noexcept
 {
-    return Pico::global_heap().free(ptr, size);
+    return Pico::Heap::global().free(ptr, size);
 }
 
 #endif
