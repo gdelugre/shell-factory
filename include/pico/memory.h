@@ -421,6 +421,7 @@ namespace Pico {
             METHOD size_t free_space() const { return free_slots.available_space(); }
             METHOD size_t used_space() const { return total_size - free_space(); }
             METHOD size_t allocated_objects() const { return nr_objects; }
+            FUNCTION size_t entry_size(void *ptr);
 
         private:
             Mutex mutex;
@@ -540,8 +541,15 @@ namespace Pico {
         if ( ptr == nullptr )
             return;
 
+        free(ptr, entry_size(ptr));
+    }
+
+    METHOD
+    size_t Heap::entry_size(void *ptr)
+    {
         struct Chunk *chunk = reinterpret_cast<Chunk *>(static_cast<char *>(ptr) - sizeof(Chunk));
-        free(ptr, chunk->size);
+
+        return chunk->size;
     }
 
     FUNCTION
@@ -565,6 +573,18 @@ void *operator new(size_t count)
 void *operator new[](size_t count)
 {
     return Pico::global_heap().allocate(count);
+}
+
+void *operator new(size_t count, void *ptr)
+{
+    assert( Pico::Heap::entry_size(ptr) == count );
+    return ptr;
+}
+
+void *operator new[](size_t count, void *ptr)
+{
+    assert( Pico::Heap::entry_size(ptr) == count );
+    return ptr;
 }
 
 void operator delete(void *ptr) noexcept
