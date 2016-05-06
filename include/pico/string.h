@@ -509,7 +509,7 @@ namespace Pico {
 
     static constexpr bool isascii(char c)
     {
-        return ( c >= 0 && c < 0x80 );
+        return ( c >= 0 );
     }
 
     static constexpr bool isprint(char c)
