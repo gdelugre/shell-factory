@@ -59,7 +59,7 @@ namespace Pico {
             METHOD bool error() const { return b_error; }
             METHOD int close();
             METHOD int close_on_exec();
-            METHOD bool operator ==(SingleIO io) {
+            METHOD bool operator ==(SingleIO const& io) {
                 return file_desc() == io.file_desc();
             }
             METHOD bool is_invalid() const {
@@ -120,18 +120,18 @@ namespace Pico {
             }
 
             // Streams are compared using their IO ports.
-            METHOD bool operator ==(Stream<Io> stm) const {
+            METHOD bool operator ==(Stream<Io> const& stm) const {
                 return io_port() == stm.io_port();
             }
 
             // Comparison returns false on type mismatch.
             template <typename T>
-            METHOD bool operator ==(Stream<T> stm) const {
+            METHOD bool operator ==(Stream<T> const&) const {
                 return false;
             }
 
             template <typename T>
-            METHOD bool operator !=(Stream<T> stm) const {
+            METHOD bool operator !=(Stream<T> const& stm) const {
                 return !(*this == stm);
             }
 
@@ -233,7 +233,7 @@ namespace Pico {
             METHOD int close() {
                 return rx.close() | tx.close();
             }
-            METHOD bool operator ==(DuplexIO io) {
+            METHOD bool operator ==(DuplexIO const& io) {
                 return rx == io.read_file_desc() && tx == io.write_file_desc();
             }
             METHOD bool is_invalid() const {
@@ -252,7 +252,7 @@ namespace Pico {
     class BiStream : public Stream<DuplexIO<typename ReadStream::io_type, typename WriteStream::io_type>>
     {
         public:
-            CONSTRUCTOR BiStream(ReadStream r, WriteStream w)
+            CONSTRUCTOR BiStream(ReadStream const& r, WriteStream const& w)
             {
                 using ReadIO = typename ReadStream::io_type;
                 using WriteIO = typename WriteStream::io_type;
