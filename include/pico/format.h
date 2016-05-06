@@ -255,13 +255,6 @@ namespace Pico {
         return count;
     }
 
-    template <typename Io>
-    METHOD
-    ssize_t Stream<Io>::write(String const& str)
-    {
-        return write(str.pointer(), str.length());
-    }
-
     template <>
     METHOD_NOINLINE
     String BasicString<char>::sprintf(const char *format, ...)

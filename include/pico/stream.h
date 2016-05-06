@@ -115,7 +115,9 @@ namespace Pico {
                 return io.out(str, N-1);
             }
 
-            METHOD ssize_t write(String const& str);
+            METHOD ssize_t write(String const& str) {
+                return write(str.pointer(), str.length());
+            }
 
             // Streams are compared using their IO ports.
             METHOD bool operator ==(Stream<Io> stm) const {
