@@ -59,7 +59,7 @@ namespace Pico {
             //
             // Move constructor.
             //
-            CONSTRUCTOR BasicString(BasicString<T>&& o) : chars(o.chars), needs_dealloc(o.needs_dealloc), size(o.size), max_size(o.max_size)
+            CONSTRUCTOR BasicString(BasicString<T>&& o) : chars(o.chars), size(o.size), max_size(o.max_size), needs_dealloc(o.needs_dealloc)
             {
                 o.chars = nullptr;
                 o.size = o.max_size = 0;
