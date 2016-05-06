@@ -21,6 +21,8 @@ namespace Pico {
         struct winsize ws = {
             .ws_row = ts.rows,
             .ws_col = ts.cols,
+            .ws_xpixel = 0,
+            .ws_ypixel = 0,
         };
 
         int ret = Syscall::ioctl(this->file_desc(), TIOCSWINSZ, &ws);
