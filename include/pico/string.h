@@ -104,7 +104,7 @@ namespace Pico {
 
             // Static functions.
             template <unsigned N>
-            FUNCTION PURE size_t length(const T (&s)[N]) { return N-1; }
+            FUNCTION PURE size_t length(const T (&)[N]) { return N-1; }
             FUNCTION PURE size_t length(T *s);
             FUNCTION PURE int compare(const T *s1, const T *s2);
             FUNCTION PURE int compare(const T *s1, const T *s2, size_t n);
