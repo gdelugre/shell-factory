@@ -7,20 +7,45 @@
 
 namespace Bits {
 
+    namespace internal {
+
+        template <typename T, unsigned N = sizeof(T) * 8>
+        struct MSB
+        {
+            using value_type = typename std::make_unsigned<T>::type;
+            static constexpr unsigned nr_bits = sizeof(value_type) * 8;
+
+            FUNCTION unsigned find(T value, unsigned count = sizeof(T) * 8)
+            {
+                value_type v = static_cast<value_type>(value);
+                constexpr unsigned shift = N / 2;
+
+                if ( v >> (nr_bits - shift) == 0 ) {
+                    v <<= shift;
+                    count -= shift;
+                }
+
+                return MSB<T, shift>::find(v, count);
+            }
+        };
+
+        template <typename T>
+        struct MSB<T, 1>
+        {
+            FUNCTION unsigned find(T, unsigned count) {
+                return count;
+            }
+        };
+    }
+
     // Find most-significant bit set.
     template <typename T>
     FUNCTION
     unsigned soft_fls(T w)
     {
         static_assert(std::numeric_limits<T>::is_integer, "Cannot use soft_fls with non-integer types.");
-        static_assert(sizeof(T) <= sizeof(unsigned int) ||
-                      sizeof(T) == sizeof(unsigned long) ||
-                      sizeof(T) == sizeof(unsigned long long), "fls not supported for this type size.");
 
         using value_type = typename std::make_unsigned<T>::type;
-        constexpr size_t nr_bits = sizeof(value_type) * 8;
-
-        unsigned count = sizeof(value_type) * 8;
         value_type value = w;
 
         if ( value == 0 )
@@ -40,37 +65,7 @@ namespace Bits {
         //
         //  Compact version not used here because some architectures do not like arbitrary sized shifts.
 
-        if ( nr_bits == 64 && (value >> (nr_bits - 32)) == 0) {
-            value <<= 32;
-            count -= 32;
-        }
-
-        if ( nr_bits >= 32 && (value >> (nr_bits - 16)) == 0) {
-            value <<= 16;
-            count -= 16;
-        }
-
-        if ( nr_bits >= 16 && (value >> (nr_bits - 8)) == 0) {
-            value <<= 8;
-            count -= 8;
-        }
-
-        if ( value >> (nr_bits - 4) == 0 ) {
-            value <<= 4;
-            count -= 4;
-        }
-
-        if ( value >> (nr_bits - 2) == 0 ) {
-            value <<= 2;
-            count -= 2;
-        }
-
-        if ( value >> (nr_bits - 1) == 0 ) {
-            value <<= 1;
-            count -= 1;
-        }
-
-        return count;
+        return internal::MSB<value_type>::find(value);
     }
 
     // Count leading zeros.
