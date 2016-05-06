@@ -22,7 +22,7 @@ namespace Pico {
 
         template <>
         METHOD
-        constexpr key_t ftok<size_t(-1)>(const char *name)
+        constexpr key_t ftok<size_t(-1)>(const char *)
         {
             return 0;
         }
