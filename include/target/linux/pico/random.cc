@@ -5,7 +5,7 @@ namespace Pico {
 
     #if SYSCALL_EXISTS(getrandom)
 
-    CONSTRUCTOR SecureRandom::SecureRandom() {}
+    CONSTRUCTOR SecureRandom::SecureRandom() { (void) pool; }
     DESTRUCTOR SecureRandom::~SecureRandom() {}
 
     template <typename T>
