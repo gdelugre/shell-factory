@@ -77,6 +77,7 @@ CFLAGS = %W{-std=c++1y
             -Wall
             -Wextra
             -Wfatal-errors
+            -ffreestanding
             -fno-common
             -fno-rtti
             -fno-exceptions
