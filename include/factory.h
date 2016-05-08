@@ -24,7 +24,7 @@
 #define FUNCTION_NOINLINE static METHOD_NOINLINE USED
 #define EXPORT_ABI_FUNCTION __attribute__((visibility("internal")))
 #define SYSTEM_CALL static INLINE
-#define SYSTEM_CALL_INLINE static __attribute__((always_inline))
+#define SYSTEM_CALL_INLINE static inline __attribute__((always_inline))
 #define UNUSED __attribute__((unused))
 #define USED __attribute__((used))
 #define PURE __attribute__((pure))
