@@ -11,7 +11,7 @@ namespace Syscall {
     SYSTEM_CALL int     open(const char *, int);
     SYSTEM_CALL int     open(const char *, int, mode_t);
     SYSTEM_CALL int     close(int);
-    SYSTEM_CALL int     creat(const char *, int, mode_t);
+    SYSTEM_CALL int     creat(const char *, mode_t);
     SYSTEM_CALL int     access(const char *, int);
     SYSTEM_CALL int     dup(int);
     SYSTEM_CALL int     dup2(int, int);
