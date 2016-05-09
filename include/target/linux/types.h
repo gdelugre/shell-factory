@@ -2,7 +2,9 @@
 #define LINUX_TYPES_H_
 
 #include <cstdint>
+#include <sys/types.h>
 #include <linux/types.h>
+#include <sys/signal.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
 #include <asm-generic/termios.h>
@@ -57,11 +59,7 @@ namespace Target {
     //
     // random_pool corresponds to the file descriptor of /dev/urandom if getrandom is not available.
     //
-    #if SYSCALL_EXISTS(getrandom)
-    using random_pool = EmptyType;
-    #else
     using random_pool = handle;
-    #endif
 
     using mutex_t = int;
     using terminal_settings = struct termios;

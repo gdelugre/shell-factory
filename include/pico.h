@@ -1,9 +1,6 @@
 #ifndef PICO_H_
 #define PICO_H_
 
-// System types definitions.
-#include <target/types.h>
-
 // Pico class headers.
 #include <pico/concurrency.h>
 #include <pico/memory.h>

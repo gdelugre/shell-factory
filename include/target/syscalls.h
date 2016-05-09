@@ -93,6 +93,8 @@
   EMIT_SYSCALL(name, ##args); \
   });
 
+// System types definitions.
+#include <target/types.h>
 
 #if defined(__linux__)
 #include <target/linux/syscalls.h>
