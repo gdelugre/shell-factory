@@ -75,6 +75,7 @@ LD_SCRIPT_PE = File.join(File.dirname(__FILE__), "factory-pe.lds")
 OUTPUT_SECTIONS = %w{.text .rodata .data}
 CFLAGS = %W{-std=c++1y
             -Wall
+            -Wno-unused-function
             -Wextra
             -Wfatal-errors
             -ffreestanding

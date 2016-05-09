@@ -21,7 +21,7 @@
 #define METHOD INLINE
 #define VIRTUAL_METHOD virtual METHOD
 #define FUNCTION static METHOD
-#define FUNCTION_NOINLINE static METHOD_NOINLINE USED
+#define FUNCTION_NOINLINE static METHOD_NOINLINE
 #define EXPORT_ABI_FUNCTION __attribute__((visibility("internal")))
 #define SYSTEM_CALL static INLINE
 #define SYSTEM_CALL_INLINE static inline __attribute__((always_inline))
