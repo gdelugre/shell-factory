@@ -1,7 +1,8 @@
 #ifndef LINUX_SYSCALLS_H_
 #define LINUX_SYSCALLS_H_
 
-#define SYSCALL_NAME_TO_NUM(name) __NR_##name
+#define DO_SYSCALL(name, args...) EMIT_SYSCALL(_, name, ##args)
+#define SYSCALL_NAME_TO_NUM(_class, name) __NR_##name
 #define SYSCALL_EXISTS(name) defined(__NR_##name)
 
 namespace Target {

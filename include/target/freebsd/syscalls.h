@@ -3,7 +3,8 @@
 
 #include <sys/errno.h>
 
-#define SYSCALL_NAME_TO_NUM(name) SYS_##name
+#define DO_SYSCALL(name, args...) EMIT_SYSCALL(_, name, ##args)
+#define SYSCALL_NAME_TO_NUM(_class, name) SYS_##name
 #define SYSCALL_EXISTS(name) defined(SYS_##name)
 
 namespace Target {
