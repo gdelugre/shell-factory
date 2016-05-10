@@ -52,7 +52,7 @@ namespace Pico {
 
         public:
             template <typename... V>
-            CONSTRUCTOR Array(V... values) : Collection<T>(elements, Size), elements{ values... } {}
+            CONSTRUCTOR Array(V&&... values) : Collection<T>(elements, Size), elements{ std::forward<V>(values)... } {}
 
             METHOD T* pointer() const { return elements; }
 
