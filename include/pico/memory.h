@@ -579,15 +579,13 @@ void *operator new[](size_t count)
     return Pico::Heap::global().allocate(count);
 }
 
-void *operator new(size_t count, void *ptr)
+void *operator new(size_t, void *ptr)
 {
-    assert( Pico::Heap::entry_size(ptr) == count );
     return ptr;
 }
 
-void *operator new[](size_t count, void *ptr)
+void *operator new[](size_t, void *ptr)
 {
-    assert( Pico::Heap::entry_size(ptr) == count );
     return ptr;
 }
 
