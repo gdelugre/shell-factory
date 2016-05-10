@@ -223,7 +223,7 @@ def target_to_source(target)
 end
 
 def compile(target, triple, output_dir, *opts)
-    common_opts = %w{CHANNEL RHOST LHOST HOST RPORT LPORT PORT HANDLE NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE NO_ERROR_CHECKS}
+    common_opts = %w{CHANNEL RHOST LHOST HOST RPORT LPORT PORT HANDLE NO_BUILTIN FORK_ON_ACCEPT REUSE_ADDR RELAX_INLINE NO_ASSERTS HEAP_BASE HEAP_SIZE NO_ERROR_CHECKS THREAD_SAFE}
     options = common_opts + opts
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
@@ -438,6 +438,7 @@ task :help do
     #{'WITH_WARNINGS:'.color(:green)}      Set to 1 to enable compiler warnings.
     #{'RELAX_INLINE:'.color(:green)}       Set to 1, 2 or 3 to let the compiler uninline some functions.
     #{'IMAGEBASE:'.color(:green)}          Address where code is executed (for ELF and Mach-O).
+    #{'THREAD_SAFE:'.color(:green)}        Set to 1 to enable thread safety.
 
  #{'Target specific options:'.color(:cyan)}
 

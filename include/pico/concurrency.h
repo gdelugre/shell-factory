@@ -98,12 +98,14 @@ namespace Pico {
         public:
             CONSTRUCTOR CriticalSection(Mutex& mutex) : mutex(mutex)
             {
-                mutex.lock();
+                if ( Options::thread_safety )
+                    mutex.lock();
             }
 
             DESTRUCTOR ~CriticalSection()
             {
-                mutex.unlock();
+                if ( Options::thread_safety )
+                    mutex.unlock();
             }
 
         private:

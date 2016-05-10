@@ -37,6 +37,12 @@
 #define OPT_NO_ERROR_CHECKS true
 #endif
 
+#if !defined(THREAD_SAFE) || (THREAD_SAFE == 0)
+#define OPT_THREAD_SAFE false
+#else
+#define OPT_THREAD_SAFE true
+#endif
+
 namespace Options {
 
     constexpr static bool fork_on_accept = OPT_FORK_ON_ACCEPT;
@@ -45,6 +51,7 @@ namespace Options {
     static void *heap_address = OPT_HEAP_BASE;
     constexpr static size_t heap_size = OPT_HEAP_SIZE;
     constexpr static bool disable_error_checks = OPT_NO_ERROR_CHECKS;
+    constexpr static bool thread_safety = OPT_THREAD_SAFE;
 }
 
 #undef OPT_FORK_ON_ACCEPT
