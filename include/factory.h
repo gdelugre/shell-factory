@@ -28,6 +28,7 @@
 #define UNUSED __attribute__((unused))
 #define USED __attribute__((used))
 #define PURE __attribute__((pure))
+#define PACKED __attribute__((packed))
 #define BUILTIN(func) __builtin_ ## func
 
 #define STRINGIZE(x) #x
