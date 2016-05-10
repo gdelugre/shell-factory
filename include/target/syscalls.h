@@ -73,7 +73,7 @@
                       arg5, arg6, arg7, ...)                            \
 ({                                                                      \
     SYSCALL_SET_ARG_7(arg7);                                            \
-    EMIT_SYSCALL5(class, name, arg1, arg2, arg3, arg4, arg5, arg6,      \
+    EMIT_SYSCALL6(class, name, arg1, arg2, arg3, arg4, arg5, arg6,      \
                   "X"(__arg7), ##__VA_ARGS__);                          \
 })                                                                      \
 
