@@ -6,49 +6,62 @@
 
 namespace Pico {
 
-    template <typename T, unsigned Size>
-    class Array
+    template <typename T>
+    class Collection
     {
-        static_assert(Size > 0, "Pico::Array must have at least one element.");
-
         public:
-            template <typename... V>
-            CONSTRUCTOR Array(V... values) : elements{ values... } {}
-
-            METHOD T* pointer() const { return elements; }
-            METHOD size_t length() const { return Size; }
-            METHOD T& first() const { return elements[0]; }
-            METHOD T& last() const { return elements[Size - 1]; }
-
-            METHOD T& operator[](unsigned index) {
-                assert(index < Size);
-                return elements[index];
+            METHOD size_t   length() const { return nr_elements; }
+            METHOD T&       empty() const { return nr_elements == 0; }
+            METHOD T&       first() const { return &storage[0]; }
+            METHOD T&       last() const { return &storage[nr_elements - 1]; }
+            METHOD T&       operator [](unsigned index) {
+                assert(index < nr_elements);
+                return storage[index];
             }
 
-            METHOD bool operator ==(Array const& o) const {
+            METHOD bool     operator ==(Collection const& o) const {
                 if ( this->length() != o.length() )
                     return false;
 
-                for ( size_t i = 0; i < length(); i++ )
+                for ( size_t i = 0; i < this->length(); i++ )
                     if ( (*this)[i] != o[i] )
                         return false;
 
                 return true;
             }
 
-            METHOD bool operator !=(Array const& o) const {
+            METHOD bool     operator !=(Collection const& o) const {
                 return !(*this == o);
             }
 
-            METHOD T* begin() { return &elements[0]; }
-            METHOD T* end() { return &elements[Size]; }
+            METHOD T*       begin() { return &storage[0]; }
+            METHOD T*       end() { return &storage[nr_elements]; }
+
+        protected:
+            Collection() = default;
+            Collection(T *elements, size_t nr_elements) : storage(elements), nr_elements(nr_elements) {}
+
+            T *storage = nullptr;
+            size_t nr_elements = 0;
+    };
+
+    template <typename T, unsigned Size>
+    class Array : public Collection<T>
+    {
+        static_assert(Size > 0, "Pico::Array must have at least one element.");
+
+        public:
+            template <typename... V>
+            CONSTRUCTOR Array(V... values) : Collection<T>(elements, Size), elements{ values... } {}
+
+            METHOD T* pointer() const { return elements; }
 
         private:
             T elements[Size];
     };
 
     template <typename T>
-    class List
+    class List : public Collection<T>
     {
         static constexpr size_t default_capacity = 10;
 
@@ -62,33 +75,21 @@ namespace Pico {
                 resize(0);
             }
 
-            METHOD T* begin() { return &storage[0]; }
-            METHOD T* end() { return &storage[nr_elements]; }
-
-            METHOD T& operator[](unsigned index) {
-                assert(index < nr_elements);
-                return storage[index];
-            }
-
             METHOD void clear();
-            METHOD size_t size() const { return nr_elements; }
             METHOD size_t capacity() const { return current_capacity; }
-            METHOD bool empty() const { return nr_elements == 0; }
             METHOD List& insert(int pos, T const& obj);
             METHOD List& insert(int pos, T&& obj);
 
         private:
-            size_t nr_elements = 0;
             size_t current_capacity = default_capacity;
-            T *storage = nullptr;
             Pico::Heap& heap;
 
             METHOD void resize(size_t new_capacity);
             METHOD unsigned pos_to_offset(int pos) {
                 if ( pos < 0 )
-                    pos = nr_elements + pos;
+                    pos = this->nr_elements + pos;
 
-                assert(pos >= 0 && pos <= nr_elements);
+                assert(pos >= 0 && pos <= this->nr_elements);
                 return pos;
             }
     };
@@ -100,7 +101,7 @@ namespace Pico {
             elem.~T();
         }
 
-        nr_elements = 0;
+        this->nr_elements = 0;
     }
 
     template <typename T>
@@ -119,29 +120,29 @@ namespace Pico {
         if ( new_capacity == current_capacity )
             return;
 
-        if ( storage == nullptr ) {
-            storage = static_cast<T *>(heap.allocate(new_capacity * sizeof(T)));
+        if ( this->storage == nullptr ) {
+            this->storage = static_cast<T *>(heap.allocate(new_capacity * sizeof(T)));
             current_capacity = new_capacity;
             return;
         }
 
-        assert(nr_elements <= new_capacity);
+        assert(this->nr_elements <= new_capacity);
 
         if ( new_capacity == 0 ) {
-            heap.free(storage, current_capacity * sizeof(T));
-            storage = nullptr;
+            heap.free(this->storage, current_capacity * sizeof(T));
+            this->storage = nullptr;
         }
         else {
             T *new_storage = static_cast<T *>(heap.allocate(new_capacity * sizeof(T)));
 
-            for ( size_t i = 0; i < nr_elements; i++ ) {
-                new (&new_storage[i]) T( std::move(storage[i]) );
+            for ( size_t i = 0; i < this->nr_elements; i++ ) {
+                new (&new_storage[i]) T( std::move(this->storage[i]) );
 
-                storage[i].~T();
+                this->storage[i].~T();
             }
 
-            heap.free(storage);
-            storage = new_storage;
+            heap.free(this->storage);
+            this->storage = new_storage;
         }
 
         current_capacity = new_capacity;
