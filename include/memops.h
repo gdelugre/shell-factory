@@ -98,7 +98,7 @@ int tstrcmp(const T *s1, const T *s2)
     T c1, c2;
     size_t i = 0;
 
-    while ( (c1 = s1[i]) && (c2 = s2[i]) )
+    while ( (c1 = s1[i]) & (c2 = s2[i]) )
     {
         if ( c1 != c2 )
             break;
@@ -121,7 +121,7 @@ int tstrncmp(const T *s1, const T *s2, size_t n)
     T c1, c2;
     size_t i = 0;
 
-    while ( i < n && (c1 = s1[i]) && (c2 = s2[i]) )
+    while ( ((c1 = s1[i]) & (c2 = s2[i])) && i < n )
     {
         if ( c1 != c2 )
             break;
