@@ -1,100 +1,11 @@
 #ifndef PICOLIB_MEMORY_H_
 #define PICOLIB_MEMORY_H_
 
+#include <utility>
+
 namespace Pico {
 
     namespace Memory {
-
-        constexpr int READ   = (1 << 0);
-        constexpr int WRITE  = (1 << 1);
-        constexpr int EXEC   = (1 << 2);
-        constexpr int STACK  = (1 << 3);
-
-        FUNCTION PURE size_t page_size();
-        FUNCTION void * allocate(void *base, size_t size, int prot);
-        FUNCTION void * allocate(size_t size, int prot) {
-            return allocate(nullptr, size, prot);
-        }
-        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, bool can_move = true);
-        FUNCTION void   release(void *ptr, size_t size);
-        FUNCTION int    set_protection(void *ptr, size_t, int prot);
-
-        FUNCTION PURE size_t round_up_page_size(size_t size)
-        {
-            size_t page_size = Memory::page_size();
-            size_t nr_pages = (size + page_size - 1) / page_size;
-
-            return nr_pages * page_size;
-        }
-
-        class BaseRegion
-        {
-            public:
-                CONSTRUCTOR BaseRegion(void *address, size_t size) {
-                    ptr = address;
-                    region_size = round_up_page_size(size);
-                }
-                METHOD void *   pointer() const { return ptr; }
-                METHOD size_t   size() const { return region_size; }
-                METHOD int      set_protection(int prot) {
-                    return Memory::set_protection(ptr, region_size, prot);
-                }
-
-                // Automatic pointer cast.
-                template <typename T>
-                METHOD operator T *() const { return static_cast<T *>(ptr); }
-
-                // Compare with pointer.
-                METHOD bool operator ==(std::nullptr_t) {
-                    return ptr == nullptr;
-                }
-                template <typename T>
-                METHOD bool operator ==(T* p) {
-                    return p == ptr;
-                }
-
-            protected:
-                void *ptr;
-                size_t region_size;
-        };
-
-        class Region : public BaseRegion
-        {
-            public:
-                CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE)
-                    : BaseRegion(Memory::allocate(size, prot), size) {}
-                CONSTRUCTOR Region(void *base, size_t size = page_size(), int prot = READ | WRITE)
-                    : BaseRegion(Memory::allocate(base, size, prot), size) {}
-
-                DESTRUCTOR ~Region() {
-                    if ( ptr != nullptr )
-                        unmap();
-                }
-
-                // returns a Region object from an already existing mapped range.
-                FUNCTION Region from(void *ptr, size_t size) {
-                    return Region(NoAlloc{}, ptr, size);
-                }
-
-                METHOD int      resize(size_t new_size, bool can_move = true) {
-                    new_size = round_up_page_size(new_size);
-                    void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
-                    if ( new_ptr == nullptr )
-                        return -1;
-
-                    ptr = new_ptr;
-                    region_size = new_size;
-                    return 0;
-                }
-
-            private:
-                struct NoAlloc {};
-                CONSTRUCTOR Region(NoAlloc, void *ptr, size_t size) : BaseRegion(ptr, size) {}
-
-                METHOD void unmap() {
-                    Memory::release(ptr, region_size);
-                }
-        };
 
         template <typename T>
         FUNCTION
@@ -181,6 +92,115 @@ namespace Pico {
         {
             set(s, 0, n);
         }
+
+        //
+        // Memory protection constants.
+        //
+        constexpr int READ   = (1 << 0);
+        constexpr int WRITE  = (1 << 1);
+        constexpr int EXEC   = (1 << 2);
+        constexpr int STACK  = (1 << 3);
+
+        FUNCTION PURE size_t page_size();
+        FUNCTION void * allocate(void *base, size_t size, int prot);
+        FUNCTION void * allocate(size_t size, int prot) {
+            return allocate(nullptr, size, prot);
+        }
+        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, bool can_move = true);
+        FUNCTION void   release(void *ptr, size_t size);
+        FUNCTION int    set_protection(void *ptr, size_t, int prot);
+
+        FUNCTION PURE size_t round_up_page_size(size_t size)
+        {
+            size_t page_size = Memory::page_size();
+            size_t nr_pages = (size + page_size - 1) / page_size;
+
+            return nr_pages * page_size;
+        }
+
+        class BaseRegion
+        {
+            public:
+                CONSTRUCTOR BaseRegion(void *address, size_t size, int prot = READ | WRITE) {
+                    ptr = address;
+                    region_size = round_up_page_size(size);
+                    mem_prot = prot;
+                }
+                CONSTRUCTOR BaseRegion(BaseRegion&& o) : ptr(o.ptr), region_size(o.region_size), mem_prot(o.mem_prot) {
+                    o.ptr = nullptr;
+                    o.region_size = 0;
+                }
+                METHOD void *   pointer() const { return ptr; }
+                METHOD size_t   size() const { return region_size; }
+
+                METHOD int      set_protection(int prot) {
+                    int ret = Memory::set_protection(ptr, region_size, prot);
+                    if ( ret == 0 )
+                        mem_prot = prot;
+                    return ret;
+                }
+
+                // Automatic pointer cast.
+                template <typename T>
+                METHOD operator T *() const { return static_cast<T *>(ptr); }
+
+                // Compare with pointer.
+                METHOD bool operator ==(std::nullptr_t) {
+                    return ptr == nullptr;
+                }
+                template <typename T>
+                METHOD bool operator ==(T* p) {
+                    return p == ptr;
+                }
+
+            protected:
+                void *ptr;
+                size_t region_size;
+                int mem_prot;
+        };
+
+        class Region : public BaseRegion
+        {
+            public:
+                CONSTRUCTOR Region(size_t size = page_size(), int prot = READ | WRITE)
+                    : BaseRegion(Memory::allocate(size, prot), size) {}
+                CONSTRUCTOR Region(void *base, size_t size = page_size(), int prot = READ | WRITE)
+                    : BaseRegion(Memory::allocate(base, size, prot), size) {}
+                CONSTRUCTOR Region(Region const& o) : Region(o.region_size, o.mem_prot) {
+                    if ( ptr != nullptr )
+                        Memory::copy(ptr, o.ptr, o.region_size);
+                }
+                CONSTRUCTOR Region(Region&& o) : BaseRegion(std::move(o)) {}
+
+                DESTRUCTOR ~Region() {
+                    if ( ptr != nullptr )
+                        unmap();
+                }
+
+                // returns a Region object from an already existing mapped range.
+                FUNCTION Region from(void *ptr, size_t size) {
+                    return Region(NoAlloc{}, ptr, size);
+                }
+
+                METHOD int      resize(size_t new_size, bool can_move = true) {
+                    new_size = round_up_page_size(new_size);
+                    void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
+                    if ( new_ptr == nullptr )
+                        return -1;
+
+                    ptr = new_ptr;
+                    region_size = new_size;
+                    return 0;
+                }
+
+            private:
+                struct NoAlloc {};
+                CONSTRUCTOR Region(NoAlloc, void *ptr, size_t size) : BaseRegion(ptr, size) {}
+
+                METHOD void unmap() {
+                    Memory::release(ptr, region_size);
+                }
+        };
     }
 
     //
