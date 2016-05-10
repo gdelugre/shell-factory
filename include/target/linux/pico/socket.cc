@@ -134,6 +134,15 @@ namespace Pico {
             return Syscall::write(fd, buf, count);
         }
 
+        METHOD
+        size_t SocketIO::available_input_bytes()
+        {
+            size_t nr_bytes = 0;
+
+            Syscall::ioctl(fd, FIONREAD, &nr_bytes);
+            return nr_bytes;
+        }
+
         CONSTRUCTOR
         Socket::Socket(int domain, int type, int protocol)
         {

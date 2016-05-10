@@ -83,6 +83,7 @@ namespace Pico {
                 using SingleIO::SingleIO;
                 METHOD ssize_t in(void *, size_t);
                 METHOD ssize_t out(const void *, size_t);
+                METHOD size_t available_input_bytes();
         };
 
         class Socket : public Stream<SocketIO>

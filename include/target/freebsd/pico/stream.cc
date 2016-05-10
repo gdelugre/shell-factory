@@ -157,6 +157,15 @@ namespace Pico {
         return nr_bytes;
     }
 
+    METHOD
+    size_t BasicIO::available_input_bytes()
+    {
+        size_t nr_bytes = 0;
+
+        Syscall::ioctl(fd, FIONREAD, &nr_bytes);
+        return nr_bytes;
+    }
+
     template <typename Io>
     template <typename T>
     METHOD

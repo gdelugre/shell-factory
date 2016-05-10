@@ -80,6 +80,7 @@ namespace Pico {
 
             METHOD ssize_t in(void *, size_t);
             METHOD ssize_t out(const void *, size_t);
+            METHOD size_t available_input_bytes();
     };
 
     template <typename Io>
@@ -216,6 +217,9 @@ namespace Pico {
             }
             METHOD ssize_t out(const void *ptr, size_t count) {
                 return tx.out(ptr, count);
+            }
+            METHOD size_t available_input_bytes() {
+                return rx.available_input_bytes();
             }
 
             // Should not be called. Undefined behavior.
