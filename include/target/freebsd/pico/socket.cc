@@ -1,6 +1,7 @@
 #ifndef PICOLIB_SOCKET_IMPL_H_
 #define PICOLIB_SOCKET_IMPL_H_
 
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 

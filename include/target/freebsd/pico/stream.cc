@@ -1,6 +1,7 @@
 #ifndef PICOLIB_STREAM_IMPL_H_
 #define PICOLIB_STREAM_IMPL_H_
 
+#include <sys/ioctl.h>
 #include <fcntl.h>
 
 namespace Pico {
