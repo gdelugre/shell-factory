@@ -77,13 +77,20 @@ namespace Pico {
 
             METHOD void clear();
             METHOD size_t capacity() const { return current_capacity; }
-            METHOD List& insert(int pos, T const& obj);
-            METHOD List& insert(int pos, T&& obj);
+
+            template <typename... V>
+            METHOD List& insert(int pos, V&&... values);
+
+            template <typename... V>
+            METHOD List& push(V&&... values);
 
         private:
-            size_t current_capacity = default_capacity;
+            size_t current_capacity = 0;
             Pico::Heap& heap;
 
+            template <typename... V>
+            METHOD void create_elements(unsigned offset, V&&... values);
+            METHOD void move_elements(unsigned from, unsigned to);
             METHOD void resize(size_t new_capacity);
             METHOD unsigned pos_to_offset(int pos) {
                 if ( pos < 0 )
@@ -95,6 +102,7 @@ namespace Pico {
     };
 
     template <typename T>
+    METHOD
     void List<T>::clear()
     {
         for ( T& elem : *this ) {
@@ -105,16 +113,75 @@ namespace Pico {
     }
 
     template <typename T>
-    List<T>& List<T>::insert(int pos, T const& obj)
+    template <typename... V>
+    METHOD
+    List<T>& List<T>::insert(int pos, V&&... values)
     {
         unsigned offset = pos_to_offset(pos);
+        constexpr size_t nr_vals = sizeof...(values);
+        const size_t required_capacity = nr_vals + this->nr_elements;
 
-        // TODO 
-         
+        // Ensure with a have a minimum capacity to store all the values.
+        if ( required_capacity > current_capacity )
+            resize(required_capacity + default_capacity);
+
+        // Displace elements to make some room for the new values.
+        if ( offset < this->nr_elements )
+            move_elements(offset, offset + nr_vals);
+
+        create_elements(offset, std::forward<T>(values)...);
+
         return *this;
     }
 
     template <typename T>
+    template <typename... V>
+    METHOD
+    List<T>& List<T>::push(V&&... values)
+    {
+        return insert(this->nr_elements, std::forward<V>(values)...);
+    }
+
+    template <typename T>
+    template <typename... V>
+    METHOD
+    void List<T>::create_elements(unsigned offset, V&&... values)
+    {
+        constexpr size_t nr_vals = sizeof...(values);
+
+        new (&this->storage[offset]) T[nr_vals] { std::forward<V>(values)... };
+        this->nr_elements += nr_vals;
+    }
+
+    template <typename T>
+    METHOD
+    void List<T>::move_elements(unsigned from, unsigned to)
+    {
+        const int nr_moved = this->nr_elements - from;
+
+        assert(nr_moved >= 0 && to + nr_moved <= current_capacity);
+
+        if ( from == to )
+            return;
+
+        if ( from > to )
+        {
+            for ( size_t i = 0; i < nr_moved; i++ ) {
+                new (&this->storage[to + i]) T( std::move(this->storage[from + i]) );
+                this->storage[from + i].~T();
+            }
+        }
+        else
+        {
+            for ( size_t i = 0; i < nr_moved; i++ ) {
+                new (&this->storage[to + nr_moved - i - 1]) T( std::move(this->storage[from + nr_moved - i - 1]) );
+                this->storage[from + nr_moved - i - 1].~T();
+            }
+        }
+    }
+
+    template <typename T>
+    METHOD
     void List<T>::resize(size_t new_capacity)
     {
         if ( new_capacity == current_capacity )
