@@ -110,18 +110,24 @@ namespace Pico {
                 resize(0);
             }
 
-            METHOD void clear();
+            METHOD List& clear();
             METHOD size_t capacity() const { return current_capacity; }
 
             template <typename... V>
             METHOD List& insert(int pos, V&&... values);
 
+            METHOD List& remove(int pos, size_t length);
+            METHOD List slice(int pos, size_t length);
+
             template <typename... V>
             METHOD List& push(V&&... values);
 
+            METHOD T pop();
+            METHOD List<T> pop(size_t n);
+
         private:
-            size_t current_capacity = 0;
             Pico::Heap& heap;
+            size_t current_capacity = 0;
 
             template <typename... V>
             METHOD void create_elements(unsigned offset, V&&... values);
@@ -131,20 +137,16 @@ namespace Pico {
                 if ( pos < 0 )
                     pos = this->nr_elements + pos;
 
-                assert(pos >= 0 && pos <= this->nr_elements);
+                assert(pos >= 0 && static_cast<size_t>(pos) <= this->nr_elements);
                 return pos;
             }
     };
 
     template <typename T>
     METHOD
-    void List<T>::clear()
+    List<T>& List<T>::clear()
     {
-        for ( T& elem : *this ) {
-            elem.~T();
-        }
-
-        this->nr_elements = 0;
+        return remove(0, this->nr_elements);
     }
 
     template <typename T>
@@ -170,11 +172,71 @@ namespace Pico {
     }
 
     template <typename T>
+    METHOD
+    List<T> List<T>::slice(int pos, size_t length)
+    {
+        unsigned offset = pos_to_offset(pos);
+
+        if ( length > this->nr_elements - offset )
+            length = this->nr_elements - offset;
+
+        List<T> sliced(heap, length);
+
+        for ( size_t i = 0; i < length; i++ )
+            new (&sliced.storage[i]) T( std::move(this->storage[offset + i]) );
+
+        sliced.nr_elements = length;
+        remove(offset, length);
+
+        return sliced;
+    }
+
+    template <typename T>
+    METHOD
+    List<T>& List<T>::remove(int pos, size_t length)
+    {
+        unsigned offset = pos_to_offset(pos);
+
+        if ( length > this->nr_elements - offset )
+            length = this->nr_elements - offset;
+
+        for ( size_t i = 0; i < length; i++ )
+            this->storage[offset + i].~T();
+
+        if ( offset + length != this->nr_elements )
+            move_elements(offset + length, offset);
+
+        this->nr_elements -= length;
+
+        return *this;
+    }
+
+    template <typename T>
     template <typename... V>
     METHOD
     List<T>& List<T>::push(V&&... values)
     {
         return insert(this->nr_elements, std::forward<V>(values)...);
+    }
+
+    template <typename T>
+    METHOD
+    T List<T>::pop()
+    {
+        T value = std::move(this->last());
+
+        remove(this->nr_elements - 1, 1);
+        return value;
+    }
+
+    template <typename T>
+    METHOD
+    List<T> List<T>::pop(size_t n)
+    {
+        if ( n > this->nr_elements )
+            n = this->nr_elements;
+
+        return slice(this->nr_elements - n, n);
     }
 
     template <typename T>
@@ -201,14 +263,14 @@ namespace Pico {
 
         if ( from > to )
         {
-            for ( size_t i = 0; i < nr_moved; i++ ) {
+            for ( int i = 0; i < nr_moved; i++ ) {
                 new (&this->storage[to + i]) T( std::move(this->storage[from + i]) );
                 this->storage[from + i].~T();
             }
         }
         else
         {
-            for ( size_t i = 0; i < nr_moved; i++ ) {
+            for ( int i = 0; i < nr_moved; i++ ) {
                 new (&this->storage[to + nr_moved - i - 1]) T( std::move(this->storage[from + nr_moved - i - 1]) );
                 this->storage[from + nr_moved - i - 1].~T();
             }
