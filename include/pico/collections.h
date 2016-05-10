@@ -38,8 +38,12 @@ namespace Pico {
             METHOD T*       end() { return &storage[nr_elements]; }
 
         protected:
-            Collection() = default;
-            Collection(T *elements, size_t nr_elements) : storage(elements), nr_elements(nr_elements) {}
+            CONSTRUCTOR Collection() = default;
+            CONSTRUCTOR Collection(T *elements, size_t nr_elements) : storage(elements), nr_elements(nr_elements) {}
+            CONSTRUCTOR Collection(Collection&& o) : storage(o.storage), nr_elements(o.nr_elements) {
+                o.storage = nullptr;
+                o.nr_elements = 0;
+            }
 
             T *storage = nullptr;
             size_t nr_elements = 0;
@@ -68,6 +72,11 @@ namespace Pico {
         public:
             CONSTRUCTOR List(Pico::Heap& heap = Pico::Heap::global(), size_t capacity = default_capacity) : heap(heap) {
                 resize(capacity);
+            }
+
+            CONSTRUCTOR List(List&& o) : Collection<T>(std::move(o)), heap(o.heap), current_capacity(o.current_capacity)
+            {
+                o.current_capacity = 0;
             }
 
             DESTRUCTOR ~List() {
