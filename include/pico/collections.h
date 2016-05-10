@@ -19,6 +19,32 @@ namespace Pico {
                 return storage[index];
             }
 
+            METHOD int      index(T const& val) const {
+                for ( size_t i = 0; i < nr_elements; i++ )
+                    if ( storage[i] == val )
+                        return i;
+
+                return -1;
+            }
+
+            template <typename Func>
+            METHOD bool     any(Func proc) const {
+                for ( T const& e : *this )
+                    if ( proc(e) == true )
+                        return true;
+
+                return false;
+            }
+
+            template <typename Func>
+            METHOD bool     all(Func proc) const {
+                for ( T const& e : *this )
+                    if ( proc(e) == false )
+                        return false;
+
+                return true;
+            }
+
             METHOD bool     operator ==(Collection const& o) const {
                 if ( this->length() != o.length() )
                     return false;
