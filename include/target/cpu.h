@@ -28,7 +28,14 @@
 
 namespace Stack {
 
-    FUNCTION
+    FUNCTION_INLINE
+    void reset(void *ptr)
+    {
+        register void *__reg_sp asm ( SP_REGISTER ) = ptr;
+        FLUSH_VARIABLE(__reg_sp);
+    }
+
+    FUNCTION_INLINE
     void shift(long offset)
     {
         register char *__reg_sp asm ( SP_REGISTER );
@@ -37,7 +44,7 @@ namespace Stack {
         FLUSH_VARIABLE(__reg_sp);
     }
 
-    FUNCTION
+    FUNCTION_INLINE
     void *pointer()
     {
         register char *__reg_sp asm ( SP_REGISTER );
