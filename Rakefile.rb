@@ -339,8 +339,9 @@ def compile(target, triple, output_dir, *opts)
         cflags << "-s"
     end
 
-    if ENV['OUTPUT_DEBUG'].to_i == 1
+    if ENV['OUTPUT_DEBUG'].to_i == 1 or ENV['OUTPUT_LLVM'].to_i == 1
         asm_cflags = ['-S'] + cflags + ['-fno-lto']
+        asm_cflags += ['-emit-llvm'] if ENV['OUTPUT_LLVM'].to_i == 1
         output_file = output_dir.join("#{target_name}.S")
         sh "#{cc_invoke(cc,triple,sysroot)} #{asm_cflags.join(" ")} #{source_file} -o #{output_file} #{defines.join(' ')}" do |ok, _|
             (STDERR.puts; show_error("Compilation failed.")) unless ok
@@ -432,6 +433,7 @@ task :help do
     #{'NO_BUILTIN:'.color(:green)}         Does not use the compiler builtins for common memory operations.
     #{'OUTPUT_LIB:'.color(:green)}         Compiles to a shared library instead of a standard executable.
     #{'OUTPUT_DEBUG:'.color(:green)}       Instructs the compiler to emit an assembly file and debug symbols.
+    #{'OUTPUT_LLVM:'.color(:green)}        Instructs the compiler to emit LLVM bytecode (clang only).
     #{'OUTPUT_STRIP:'.color(:green)}       Strip symbols from output file.
     #{'OUTPUT_HEX:'.color(:green)}         Prints the resulting shellcode as an hexadecimal string.
     #{'VERBOSE:'.color(:green)}            Set to 1 for verbose compilation commands.
