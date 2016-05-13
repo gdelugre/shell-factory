@@ -26,30 +26,31 @@
 #define FLUSH_VARIABLE(var) \
     asm("" :: "r" (var));
 
+
 namespace Stack {
 
-    FUNCTION_INLINE
-    void reset(void *ptr)
-    {
-        register void *__reg_sp asm ( SP_REGISTER ) = ptr;
-        FLUSH_VARIABLE(__reg_sp);
-    }
-
-    FUNCTION_INLINE
-    void shift(long offset)
-    {
-        register char *__reg_sp asm ( SP_REGISTER );
-
-        __reg_sp += offset;
-        FLUSH_VARIABLE(__reg_sp);
-    }
+    register CPU::reg_t __reg_ptr asm ( SP_REGISTER );
 
     FUNCTION_INLINE
     void *pointer()
     {
-        register char *__reg_sp asm ( SP_REGISTER );
+        return reinterpret_cast<void *>(Stack::__reg_ptr);
+    }
 
-        return __reg_sp;
+    FUNCTION_INLINE
+    void reset(void *ptr)
+    {
+        Stack::__reg_ptr = reinterpret_cast<CPU::reg_t>(ptr);
+        FLUSH_VARIABLE(Stack::__reg_ptr);
+    }
+
+    FUNCTION_INLINE
+    void *shift(long offset)
+    {
+        Stack::__reg_ptr += offset;
+        FLUSH_VARIABLE(Stack::__reg_ptr);
+
+        return Stack::pointer();
     }
 }
 
