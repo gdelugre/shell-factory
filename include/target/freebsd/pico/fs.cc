@@ -1,6 +1,7 @@
 #ifndef PICOLIB_FS_IMPL_H_
 #define PICOLIB_FS_IMPL_H_
 
+#include <sys/unistd.h>
 #include <dirent.h>
 
 #define foreach_dirent(dirents, ent, off, dsize) \
