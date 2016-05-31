@@ -311,6 +311,10 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
+    if ENV['THUMB'].to_i == 1
+        cflags << "-mthumb"
+    end
+
     if ENV['CODE_MODEL']
         cmodel = ENV['CODE_MODEL']
         cflags << "-mcmodel=#{cmodel}"
@@ -446,7 +450,8 @@ task :help do
 
     #{'32BIT:'.color(:green)}              Set to 1 to compile for a 32-bit environment.
     #{'STACK_REALIGN:'.color(:green)}      Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
-    #{'CODE_MODEL:'.color(:green)}         Set target code model (tiny, small, large), AArch64 only.
+    #{'THUMB:'.color(:green)}              Set to 1 to compile to Thumb mode (ARM only).
+    #{'CODE_MODEL:'.color(:green)}         Select target code model: tiny, small, large (AArch64 only).
 
  #{'Shellcode customization options:'.color(:cyan)}
 
