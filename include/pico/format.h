@@ -17,10 +17,8 @@ namespace Pico {
         int nr_digits = 0;
         char str[sizeof(value) * 8]; // Worst case, radix = 2.
         do {
-            static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-
             long r = value % radix;
-            char digit = digits[r];
+            char digit = num_to_digit(r);
             if ( upcase )
                 digit = toupper(digit);
 

@@ -582,20 +582,23 @@ namespace Pico {
         return isupper(c) ? (c + ('a' - 'A')) : c;
     }
 
+    static constexpr char num_to_digit(unsigned long value)
+    {
+        return ( value < 10 ) ? ( value + '0' ) : ( value - 10 + 'a' );
+    }
+
+    static constexpr unsigned long digit_to_num(char digit)
+    {
+        return ( digit >= 'a' ) ? ( digit - 'a' + 10 ) : ( digit - '0' );
+    }
+
     FUNCTION
     long long int strtoll(const char *nptr, char **endptr, int radix = 10)
     {
-        static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
         long long int result = 0;
         int sign = 1;
         unsigned pow = 1;
         unsigned nr_digits = 0;
-        auto digit_to_dec = [] (char c) -> unsigned {
-            for ( size_t i = 0; i < sizeof(digits) - 1; i++ )
-                if ( digits[i] == c )
-                    return i;
-            return 0;
-        };
 
         while ( isspace(*nptr) )
             nptr++;
@@ -615,7 +618,7 @@ namespace Pico {
             nptr += 2;
 
         char *dptr = const_cast<char *>(nptr);
-        while ( tolower(*dptr) >= digits[0] && tolower(*dptr) <= digits[radix - 1] )
+        while ( tolower(*dptr) >= num_to_digit(0) && tolower(*dptr) <= num_to_digit(radix - 1) )
         {
             nr_digits++;
             dptr++;
@@ -623,7 +626,7 @@ namespace Pico {
 
         for ( size_t i = 0; i < nr_digits; i++ )
         {
-            result += digit_to_dec(tolower(nptr[nr_digits - i - 1])) * pow;
+            result += digit_to_num(tolower(nptr[nr_digits - i - 1])) * pow;
             pow *= radix;
         }
 
