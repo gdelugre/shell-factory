@@ -50,6 +50,7 @@ class Triple
     def self.parse(str)
         fields = str.split('-')
         case fields.size
+        when 1 then Triple.new(fields[0], nil, nil, nil)
         when 2 then Triple.new(fields[0], nil, fields[1], nil)
         when 3 then Triple.new(fields[0], nil, fields[1], fields[2])
         when 4 then Triple.new(fields[0], fields[1], fields[2], fields[3])
