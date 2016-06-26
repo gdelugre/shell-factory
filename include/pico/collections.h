@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <utility>
+#include <type_traits>
 
 namespace Pico {
 
@@ -311,6 +312,35 @@ namespace Pico {
 
         current_capacity = new_capacity;
     }
+
+    //
+    // Tiny tuple implementation.
+    // Elements are stored in reverse order in memory, size of structure is not optimized.
+    //
+    template <typename... T>
+    class Tuple;
+
+    template <>
+    class Tuple<> {};
+
+    template <typename Head, typename... Rest>
+    class Tuple<Head, Rest...> : Tuple<Rest...>
+    {
+        public:
+            CONSTRUCTOR Tuple() {}
+            CONSTRUCTOR Tuple<Head, Rest...>(Head v, Rest... r) : element(v), Tuple<Rest...>(r...) {}
+            CONSTRUCTOR Tuple<Head, Rest...>(Tuple<Head, Rest...> const& o) : element(o.get<0>()), Tuple<Rest...>(o.tail()) {}
+
+            template <unsigned I, typename T = typename std::enable_if<I == 0>::type>
+            METHOD Head get() const { return element; }
+
+            template <unsigned I, typename T = typename std::enable_if<I != 0>::type>
+            METHOD auto get() const { return Tuple<Rest...>::template get<I-1>(); }
+
+        private:
+            METHOD Tuple<Rest...> tail() const { return static_cast<Tuple<Rest...>>(*this); }
+            Head element;
+    };
 }
 
 #endif
