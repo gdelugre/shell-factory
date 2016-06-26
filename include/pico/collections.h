@@ -315,31 +315,32 @@ namespace Pico {
 
     //
     // Tiny tuple implementation.
-    // Elements are stored in reverse order in memory, size of structure is not optimized.
     //
     template <typename... T>
-    class Tuple;
+    PACKED struct Tuple;
 
     template <>
-    class Tuple<> {};
+    PACKED struct Tuple<> {};
 
     template <typename Head, typename... Rest>
-    class Tuple<Head, Rest...> : Tuple<Rest...>
+    PACKED struct Tuple<Head, Rest...>
     {
         public:
             CONSTRUCTOR Tuple() {}
-            CONSTRUCTOR Tuple<Head, Rest...>(Head v, Rest... r) : element(v), Tuple<Rest...>(r...) {}
-            CONSTRUCTOR Tuple<Head, Rest...>(Tuple<Head, Rest...> const& o) : element(o.get<0>()), Tuple<Rest...>(o.tail()) {}
+            CONSTRUCTOR Tuple<Head, Rest...>(Head v, Rest... r) : element(v), rest(r...) {}
+            CONSTRUCTOR Tuple<Head, Rest...>(Tuple<Head, Rest...> const& o) : element(o.get<0>()), rest(o.tail()) {}
 
             template <unsigned I, typename T = typename std::enable_if<I == 0>::type>
             METHOD Head get() const { return element; }
 
             template <unsigned I, typename T = typename std::enable_if<I != 0>::type>
-            METHOD auto get() const { return Tuple<Rest...>::template get<I-1>(); }
+            METHOD auto get() const { return rest.template get<I-1>(); }
 
         private:
-            METHOD Tuple<Rest...> tail() const { return static_cast<Tuple<Rest...>>(*this); }
             Head element;
+            Tuple<Rest...> rest;
+
+            METHOD Tuple<Rest...> tail() const { return rest; }
     };
 }
 
