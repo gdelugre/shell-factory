@@ -80,6 +80,8 @@ CFLAGS = %W{-std=c++1y
             -Wextra
             -Wfatal-errors
             -ffreestanding
+            -fshort-wchar
+            -fshort-enums
             -fno-common
             -fno-rtti
             -fno-exceptions
