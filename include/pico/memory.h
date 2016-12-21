@@ -214,9 +214,9 @@ namespace Pico {
     {
         static constexpr size_t DEFAULT_SIZE = Options::heap_size;
 
-        enum ChunkType {
-            STANDARD_CHUNK,
-            BIG_CHUNK
+        enum class ChunkType {
+            STANDARD,
+            BIG
         };
 
         // An allocated memory chunk.
@@ -499,7 +499,7 @@ namespace Pico {
             size_t alloc_size = Memory::round_up_page_size(needed_size);
             struct Chunk *chunk = static_cast<Chunk *>(Memory::allocate(alloc_size, Memory::READ | Memory::WRITE));
 
-            chunk->type = BIG_CHUNK;
+            chunk->type = ChunkType::BIG;
             chunk->size = alloc_size - sizeof(Chunk);
             nr_objects++;
             total_size += alloc_size;
@@ -517,7 +517,7 @@ namespace Pico {
                 return nullptr;
         }
 
-        chunk->type = STANDARD_CHUNK;
+        chunk->type = ChunkType::STANDARD;
         chunk->size = count;
         nr_objects++;
 
@@ -540,7 +540,7 @@ namespace Pico {
         assert(size == chunk->size);
 
         // Big chunks have their own dedicated memory region, just release it.
-        if ( chunk->type == BIG_CHUNK ) {
+        if ( chunk->type == ChunkType::BIG ) {
             Memory::release(chunk, used_size);
 
             nr_objects--;
@@ -549,7 +549,7 @@ namespace Pico {
             return;
         }
 
-        assert(chunk->type == STANDARD_CHUNK);
+        assert(chunk->type == ChunkType::STANDARD);
 
         chunk->size = 0;
         free_slots.unallocate(chunk, used_size);

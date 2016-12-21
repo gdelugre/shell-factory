@@ -113,21 +113,21 @@ namespace Pico {
         {
             for ( auto stm : r_ios )
                 if ( FD_ISSET(stm.file_desc(), &r_fds) )
-                    cb(INPUT_READY, stm);
+                    cb(Event::INPUT_READY, stm);
         }
 
         if ( w_ios.size() > 0 )
         {
             for ( auto stm : w_ios )
                 if ( FD_ISSET(stm.file_desc(), &w_fds) )
-                    cb(OUTPUT_READY, stm);
+                    cb(Event::OUTPUT_READY, stm);
         }
 
         if ( e_ios.size() > 0 )
         {
             for ( auto stm : e_ios )
                 if ( FD_ISSET(stm.file_desc(), &w_fds) )
-                    cb(POLL_ERROR, stm);
+                    cb(Event::POLL_ERROR, stm);
         }
 
         return res;

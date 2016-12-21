@@ -22,7 +22,7 @@ namespace Pico {
             Group group;
         };
 
-        enum Seek {
+        enum class Seek {
             BEGIN,
             CURRENT,
             END,

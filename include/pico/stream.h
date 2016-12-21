@@ -18,7 +18,7 @@ namespace Pico {
     class IO
     {
         public:
-            enum poll_event {
+            enum class Event {
                 INPUT_READY,
                 OUTPUT_READY,
                 POLL_ERROR
