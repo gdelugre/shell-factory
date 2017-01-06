@@ -10,30 +10,32 @@ namespace Shellcode {
     //
     // The list of defined channel modes.
     //
-    #define USE_STDOUT      0
-    #define USE_STDERR      1
-    #define TCP_CONNECT     2
-    #define TCP_LISTEN      3
-    #define TCP6_CONNECT    4
-    #define TCP6_LISTEN     5
-    #define SCTP_CONNECT    6
-    #define SCTP_LISTEN     7
-    #define SCTP6_CONNECT   8
-    #define SCTP6_LISTEN    9
-    #define UDP_CONNECT     10
-    #define UDP6_CONNECT    11
-    #define REUSE_SOCKET    12
-    #define REUSE_FILE      13
+    enum class ChannelType {
+        USE_STDOUT,
+        USE_STDERR,
+        TCP_CONNECT,
+        TCP_LISTEN,
+        TCP6_CONNECT,
+        TCP6_LISTEN,
+        SCTP_CONNECT,
+        SCTP_LISTEN,
+        SCTP6_CONNECT,
+        SCTP6_LISTEN,
+        UDP_CONNECT,
+        UDP6_CONNECT,
+        REUSE_SOCKET,
+        REUSE_FILE,
+    };
 
     //
     // Static structure holding information for each mode.
     //
-    template <unsigned>
+    template <enum ChannelType>
     struct ChannelMode;
 
     #define DEFINE_CHANNEL_MODE(mode, type)                     \
         template<>                                              \
-        struct ChannelMode<mode>                                \
+        struct ChannelMode<ChannelType::mode>                   \
         {                                                       \
             using stream_type = type;                           \
         };                                                      \
@@ -57,8 +59,8 @@ namespace Shellcode {
     // The channel class definition.
     // Every channel is a daughter class of the underlying stream it is representing.
     //
-    template <unsigned M>
-    struct Channel : ChannelMode<M>::stream_type
+    template <enum ChannelType C>
+    struct Channel : ChannelMode<C>::stream_type
     {
         CONSTRUCTOR Channel();
 
@@ -74,18 +76,18 @@ namespace Shellcode {
 
     template<>
     CONSTRUCTOR
-    Channel<USE_STDOUT>::Channel() :
-        ChannelMode<USE_STDOUT>::stream_type(Stdio::input(), Stdio::output()) {}
+    Channel<ChannelType::USE_STDOUT>::Channel() :
+        ChannelMode<ChannelType::USE_STDOUT>::stream_type(Stdio::input(), Stdio::output()) {}
 
     template<>
     CONSTRUCTOR
-    Channel<USE_STDERR>::Channel() :
-        ChannelMode<USE_STDERR>::stream_type(Stdio::input(), Stdio::error()) {}
+    Channel<ChannelType::USE_STDERR>::Channel() :
+        ChannelMode<ChannelType::USE_STDERR>::stream_type(Stdio::input(), Stdio::error()) {}
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<UDP_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
+    Channel<ChannelType::UDP_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
     {
         static_assert(T == Network::IPV4, "UDP_CONNECT requires an IPV4 address.");
         bind(laddr, lport);
@@ -95,7 +97,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<UDP6_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
+    Channel<ChannelType::UDP6_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
     {
         static_assert(T == Network::IPV6, "UDP6_CONNECT requires an IPV4 address.");
         bind(laddr, lport);
@@ -105,7 +107,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
+    Channel<ChannelType::TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV4, "TCP_CONNECT requires an IPV4 address.");
         connect(addr, port);
     }
@@ -113,7 +115,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<TCP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
+    Channel<ChannelType::TCP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV6, "TCP6_CONNECT requires an IPV6 address.");
         connect(addr, port);
     }
@@ -121,7 +123,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<TCP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
+    Channel<ChannelType::TCP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         TcpSocket(Network::SocketServer<Network::TcpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV4, "TCP_LISTEN requires an IPV4 address.");
@@ -130,7 +132,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<TCP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
+    Channel<ChannelType::TCP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         Tcp6Socket(Network::SocketServer<Network::Tcp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV6, "TCP6_LISTEN requires an IPV6 address.");
@@ -139,7 +141,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<SCTP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
+    Channel<ChannelType::SCTP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV4, "SCTP_CONNECT requires an IPV4 address.");
         connect(addr, port);
     }
@@ -147,7 +149,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<SCTP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
+    Channel<ChannelType::SCTP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::IPV6, "SCTP6_CONNECT requires an IPV6 address.");
         connect(addr, port);
     }
@@ -155,7 +157,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<SCTP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
+    Channel<ChannelType::SCTP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         SctpSocket(Network::SocketServer<Network::SctpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV4, "SCTP_LISTEN requires an IPV4 address.");
@@ -164,7 +166,7 @@ namespace Shellcode {
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
-    Channel<SCTP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
+    Channel<ChannelType::SCTP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         Sctp6Socket(Network::SocketServer<Network::Sctp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
         static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
@@ -172,11 +174,11 @@ namespace Shellcode {
 
     template <>
     CONSTRUCTOR
-    Channel<REUSE_SOCKET>::Channel(int fd) : Socket(fd) {}
+    Channel<ChannelType::REUSE_SOCKET>::Channel(int fd) : Socket(fd) {}
 
     template <>
     CONSTRUCTOR
-    Channel<REUSE_FILE>::Channel(int fd) : BasicStream(fd) {}
+    Channel<ChannelType::REUSE_FILE>::Channel(int fd) : BasicStream(fd) {}
 }
 
 namespace Options {
@@ -208,7 +210,7 @@ namespace Options {
     FUNCTION auto channel()
     {
         using namespace Shellcode;
-        using SelectedChannel = Channel<CHANNEL>;
+        using SelectedChannel = Channel<ChannelType::CHANNEL>;
 
         // No parameter required for standard IOs.
         #if (CHANNEL == USE_STDOUT) || (CHANNEL == USE_STDERR)
