@@ -100,7 +100,7 @@ namespace Shellcode {
     CONSTRUCTOR
     Channel<ChannelType::UDP_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
     {
-        static_assert(T == Network::IPV4, "UDP_CONNECT requires an IPV4 address.");
+        static_assert(T == Network::AddressType::IPV4, "UDP_CONNECT requires an IPV4 address.");
         bind(laddr, lport);
         connect(raddr, rport);
     }
@@ -110,7 +110,7 @@ namespace Shellcode {
     CONSTRUCTOR
     Channel<ChannelType::UDP6_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
     {
-        static_assert(T == Network::IPV6, "UDP6_CONNECT requires an IPV4 address.");
+        static_assert(T == Network::AddressType::IPV6, "UDP6_CONNECT requires an IPV4 address.");
         bind(laddr, lport);
         connect(raddr, rport);
     }
@@ -119,7 +119,7 @@ namespace Shellcode {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
-        static_assert(T == Network::IPV4, "TCP_CONNECT requires an IPV4 address.");
+        static_assert(T == Network::AddressType::IPV4, "TCP_CONNECT requires an IPV4 address.");
         connect(addr, port);
     }
 
@@ -127,7 +127,7 @@ namespace Shellcode {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::TCP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
-        static_assert(T == Network::IPV6, "TCP6_CONNECT requires an IPV6 address.");
+        static_assert(T == Network::AddressType::IPV6, "TCP6_CONNECT requires an IPV6 address.");
         connect(addr, port);
     }
 
@@ -137,7 +137,7 @@ namespace Shellcode {
     Channel<ChannelType::TCP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         TcpSocket(Network::SocketServer<Network::TcpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
-        static_assert(T == Network::IPV4, "TCP_LISTEN requires an IPV4 address.");
+        static_assert(T == Network::AddressType::IPV4, "TCP_LISTEN requires an IPV4 address.");
     }
 
     template <>
@@ -146,14 +146,14 @@ namespace Shellcode {
     Channel<ChannelType::TCP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         Tcp6Socket(Network::SocketServer<Network::Tcp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
-        static_assert(T == Network::IPV6, "TCP6_LISTEN requires an IPV6 address.");
+        static_assert(T == Network::AddressType::IPV6, "TCP6_LISTEN requires an IPV6 address.");
     }
 
     template <>
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::SCTP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
-        static_assert(T == Network::IPV4, "SCTP_CONNECT requires an IPV4 address.");
+        static_assert(T == Network::AddressType::IPV4, "SCTP_CONNECT requires an IPV4 address.");
         connect(addr, port);
     }
 
@@ -161,7 +161,7 @@ namespace Shellcode {
     template <enum Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::SCTP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
-        static_assert(T == Network::IPV6, "SCTP6_CONNECT requires an IPV6 address.");
+        static_assert(T == Network::AddressType::IPV6, "SCTP6_CONNECT requires an IPV6 address.");
         connect(addr, port);
     }
 
@@ -171,7 +171,7 @@ namespace Shellcode {
     Channel<ChannelType::SCTP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         SctpSocket(Network::SocketServer<Network::SctpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
-        static_assert(T == Network::IPV4, "SCTP_LISTEN requires an IPV4 address.");
+        static_assert(T == Network::AddressType::IPV4, "SCTP_LISTEN requires an IPV4 address.");
     }
 
     template <>
@@ -180,7 +180,7 @@ namespace Shellcode {
     Channel<ChannelType::SCTP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         Sctp6Socket(Network::SocketServer<Network::Sctp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
     {
-        static_assert(T == Network::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
+        static_assert(T == Network::AddressType::IPV6, "SCTP6_LISTEN requires an IPV6 address.");
     }
 
     template <>

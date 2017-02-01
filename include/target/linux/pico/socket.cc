@@ -39,7 +39,7 @@ namespace Pico {
         struct Sockaddr;
 
         template <>
-        struct Sockaddr<IPV4>
+        struct Sockaddr<AddressType::IPV4>
         {
             static constexpr int family = AF_INET;
             using type = struct sockaddr_in;
@@ -59,7 +59,7 @@ namespace Pico {
         };
 
         template <>
-        struct Sockaddr<IPV6>
+        struct Sockaddr<AddressType::IPV6>
         {
             static constexpr int family = AF_INET6;
             using type = struct sockaddr_in6;
@@ -80,7 +80,7 @@ namespace Pico {
         };
 
         template <>
-        struct Sockaddr<UNIX>
+        struct Sockaddr<AddressType::UNIX>
         {
             static constexpr int family = AF_UNIX;
             using type = struct sockaddr_un;
@@ -99,7 +99,7 @@ namespace Pico {
         };
 
         template <>
-        struct Sockaddr<UNIX_ABSTRACT>
+        struct Sockaddr<AddressType::UNIX_ABSTRACT>
         {
             static constexpr int family = AF_UNIX;
             using type = struct sockaddr_un;
@@ -169,7 +169,8 @@ namespace Pico {
         METHOD
         int Socket::bind(Address<T> addr)
         {
-            static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
+            static_assert(T == AddressType::UNIX || T == AddressType::UNIX_ABSTRACT, 
+                          "This method only supports UNIX address sockets.");
 
             size_t addr_len;
             auto bind_addr = Sockaddr<T>::pack(addr, addr_len);
@@ -195,7 +196,9 @@ namespace Pico {
         METHOD
         int Socket::connect(Address<T> addr)
         {
-            static_assert(T == UNIX || T == UNIX_ABSTRACT, "This method only supports UNIX address sockets.");
+            static_assert(T == AddressType::UNIX || T == AddressType::UNIX_ABSTRACT, 
+                          "This method only supports UNIX address sockets.");
+
             size_t addr_len;
             auto serv_addr = Sockaddr<T>::pack(addr, addr_len);
 

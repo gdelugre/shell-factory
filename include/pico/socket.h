@@ -7,7 +7,7 @@ namespace Pico {
 
     namespace Network {
 
-        enum AddressType {
+        enum class AddressType {
             IPV4,
             IPV6,
             UNIX,
@@ -18,7 +18,7 @@ namespace Pico {
         struct Address;
 
         template <>
-        struct Address<IPV4>
+        struct Address<AddressType::IPV4>
         {
             union {
                 uint8_t bytes[4];
@@ -27,27 +27,27 @@ namespace Pico {
         };
 
         template <>
-        struct Address<IPV6>
+        struct Address<AddressType::IPV6>
         {
             uint8_t bytes[16];
         };
 
         template <>
-        struct Address<UNIX>
+        struct Address<AddressType::UNIX>
         {
             char *path;
         };
 
         template <>
-        struct Address<UNIX_ABSTRACT>
+        struct Address<AddressType::UNIX_ABSTRACT>
         {
             char *path;
         };
 
-        using IpAddress             = Address<IPV4>;
-        using IpAddress6            = Address<IPV6>;
-        using UnixAddress           = Address<UNIX>;
-        using UnixAbstractAddress   = Address<UNIX_ABSTRACT>;
+        using IpAddress             = Address<AddressType::IPV4>;
+        using IpAddress6            = Address<AddressType::IPV6>;
+        using UnixAddress           = Address<AddressType::UNIX>;
+        using UnixAbstractAddress   = Address<AddressType::UNIX_ABSTRACT>;
 
         template <size_t N>
         struct ip_address_type;
