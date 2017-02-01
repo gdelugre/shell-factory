@@ -67,7 +67,7 @@ namespace Pico {
         // Generates an IP address structure out of a list of static arguments.
         template <typename... V> 
         FUNCTION
-        auto ip_address_from_bytes(V... bytes)
+        constexpr auto ip_address_from_bytes(V... bytes)
         {
             constexpr size_t nr_bytes = sizeof...(bytes);
             static_assert(nr_bytes == 4 || nr_bytes == 16, "Invalid number of bytes for IP address.");

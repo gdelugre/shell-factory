@@ -1,6 +1,7 @@
 #ifndef CHANNEL_HELPER_H_
 #define CHANNEL_HELPER_H_
 
+#include <channel-options.h>
 #include <pico.h>
 
 namespace Shellcode {
@@ -179,38 +180,11 @@ namespace Shellcode {
     template <>
     CONSTRUCTOR
     Channel<ChannelType::REUSE_FILE>::Channel(int fd) : BasicStream(fd) {}
-}
 
-namespace Options {
-
-    #ifndef CHANNEL
-    #define CHANNEL USE_STDOUT
-    #endif
-
-    /*
-     * HOST parameter.
-     * Used for socket channels.
-     */
-    #ifndef HOST
-    #define HOST            0,0,0,0
-    #endif
-
-    /*
-     * PORT parameter.
-     * Used for socket channels.
-     */
-    #ifndef PORT
-    #define PORT            0
-    #endif
-
-    #ifndef HANDLE
-    #define HANDLE          -1
-    #endif
 
     FUNCTION auto channel()
     {
-        using namespace Shellcode;
-        using SelectedChannel = Channel<ChannelType::CHANNEL>;
+        using SelectedChannel = Channel<ChannelType::OPT_CHANNEL>;
 
         // No parameter required for standard IOs.
         #if (CHANNEL == USE_STDOUT) || (CHANNEL == USE_STDERR)
@@ -218,46 +192,18 @@ namespace Options {
 
         // Connect-back channels require a remote address/port.
         #elif (CHANNEL == TCP_CONNECT) || (CHANNEL == TCP6_CONNECT) || (CHANNEL == SCTP_CONNECT) || (CHANNEL == SCTP6_CONNECT)
-            // Can use HOST/PORT instead of RHOST/RPORT.
-            #ifndef RHOST
-            #define RHOST HOST
-            #endif
-            #ifndef RPORT
-            #define RPORT PORT
-            #endif
-
-            auto remote_address = Pico::Network::ip_address_from_bytes(RHOST);
-            uint16_t remote_port = RPORT;
-
-            return SelectedChannel(remote_address, remote_port);
+            return SelectedChannel(Options::remote_address, Options::remote_port);
 
         // Listen channels require a local address/port.
         #elif (CHANNEL == TCP_LISTEN) || (CHANNEL == TCP6_LISTEN) || (CHANNEL == SCTP_LISTEN) || (CHANNEL == SCTP6_LISTEN)
-            // Can use HOST/PORT instead of LHOST/LPORT.
-            #ifndef LHOST
-            #define LHOST HOST
-            #endif
-            #ifndef LPORT
-            #define LPORT PORT
-            #endif
-
-            auto local_address = Pico::Network::ip_address_from_bytes(LHOST);
-            uint16_t local_port = LPORT;
-
-            return SelectedChannel(local_address, local_port);
+            return SelectedChannel(Options::local_address, Options::local_port);
 
         #elif (CHANNEL == UDP_CONNECT) || (CHANNEL == UDP6_CONNECT)
-            auto local_address = Pico::Network::ip_address_from_bytes(LHOST);
-            uint16_t local_port = LPORT;
-            auto remote_address = Pico::Network::ip_address_from_bytes(RHOST);
-            uint16_t remote_port = RPORT;
-
-            return SelectedChannel(local_address, local_port, remote_address, remote_port);
+            return SelectedChannel(Options::local_address, Options::local_port, Options::remote_address, Options::remote_port);
 
         #elif (CHANNEL == REUSE_SOCKET) || (CHANNEL == REUSE_FILE)
-            static_assert(HANDLE != -1, "Requires a HANDLE parameter.");
-            Target::handle desc = HANDLE;
-            return SelectedChannel(desc);
+            static_assert(Options::handle != -1, "Requires a HANDLE parameter.");
+            return SelectedChannel(Options::handle);
 
         #else
         #error "No channel mode is selected."
