@@ -22,13 +22,13 @@ namespace Options {
     #endif
 
     #if !defined(LHOST)
-    #define OPT_LHOST HOST
+    #define OPT_LHOST OPT_HOST
     #else
     #define OPT_LHOST LHOST
     #endif
    
     #if !defined(RHOST)
-    #define OPT_RHOST HOST
+    #define OPT_RHOST OPT_HOST
     #else
     #define OPT_RHOST RHOST
     #endif
@@ -44,13 +44,13 @@ namespace Options {
     #endif
 
     #if !defined(LPORT)
-    #define OPT_LPORT PORT
+    #define OPT_LPORT OPT_PORT
     #else
     #define OPT_LPORT LPORT
     #endif
    
     #if !defined(RPORT)
-    #define OPT_RPORT PORT
+    #define OPT_RPORT OPT_PORT
     #else
     #define OPT_RPORT RPORT
     #endif
