@@ -34,27 +34,37 @@ namespace Shellcode {
     template <enum ChannelType>
     struct ChannelMode;
 
-    #define DEFINE_CHANNEL_MODE(mode, type)                     \
+    //
+    // Channel type tags.
+    //
+    struct ChannelTypeStandardIoTag {};
+    struct ChannelTypeStreamConnectTag {};
+    struct ChannelTypeStreamListenTag {};
+    struct ChannelTypeDatagramTag {};
+    struct ChannelTypeReuseTag {};
+
+    #define DEFINE_CHANNEL_MODE(mode, type, tag)                \
         template<>                                              \
         struct ChannelMode<ChannelType::mode>                   \
         {                                                       \
             using stream_type = type;                           \
+            using type_tag = tag;                               \
         };                                                      \
 
-    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>);
-    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>);
-    DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket);
-    DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket);
-    DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket);
-    DEFINE_CHANNEL_MODE(TCP6_LISTEN,    Network::Tcp6Socket);
-    DEFINE_CHANNEL_MODE(SCTP_CONNECT,   Network::SctpSocket);
-    DEFINE_CHANNEL_MODE(SCTP6_CONNECT,  Network::Sctp6Socket);
-    DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket);
-    DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket);
-    DEFINE_CHANNEL_MODE(UDP_CONNECT,    Network::UdpSocket);
-    DEFINE_CHANNEL_MODE(UDP6_CONNECT,   Network::Udp6Socket);
-    DEFINE_CHANNEL_MODE(REUSE_SOCKET,   Network::Socket);
-    DEFINE_CHANNEL_MODE(REUSE_FILE,     BasicStream);
+    DEFINE_CHANNEL_MODE(USE_STDOUT,     BiStream<BasicStream>,  ChannelTypeStandardIoTag);
+    DEFINE_CHANNEL_MODE(USE_STDERR,     BiStream<BasicStream>,  ChannelTypeStandardIoTag);
+    DEFINE_CHANNEL_MODE(TCP_CONNECT,    Network::TcpSocket,     ChannelTypeStreamConnectTag);
+    DEFINE_CHANNEL_MODE(TCP6_CONNECT,   Network::Tcp6Socket,    ChannelTypeStreamConnectTag);
+    DEFINE_CHANNEL_MODE(TCP_LISTEN,     Network::TcpSocket,     ChannelTypeStreamListenTag);
+    DEFINE_CHANNEL_MODE(TCP6_LISTEN,    Network::Tcp6Socket,    ChannelTypeStreamListenTag);
+    DEFINE_CHANNEL_MODE(SCTP_CONNECT,   Network::SctpSocket,    ChannelTypeStreamConnectTag);
+    DEFINE_CHANNEL_MODE(SCTP6_CONNECT,  Network::Sctp6Socket,   ChannelTypeStreamConnectTag);
+    DEFINE_CHANNEL_MODE(SCTP_LISTEN,    Network::SctpSocket,    ChannelTypeStreamListenTag);
+    DEFINE_CHANNEL_MODE(SCTP6_LISTEN,   Network::Sctp6Socket,   ChannelTypeStreamListenTag);
+    DEFINE_CHANNEL_MODE(UDP_CONNECT,    Network::UdpSocket,     ChannelTypeDatagramTag);
+    DEFINE_CHANNEL_MODE(UDP6_CONNECT,   Network::Udp6Socket,    ChannelTypeDatagramTag);
+    DEFINE_CHANNEL_MODE(REUSE_SOCKET,   Network::Socket,        ChannelTypeReuseTag);
+    DEFINE_CHANNEL_MODE(REUSE_FILE,     BasicStream,            ChannelTypeReuseTag);
 
     //
     // The channel class definition.
@@ -181,33 +191,46 @@ namespace Shellcode {
     CONSTRUCTOR
     Channel<ChannelType::REUSE_FILE>::Channel(int fd) : BasicStream(fd) {}
 
+    //
+    // Compile-time switch.
+    // This part can be rewritten as soon as 'if constexpr' becomes available.
+    //
+
+    template <enum ChannelType T>
+    FUNCTION auto _channel_select(ChannelTypeStandardIoTag)
+    {
+        return Channel<T>();
+    }
+
+    template <enum ChannelType T>
+    FUNCTION auto _channel_select(ChannelTypeStreamConnectTag)
+    {
+        return Channel<T>(Options::remote_address, Options::remote_port);
+    }
+
+    template <enum ChannelType T>
+    FUNCTION auto _channel_select(ChannelTypeStreamListenTag)
+    {
+        return Channel<T>(Options::local_address, Options::local_port);
+    }
+
+    template <enum ChannelType T>
+    FUNCTION auto _channel_select(ChannelTypeDatagramTag)
+    {
+        return Channel<T>(Options::local_address, Options::local_port, Options::remote_address, Options::remote_port);
+    }
+
+    template <enum ChannelType T>
+    FUNCTION auto _channel_select(ChannelTypeReuseTag)
+    {
+        return Channel<T>(Options::handle);
+    }
 
     FUNCTION auto channel()
     {
-        using SelectedChannel = Channel<ChannelType::OPT_CHANNEL>;
+        using ChannelTypeTag = ChannelMode<ChannelType::OPT_CHANNEL>::type_tag;
 
-        // No parameter required for standard IOs.
-        #if (CHANNEL == USE_STDOUT) || (CHANNEL == USE_STDERR)
-            return SelectedChannel();
-
-        // Connect-back channels require a remote address/port.
-        #elif (CHANNEL == TCP_CONNECT) || (CHANNEL == TCP6_CONNECT) || (CHANNEL == SCTP_CONNECT) || (CHANNEL == SCTP6_CONNECT)
-            return SelectedChannel(Options::remote_address, Options::remote_port);
-
-        // Listen channels require a local address/port.
-        #elif (CHANNEL == TCP_LISTEN) || (CHANNEL == TCP6_LISTEN) || (CHANNEL == SCTP_LISTEN) || (CHANNEL == SCTP6_LISTEN)
-            return SelectedChannel(Options::local_address, Options::local_port);
-
-        #elif (CHANNEL == UDP_CONNECT) || (CHANNEL == UDP6_CONNECT)
-            return SelectedChannel(Options::local_address, Options::local_port, Options::remote_address, Options::remote_port);
-
-        #elif (CHANNEL == REUSE_SOCKET) || (CHANNEL == REUSE_FILE)
-            static_assert(Options::handle != -1, "Requires a HANDLE parameter.");
-            return SelectedChannel(Options::handle);
-
-        #else
-        #error "No channel mode is selected."
-        #endif
+        return _channel_select<ChannelType::OPT_CHANNEL>(ChannelTypeTag{});
     }
 }
 
