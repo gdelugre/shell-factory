@@ -10,6 +10,8 @@
 namespace Syscall {
 
     SYSTEM_CALL int _umtx_op(void *, int ,u_long, void *, void *);
+    SYSTEM_CALL int pipe(int[2]);
+    SYSTEM_CALL int pipe2(int[2], int);
     #if SYSCALL_EXISTS(shmsys)
     SYSTEM_CALL int shmsys(int, int, int, int);
     SYSTEM_CALL int shmsys(int, int, const void *, int);
@@ -22,6 +24,25 @@ namespace Syscall {
     {
         return DO_SYSCALL(_umtx_op, obj, op, val, uaddr, uaddr2);
     }
+
+    #if SYSCALL_EXISTS(pipe2)
+    SYSTEM_CALL
+    int pipe2(int filedes[2], int flags)
+    {
+        return DO_SYSCALL(pipe2, filedes, flags);
+    }
+    #endif
+
+    //
+    // Fallback version if the POSIX version is not present (since FreeBSD 11).
+    //
+    #if !SYSCALL_EXISTS(pipe)
+    SYSTEM_CALL
+    int pipe(int filedes[2])
+    {
+        return pipe2(filedes, 0);
+    }
+    #endif
 
     //
     // Common entry point for shared memory operations.

@@ -10,6 +10,7 @@
 namespace Syscall {
 
     SYSTEM_CALL int futex(int *, int, int, const struct timespec *, int *, int);
+    SYSTEM_CALL int pipe2(int[2], int);
     #if SYSCALL_EXISTS(ipc)
     SYSTEM_CALL int ipc(uint32_t, int, int, uint32_t, void *, uint32_t);
     SYSTEM_CALL int ipc(uint32_t, int, int, uint32_t, void *);
@@ -22,6 +23,14 @@ namespace Syscall {
     {
         return DO_SYSCALL(futex, uaddr, futex_op, val, timeout, uaddr2, val3);
     }
+
+    #if SYSCALL_EXISTS(pipe2)
+    SYSTEM_CALL
+    int pipe2(int pipefd[2], int flags)
+    {
+        return DO_SYSCALL(pipe2, pipefd, flags);
+    }
+    #endif
 
     //
     // Common ipc entry-point for some architectures.

@@ -23,11 +23,13 @@ namespace Syscall {
     SYSTEM_CALL int     semctl(int, int, int, struct semid_ds *);
     SYSTEM_CALL int     semctl(int, int, int, unsigned short *);
 
+    #if SYSCALL_EXISTS(pipe)
     SYSTEM_CALL
     int pipe(int fd[2])
     {
         return DO_SYSCALL(pipe, fd);
     }
+    #endif
 
     #if SYSCALL_EXISTS(shmget)
     SYSTEM_CALL
