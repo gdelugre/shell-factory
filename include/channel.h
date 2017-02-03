@@ -77,10 +77,10 @@ namespace Shellcode {
 
         CONSTRUCTOR Channel(int fd);
 
-        template <enum Network::AddressType T>
+        template <Network::AddressType T>
         CONSTRUCTOR Channel(Network::Address<T> addr, uint16_t port);
 
-        template <enum Network::AddressType T>
+        template <Network::AddressType T>
         CONSTRUCTOR Channel(Network::Address<T> laddr, uint16_t lport,
                             Network::Address<T> raddr, uint16_t rport);
     };
@@ -96,7 +96,7 @@ namespace Shellcode {
         ChannelMode<ChannelType::USE_STDERR>::stream_type(Stdio::input(), Stdio::error()) {}
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::UDP_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
     {
@@ -106,7 +106,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::UDP6_CONNECT>::Channel(Network::Address<T> laddr, uint16_t lport, Network::Address<T> raddr, uint16_t rport)
     {
@@ -116,7 +116,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::TCP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::AddressType::IPV4, "TCP_CONNECT requires an IPV4 address.");
@@ -124,7 +124,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::TCP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::AddressType::IPV6, "TCP6_CONNECT requires an IPV6 address.");
@@ -132,7 +132,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::TCP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         TcpSocket(Network::SocketServer<Network::TcpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
@@ -141,7 +141,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::TCP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         Tcp6Socket(Network::SocketServer<Network::Tcp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
@@ -150,7 +150,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::SCTP_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::AddressType::IPV4, "SCTP_CONNECT requires an IPV4 address.");
@@ -158,7 +158,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::SCTP6_CONNECT>::Channel(Network::Address<T> addr, uint16_t port) {
         static_assert(T == Network::AddressType::IPV6, "SCTP6_CONNECT requires an IPV6 address.");
@@ -166,7 +166,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::SCTP_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         SctpSocket(Network::SocketServer<Network::SctpSocket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))
@@ -175,7 +175,7 @@ namespace Shellcode {
     }
 
     template <>
-    template <enum Network::AddressType T>
+    template <Network::AddressType T>
     CONSTRUCTOR
     Channel<ChannelType::SCTP6_LISTEN>::Channel(Network::Address<T> addr, uint16_t port) :
         Sctp6Socket(Network::SocketServer<Network::Sctp6Socket, Options::fork_on_accept>::start(addr, port, Options::reuse_addr))

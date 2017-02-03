@@ -56,6 +56,15 @@ namespace Target {
                                                          Filesystem::USER_EXEC;
     }
 
+    namespace Network {
+        enum class AddressType {
+            IPV4,
+            IPV6,
+            UNIX,
+            UNIX_ABSTRACT
+        };
+    }
+
     //
     // random_pool corresponds to the file descriptor of /dev/urandom if getrandom is not available.
     //

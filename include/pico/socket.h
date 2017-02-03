@@ -1,81 +1,14 @@
 #ifndef PICOLIB_SOCKET_H_
 #define PICOLIB_SOCKET_H_
 
-#include <netinet/in.h>
-
 namespace Pico {
 
     namespace Network {
 
-        enum class AddressType {
-            IPV4,
-            IPV6,
-            UNIX,
-            UNIX_ABSTRACT,
-        };
+        using AddressType = Target::Network::AddressType;
 
-        template <enum AddressType>
+        template <AddressType>
         struct Address;
-
-        template <>
-        struct Address<AddressType::IPV4>
-        {
-            union {
-                uint8_t bytes[4];
-                uint32_t value;
-            };
-        };
-
-        template <>
-        struct Address<AddressType::IPV6>
-        {
-            uint8_t bytes[16];
-        };
-
-        template <>
-        struct Address<AddressType::UNIX>
-        {
-            char *path;
-        };
-
-        template <>
-        struct Address<AddressType::UNIX_ABSTRACT>
-        {
-            char *path;
-        };
-
-        using IpAddress             = Address<AddressType::IPV4>;
-        using IpAddress6            = Address<AddressType::IPV6>;
-        using UnixAddress           = Address<AddressType::UNIX>;
-        using UnixAbstractAddress   = Address<AddressType::UNIX_ABSTRACT>;
-
-        template <size_t N>
-        struct ip_address_type;
-
-        template <>
-        struct ip_address_type<4>
-        {
-            using type = IpAddress;
-        };
-
-        template <>
-        struct ip_address_type<16>
-        {
-            using type = IpAddress6;
-        };
-
-        // Generates an IP address structure out of a list of static arguments.
-        template <typename... V> 
-        FUNCTION
-        constexpr auto ip_address_from_bytes(V... bytes)
-        {
-            constexpr size_t nr_bytes = sizeof...(bytes);
-            static_assert(nr_bytes == 4 || nr_bytes == 16, "Invalid number of bytes for IP address.");
-
-            using ip_address = typename ip_address_type<nr_bytes>::type;
-
-            return ip_address { { static_cast<uint8_t>(bytes)... } };
-        }
 
         class SocketIO : public SingleIO
         {
@@ -101,10 +34,10 @@ namespace Pico {
                 template <AddressType T>
                 METHOD int connect(Address<T> addr, uint16_t port);
 
-                template <enum AddressType T>
+                template <AddressType T>
                 METHOD int bind(Address<T> addr);
 
-                template <enum AddressType T>
+                template <AddressType T>
                 METHOD int bind(Address<T> addr, uint16_t port, bool reuse_addr = false);
         };
 
@@ -112,28 +45,28 @@ namespace Pico {
         {
             public:
                 using Socket::Socket;
-                CONSTRUCTOR SequencedSocket(int domain, int protocol) : Socket(domain, SOCK_SEQPACKET, protocol) {}
+                CONSTRUCTOR SequencedSocket(int domain, int protocol);
         };
 
         class DatagramSocket : public Socket
         {
             public:
                 using Socket::Socket;
-                CONSTRUCTOR DatagramSocket(int domain, int protocol) : Socket(domain, SOCK_DGRAM, protocol) {}
+                CONSTRUCTOR DatagramSocket(int domain, int protocol);
         };
 
         class UdpSocket : public DatagramSocket
         {
             public:
                 using DatagramSocket::DatagramSocket;
-                CONSTRUCTOR UdpSocket() : DatagramSocket(AF_INET, IPPROTO_IP) {}
+                CONSTRUCTOR UdpSocket();
         };
 
         class Udp6Socket : public DatagramSocket
         {
             public:
                 using DatagramSocket::DatagramSocket;
-                CONSTRUCTOR Udp6Socket() : DatagramSocket(AF_INET6, IPPROTO_IP) {}
+                CONSTRUCTOR Udp6Socket();
         };
 
         class StreamSocket : public Socket
@@ -141,8 +74,7 @@ namespace Pico {
             public:
                 using Socket::Socket;
 
-                CONSTRUCTOR StreamSocket(int domain, int protocol) : Socket(domain, SOCK_STREAM, protocol) {}
-
+                CONSTRUCTOR StreamSocket(int domain, int protocol);
                 METHOD int listen(int backlog);
 
                 template <bool Fork = false>
@@ -153,35 +85,35 @@ namespace Pico {
         {
             public:
                 using StreamSocket::StreamSocket;
-                CONSTRUCTOR TcpSocket() : StreamSocket(AF_INET, IPPROTO_IP) {}
+                CONSTRUCTOR TcpSocket();
         };
 
         class Tcp6Socket : public StreamSocket
         {
             public:
                 using StreamSocket::StreamSocket;
-                CONSTRUCTOR Tcp6Socket() : StreamSocket(AF_INET6, IPPROTO_IP) {}
+                CONSTRUCTOR Tcp6Socket();
         };
 
         class SctpSocket : public StreamSocket
         {
             public:
                 using StreamSocket::StreamSocket;
-                CONSTRUCTOR SctpSocket() : StreamSocket(AF_INET, IPPROTO_SCTP) {}
+                CONSTRUCTOR SctpSocket();
         };
 
         class Sctp6Socket : public StreamSocket
         {
             public:
                 using StreamSocket::StreamSocket;
-                CONSTRUCTOR Sctp6Socket() : StreamSocket(AF_INET6, IPPROTO_SCTP) {}
+                CONSTRUCTOR Sctp6Socket();
         };
 
         class UnixStreamSocket : public StreamSocket
         {
             public:
                 using StreamSocket::StreamSocket;
-                CONSTRUCTOR UnixStreamSocket() : StreamSocket(AF_UNIX, 0) {}
+                CONSTRUCTOR UnixStreamSocket();
 
                 METHOD int send_io(SingleIO const& io);
                 METHOD SingleIO recv_io();

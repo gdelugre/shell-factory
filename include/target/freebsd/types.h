@@ -52,6 +52,15 @@ namespace Target {
                                                          Filesystem::USER_EXEC;
     }
 
+    namespace Network {
+        enum class AddressType {
+            IPV4,
+            IPV6,
+            UNIX,
+            UNIX_ABSTRACT
+        };
+    }
+
     using random_pool = handle;
 
     using mutex_t = unsigned long;
