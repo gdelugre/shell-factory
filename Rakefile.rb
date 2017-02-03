@@ -104,6 +104,7 @@ COMPILER_CFLAGS =
            -flto
            -nodefaultlibs
            -Os
+           -Wa,--no-pad-sections
            },
 
     /^clang/ =>
