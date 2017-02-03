@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <netinet/in.h>
 
 namespace Pico {
 
