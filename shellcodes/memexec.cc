@@ -18,7 +18,7 @@ using shellcode = void (*)(void);
 
 SHELLCODE_ENTRY
 {
-    auto channel = Options::channel();
+    auto channel = Shellcode::channel();
     uint32_t buffer_size;
     void *memory;
 
