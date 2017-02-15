@@ -228,8 +228,8 @@ namespace Pico {
             char dummy                       = 0;
             int fd                           = io.file_desc();
             struct msghdr msg                = {};
-            char buf[CMSG_SPACE(sizeof(fd))] = {0};
             struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
+            char buf[CMSG_SPACE(sizeof(fd))];
 
             msg.msg_iov = &iov;
             msg.msg_iovlen = 1;
@@ -252,8 +252,8 @@ namespace Pico {
             char dummy;
             int fd                           = Target::invalid_handle;
             struct msghdr msg                = {};
-            char buf[CMSG_SPACE(sizeof(fd))] = {0};
             struct iovec iov                 = { .iov_base = &dummy, .iov_len = sizeof(dummy) };
+            char buf[CMSG_SPACE(sizeof(fd))];
 
             msg.msg_iov = &iov;
             msg.msg_iovlen = 1;
