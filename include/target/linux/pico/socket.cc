@@ -18,27 +18,6 @@ namespace Pico {
 
         using UnixAbstractAddress   = Address<AddressType::UNIX_ABSTRACT>;
 
-        // From glibc 2.19, sysdeps/unix/sysv/linux/cmsg_nxthdr.c
-        FUNCTION
-        struct cmsghdr *cmsg_nxthdr (struct msghdr *mhdr, struct cmsghdr *cmsg)
-        {
-            if ((size_t) cmsg->cmsg_len < sizeof (struct cmsghdr))
-            /* The kernel header does this so there may be a reason.  */
-                return NULL;
-
-            cmsg = (struct cmsghdr *) ((unsigned char *) cmsg
-                    + CMSG_ALIGN (cmsg->cmsg_len));
-
-            if ((unsigned char *) (cmsg + 1) > ((unsigned char *) mhdr->msg_control
-                                                + mhdr->msg_controllen)
-                || ((unsigned char *) cmsg + CMSG_ALIGN (cmsg->cmsg_len)
-                    > ((unsigned char *) mhdr->msg_control + mhdr->msg_controllen)))
-                /* No more entries.  */
-                return NULL;
-
-            return cmsg;
-        }
-
         template <>
         struct Sockaddr<AddressType::UNIX_ABSTRACT>
         {
@@ -74,6 +53,32 @@ namespace Pico {
 
         CONSTRUCTOR
         Sctp6Socket::Sctp6Socket() : StreamSocket(AF_INET6, IPPROTO_SCTP) {}
+    }
+}
+
+extern "C" {
+    //
+    // From glibc 2.19, sysdeps/unix/sysv/linux/cmsg_nxthdr.c
+    // Required by CMSG_NXTHDR.
+    //
+    EXPORT_ABI_FUNCTION
+    struct cmsghdr *__cmsg_nxthdr (struct msghdr *mhdr, struct cmsghdr *cmsg)
+    {
+        if ((size_t) cmsg->cmsg_len < sizeof (struct cmsghdr))
+        /* The kernel header does this so there may be a reason.  */
+            return NULL;
+
+        cmsg = (struct cmsghdr *) ((unsigned char *) cmsg
+                + CMSG_ALIGN (cmsg->cmsg_len));
+
+        if ((unsigned char *) (cmsg + 1) > ((unsigned char *) mhdr->msg_control
+                                            + mhdr->msg_controllen)
+            || ((unsigned char *) cmsg + CMSG_ALIGN (cmsg->cmsg_len)
+                > ((unsigned char *) mhdr->msg_control + mhdr->msg_controllen)))
+            /* No more entries.  */
+            return NULL;
+
+        return cmsg;
     }
 }
 
