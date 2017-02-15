@@ -177,9 +177,6 @@ namespace Pico {
         METHOD
         int Socket::connect(Address<T> addr)
         {
-            static_assert(T == AddressType::UNIX || T == AddressType::UNIX_ABSTRACT, 
-                          "This method only supports UNIX address sockets.");
-
             size_t addr_len;
             auto serv_addr = Sockaddr<T>::pack(addr, addr_len);
 
