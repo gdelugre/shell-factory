@@ -2,5 +2,6 @@
 #define POSIX_PICO_H_
 
 #include "pico/socket.cc"
+#include "pico/security.cc"
 
 #endif

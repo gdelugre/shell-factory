@@ -1,5 +1,5 @@
-#ifndef PICOLIB_SECURITY_IMPL_H_
-#define PICOLIB_SECURITY_IMPL_H_
+#ifndef POSIX_PICO_SECURITY_H_
+#define POSIX_PICO_SECURITY_H_
 
 namespace Pico {
 
