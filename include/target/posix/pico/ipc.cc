@@ -1,5 +1,8 @@
-#ifndef PICOLIB_IPC_IMPL_H_
-#define PICOLIB_IPC_IMPL_H_
+#ifndef POSIX_PICO_IPC_H_
+#define POSIX_PICO_IPC_H_
+
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 namespace Pico {
 
@@ -27,6 +30,12 @@ namespace Pico {
             return 0;
         }
 
+        FUNCTION
+        constexpr int shm_flags(int pico_prot)
+        {
+            return (pico_prot & Memory::WRITE) ? 0 : SHM_RDONLY;
+        }
+
         template <int N>
         CONSTRUCTOR SharedRegion::SharedRegion(const char (&name)[N],
                                                void *base, size_t size,
@@ -35,7 +44,7 @@ namespace Pico {
             key_t key = ftok<N>(name); // Compile-time hash of input name.
 
             shm_obj = Syscall::shmget(key, size, IPC_CREAT | rights.value);
-            void *result = Syscall::shmat(shm_obj, base, SHM_RND);
+            void *result = Syscall::shmat(shm_obj, base, shm_flags(prot) | SHM_RND);
             if ( Target::is_error(result) ) {
                 ptr = nullptr;
                 return;
@@ -44,7 +53,8 @@ namespace Pico {
             ptr = result;
             region_size = Memory::round_up_page_size(size);
 
-            set_protection(prot);
+            if ( prot & Memory::EXEC )
+                set_protection(prot);
         }
 
         DESTRUCTOR SharedRegion::~SharedRegion()

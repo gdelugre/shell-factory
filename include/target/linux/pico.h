@@ -16,7 +16,6 @@
 #include "pico/debug.cc"
 #include "pico/socket.cc"
 #include "pico/terminal.cc"
-#include "pico/ipc.cc"
 #include "pico/random.cc"
 
 #endif
