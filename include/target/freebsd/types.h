@@ -5,6 +5,7 @@
 #include <target/posix/types.h>
 
 #include <termios.h>
+#include <sys/mman.h>
 
 namespace Target {
 
@@ -20,6 +21,12 @@ namespace Target {
             UNIX,
             UNIX_ABSTRACT
         };
+    }
+
+    namespace Flags {
+        using namespace Memory::Flags;
+
+        static constexpr int mmap_stack_flag = MAP_STACK;
     }
 
     using random_pool = handle;

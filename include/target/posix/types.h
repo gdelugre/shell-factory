@@ -46,6 +46,10 @@ namespace Target {
         static constexpr shm_rights default_shm_rights = Filesystem::USER_READ |
                                                  Filesystem::USER_WRITE |
                                                  Filesystem::USER_EXEC;
+        namespace Flags {
+            // Flag passed to mmap when allocating a new stack.
+            static constexpr int mmap_stack_flag = 0;
+        }
     }
 }
 
