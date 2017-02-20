@@ -3,7 +3,7 @@
 
 namespace Target {
 
-    constexpr size_t PAGE_SIZE = 4_KB;
+    constexpr size_t SIZEOF_PAGE = 4_KB;
 }
 
 #endif

@@ -8,7 +8,7 @@ namespace Pico {
         FUNCTION
         size_t page_size()
         {
-            return Target::PAGE_SIZE;
+            return Target::SIZEOF_PAGE;
         }
 
         // Converts pico memory protection to target protection.
