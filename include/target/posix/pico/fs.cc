@@ -1,6 +1,8 @@
 #ifndef POSIX_PICO_FS_H_
 #define POSIX_PICO_FS_H_
 
+#include <unistd.h>
+
 namespace Pico {
 
     namespace Filesystem {
