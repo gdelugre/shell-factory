@@ -5,6 +5,8 @@
 #include <target/linux/types.h>
 #elif defined(__FreeBSD__)
 #include <target/freebsd/types.h>
+#elif defined(__APPLE__)
+#include <target/darwin/types.h>
 #endif
 
 #endif

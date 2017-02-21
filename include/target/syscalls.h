@@ -97,6 +97,8 @@
 #include <target/linux/syscalls.h>
 #elif defined(__FreeBSD__)
 #include <target/freebsd/syscalls.h>
+#elif defined(__APPLE__)
+#include <target/darwin/syscalls.h>
 #else
 #pragma message "No operating system detected, compiling to bare-metal."
 #endif
