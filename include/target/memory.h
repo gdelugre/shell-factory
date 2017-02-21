@@ -5,6 +5,8 @@
 #include <target/linux/memory.h>
 #elif defined(__FreeBSD__)
 #include <target/freebsd/memory.h>
+#elif defined(__APPLE__)
+#include <target/darwin/memory.h>
 #endif
 
 #endif
