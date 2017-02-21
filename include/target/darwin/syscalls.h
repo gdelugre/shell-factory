@@ -48,15 +48,19 @@ namespace Target {
 #error "No syscall ABI defined for this architecture."
 #endif
 
-/* Syscall definitions */
+// Error definitions.
+#include <errno.h>
+
+// Syscall definitions.
 #include <sys/syscall.h>
 
+// Common POSIX system calls.
+#include <target/posix/syscalls.h>
+
+// Darwin specific system calls.
 #include "syscalls/sys.cc"
 #include "syscalls/io.cc"
 #include "syscalls/process.cc"
-#include "syscalls/memory.cc"
-#include "syscalls/socket.cc"
 #include "syscalls/ipc.cc"
-#include "syscalls/security.cc"
 
 #endif
