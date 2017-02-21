@@ -2,6 +2,7 @@
 #define DARWIN_SYSCALLS_H_
 
 #include <sys/errno.h>
+#include <target/darwin/mach_syscalls.h>
 
 // Constants taken from official XNU source.
 // http://www.opensource.apple.com/source/xnu/xnu-792.13.8/osfmk/mach/i386/syscall_sw.h
@@ -16,7 +17,6 @@ enum DarwinSyscallClass {
 };
 
 #define DO_SYSCALL_WITH_CLASS(class, name, args...) EMIT_SYSCALL(SYSCALL_CLASS_##class, name, ##args)
-#define DO_MACH_SYSCALL(name, args...) DO_SYSCALL_WITH_CLASS(MACH, name, ##args)
 #define DO_BSD_SYSCALL(name, args...) DO_SYSCALL_WITH_CLASS(UNIX, name, ##args)
 #define DO_SYSCALL(name, args...) DO_BSD_SYSCALL(name, ##args)
 #define SYSCALL_NAME_TO_NUM(class, name) SYS_##name | (class << SYSCALL_CLASS_SHIFT)
