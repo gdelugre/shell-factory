@@ -15,9 +15,11 @@ enum DarwinSyscallClass {
     SYSCALL_CLASS_DIAG = 4,
 };
 
-// XXX: How to handle mach syscalls?
-// Only assume BSD syscalls for now.
-#define SYSCALL_NAME_TO_NUM(name) SYS_##name | (SYSCALL_CLASS_UNIX << SYSCALL_CLASS_SHIFT)
+#define DO_SYSCALL_WITH_CLASS(class, name, args...) EMIT_SYSCALL(SYSCALL_CLASS_##class, name, ##args)
+#define DO_MACH_SYSCALL(name, args...) DO_SYSCALL_WITH_CLASS(MACH, name, ##args)
+#define DO_BSD_SYSCALL(name, args...) DO_SYSCALL_WITH_CLASS(UNIX, name, ##args)
+#define DO_SYSCALL(name, args...) DO_BSD_SYSCALL(name, ##args)
+#define SYSCALL_NAME_TO_NUM(class, name) SYS_##name | (class << SYSCALL_CLASS_SHIFT)
 #define SYSCALL_EXISTS(name) defined(SYS_##name)
 
 namespace Target {
@@ -44,7 +46,6 @@ namespace Target {
 /* Syscall definitions */
 #include <sys/syscall.h>
 
-/*
 #include "syscalls/sys.cc"
 #include "syscalls/io.cc"
 #include "syscalls/process.cc"
@@ -52,6 +53,5 @@ namespace Target {
 #include "syscalls/socket.cc"
 #include "syscalls/ipc.cc"
 #include "syscalls/security.cc"
-*/
 
 #endif
