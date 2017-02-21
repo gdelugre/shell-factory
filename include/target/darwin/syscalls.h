@@ -32,8 +32,13 @@ namespace Target {
     constexpr bool is_error(T err)
     {
         return Options::disable_error_checks ? false :
-               (unsigned long)(err) > 0 &&
-               (unsigned long)(err) <= (unsigned long)(max_error);
+               (unsigned long)(err) >= (unsigned long)(-max_error);
+    }
+
+    FUNCTION
+    constexpr long set_error(long err)
+    {
+        return -1 * err;
     }
 }
 
