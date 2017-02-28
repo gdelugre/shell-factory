@@ -317,13 +317,13 @@ namespace Pico {
     // Tiny tuple implementation.
     //
     template <typename... T>
-    PACKED struct Tuple;
+    struct PACKED Tuple;
 
     template <>
-    PACKED struct Tuple<> {};
+    struct PACKED Tuple<> {};
 
     template <typename Head, typename... Rest>
-    PACKED struct Tuple<Head, Rest...>
+    struct PACKED Tuple<Head, Rest...>
     {
         public:
             CONSTRUCTOR Tuple() {}
