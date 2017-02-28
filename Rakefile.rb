@@ -104,7 +104,6 @@ COMPILER_CFLAGS =
            -flto
            -nodefaultlibs
            -Os
-           -Wa,--no-pad-sections
            },
 
     /^clang/ =>
@@ -140,6 +139,7 @@ OS_CFLAGS =
         %W{-Wl,-T#{LD_SCRIPT_PE}
            -Wl,-N
            -Wl,--gc-sections
+           -Wa,--no-pad-sections
         },
 
     /none/ =>
