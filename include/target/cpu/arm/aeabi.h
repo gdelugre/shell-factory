@@ -33,6 +33,12 @@ extern "C" {
         uint64_t result = q | (r << 32);
         return result;
     }
+
+    EXPORT_ABI_FUNCTION
+    int __aeabi_atexit(void *objptr, void (* f)(void *), void *dso)
+    {
+        return __cxa_atexit(f, objptr, dso);
+    }
     #endif
 }
 
