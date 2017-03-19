@@ -26,7 +26,8 @@
 #define FUNCTION static METHOD
 #define FUNCTION_NOINLINE static METHOD_NOINLINE
 #define FUNCTION_INLINE static ALWAYS_INLINE
-#define EXPORT_ABI_FUNCTION __attribute__((visibility("internal")))
+#define EXPORT_ABI __attribute__((visibility("internal")))
+#define EXPORT_ABI_FUNCTION EXPORT_ABI
 #define SYSTEM_CALL static INLINE
 #define SYSTEM_CALL_INLINE static ALWAYS_INLINE
 #define UNUSED __attribute__((unused))
@@ -66,6 +67,9 @@ extern "C" {
         __builtin_trap();
         __builtin_unreachable();
     }
+
+    EXPORT_ABI
+    void *__dso_handle;
 }
 
 #if defined(NO_ASSERTS) && (NO_ASSERTS == 1)
