@@ -1,3 +1,8 @@
 *.bin
 *.elf
 *.o
+*.so
+*.exe
+*.dll
+*.macho
+*.dylib
