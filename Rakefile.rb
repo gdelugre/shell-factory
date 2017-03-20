@@ -171,8 +171,18 @@ FILE_EXT =
     }
 }
 
-def detect_compiler(cmd)
-    version = %x{#{cmd} -v 2>&1}
+def compiler_binary(cc, triple)
+    return cc if triple.empty?
+
+    case cc
+    when /^g\+\+|gcc/ then "#{triple}-#{cc}"
+    else
+        cc
+    end
+end
+
+def detect_compiler(cc, triple)
+    version = %x{#{compiler_binary(cc, triple)} -v 2>&1}
     case version
     when /gcc version (\S+)/ then ["gcc", $1]
     when /clang version (\S+)/, /Apple LLVM version (\S+)/ then ["clang", $1]
@@ -197,19 +207,20 @@ def show_error(str)
 end
 
 def cc_invoke(cc, triple, sysroot = nil)
+    cmd = compiler_binary(cc, triple)
+
     if triple.empty?
-        return cc if sysroot.nil?
-        return "#{cc} --sysroot=#{sysroot}"
+        return cmd if sysroot.nil?
+        return "#{cmd} --sysroot=#{sysroot}"
     end
 
     triple_cc =
-    case cc
-    when /^g\+\+|gcc/
-        "#{triple}-#{cc}"
-
+    case cmd
     when /^clang/
         sysroot ||= "/usr/#{triple}"
-        "#{cc} -target #{triple} --sysroot=#{sysroot}"
+        "#{cmd} -target #{triple} --sysroot=#{sysroot}"
+    else
+        cmd
     end
 
     triple_cc << " --sysroot=#{sysroot}" unless sysroot.nil?
@@ -232,11 +243,6 @@ def compile(target, triple, output_dir, *opts)
     defines = ENV.select{|e| options.include?(e)}
     options = common_opts + opts
     cc = ENV['CC'] || CC
-    if cc == 'cc'
-        cc, ver = detect_compiler(cc)
-    else
-        _, ver = detect_compiler(cc)
-    end
     cflags = CFLAGS.dup
     source_dir, target_name = target_to_source(target)
     source_file = source_dir.join("#{target_name}.cc")
@@ -249,6 +255,9 @@ def compile(target, triple, output_dir, *opts)
 
     host_triple = Triple.current
     target_triple = triple.empty? ? Triple.current : Triple.parse(triple)
+
+    cc, _ = detect_compiler(cc, '') if cc == 'cc' # Detect the system compiler if not specified.
+    _, ver = detect_compiler(cc, triple)
 
     show_info("#{'Generating target'.color(:cyan)} '#{target.to_s.color(:red)}'",
         'Compiler' => "#{cc} #{ver}",
