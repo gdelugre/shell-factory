@@ -328,6 +328,11 @@ def compile(target, triple, output_dir, *opts)
         cflags << "-mcmodel=#{cmodel}"
     end
 
+    if ENV['DISABLE_LTO'].to_i == 1
+        cflags.delete("-flto")
+        cflags << "-fno-lto"
+    end
+
     unless ENV['WITH_WARNINGS'].to_i == 1
         cflags << '-w'
     end
@@ -453,6 +458,7 @@ task :help do
     #{'RELAX_INLINE:'.color(:green)}       Set to 1, 2 or 3 to let the compiler uninline some functions.
     #{'IMAGEBASE:'.color(:green)}          Address where code is executed (for ELF and Mach-O).
     #{'THREAD_SAFE:'.color(:green)}        Set to 1 to enable thread safety.
+    #{'DISABLE_LTO:'.color(:green)}        Set to 1 to disable link-time optimization.
 
  #{'Target specific options:'.color(:cyan)}
 
