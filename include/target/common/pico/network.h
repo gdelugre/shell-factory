@@ -47,12 +47,9 @@ namespace Pico {
         FUNCTION
         constexpr auto ip_address_from_bytes(V... bytes)
         {
-            constexpr size_t nr_bytes = sizeof...(bytes);
-            static_assert(nr_bytes == 4 || nr_bytes == 16, "Invalid number of bytes for IP address.");
+            static_assert(sizeof...(bytes) == 4 || sizeof...(bytes) == 16, "Invalid number of bytes for IP address.");
 
-            using ip_address = typename ip_address_type<nr_bytes>::type;
-
-            return ip_address { { static_cast<uint8_t>(bytes)... } };
+            return typename ip_address_type<sizeof...(bytes)>::type { { static_cast<uint8_t>(bytes)... } };
         }
     }
 }
