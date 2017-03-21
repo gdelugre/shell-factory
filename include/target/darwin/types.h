@@ -5,6 +5,7 @@
 #include <target/posix/types.h>
 
 #include <mach/port.h>
+#include <mach/semaphore.h>
 #include <termios.h>
 
 namespace Target {
@@ -28,7 +29,7 @@ namespace Target {
 
     using random_pool = handle;
 
-    using mutex_t = uint32_t;
+    using mutex_t = semaphore_t;
     using terminal_settings = struct termios;
 }
 

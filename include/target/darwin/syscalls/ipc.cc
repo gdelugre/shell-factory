@@ -3,11 +3,11 @@
 
 #include <sys/types.h>
 #include <mach/message.h>
+#include <mach/semaphore.h>
 
-
-/*
- * This file defines Darwin specific system calls (i.e. not POSIX).
- */
+//
+// This file defines Darwin specific system calls (i.e. not POSIX).
+//
 namespace Syscall {
 
     SYSTEM_CALL mach_port_t         mach_reply_port();
@@ -23,6 +23,15 @@ namespace Syscall {
                                              mach_port_name_t,
                                              mach_msg_timeout_t,
                                              mach_port_name_t);
+
+    // Mach semaphores.
+    SYSTEM_CALL kern_return_t       semaphore_signal(semaphore_t);
+    SYSTEM_CALL kern_return_t       semaphore_signal_all(semaphore_t);
+    SYSTEM_CALL kern_return_t       semaphore_wait(semaphore_t);
+    SYSTEM_CALL kern_return_t       semaphore_timedwait(semaphore_t, mach_timespec_t);
+    SYSTEM_CALL kern_return_t       semaphore_timedwait_signal(semaphore_t, semaphore_t, mach_timespec_t);
+    SYSTEM_CALL kern_return_t       semaphore_wait_signal(semaphore_t, semaphore_t);
+    SYSTEM_CALL kern_return_t       semaphore_signal_thread(semaphore_t, thread_t);
 
     #if SYSCALL_EXISTS(shmsys)
     SYSTEM_CALL int                 shmsys(int, int, int, int);
@@ -53,6 +62,53 @@ namespace Syscall {
     mach_port_t mach_host_self()
     {
         return DO_MACH_SYSCALL(host_self_trap);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_signal(semaphore_t semaphore)
+    {
+        return DO_MACH_SYSCALL(semaphore_signal_trap, semaphore);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_signal_all(semaphore_t semaphore)
+    {
+        return DO_MACH_SYSCALL(semaphore_signal_all_trap, semaphore);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_wait(semaphore_t semaphore)
+    {
+        return DO_MACH_SYSCALL(semaphore_wait_trap, semaphore);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_timedwait(semaphore_t semaphore,
+                                      mach_timespec_t wait_time)
+    {
+        return DO_MACH_SYSCALL(semaphore_timedwait_trap, semaphore, wait_time);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_timedwait_signal(semaphore_t wait_semaphore,
+                                             semaphore_t signal_semaphore,
+                                             mach_timespec_t wait_time)
+    {
+        return DO_MACH_SYSCALL(semaphore_timedwait_signal_trap, wait_semaphore, signal_semaphore, wait_time);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_wait_signal(semaphore_t wait_semaphore,
+                                        semaphore_t signal_semaphore)
+    {
+        return DO_MACH_SYSCALL(semaphore_wait_signal_trap, wait_semaphore, signal_semaphore);
+    }
+
+    SYSTEM_CALL
+    kern_return_t semaphore_signal_thread(semaphore_t semaphore,
+                                          thread_t thread)
+    {
+        return DO_MACH_SYSCALL(semaphore_signal_thread_trap, semaphore, thread);
     }
 
     //
