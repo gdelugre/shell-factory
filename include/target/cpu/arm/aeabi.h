@@ -1,5 +1,5 @@
-#ifndef ARM_SOFTFLOAT_H_
-#define ARM_SOFTFLOAT_H_
+#ifndef ARM_AEABI_H_
+#define ARM_AEABI_H_
 
 #include <cstdint>
 
