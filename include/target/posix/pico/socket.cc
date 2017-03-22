@@ -204,22 +204,26 @@ namespace Pico {
         METHOD
         StreamSocket StreamSocket::accept()
         {
-            do {
-                int client_fd = Syscall::accept(this->file_desc(), nullptr, 0);
-                if ( Target::is_error(client_fd) )
-                    continue;
+            int client_fd;
 
-                if ( Fork )
-                {
-                    if ( Syscall::fork() == 0 )
-                        return StreamSocket(client_fd);
-                    else
-                        Syscall::close(client_fd);
+            do {
+                client_fd = Syscall::accept(this->file_desc(), nullptr, 0);
+                if ( Target::is_error(client_fd) ) {
+                    client_fd = Target::invalid_handle;
+                    continue;
                 }
+
+                if ( !Fork )
+                    break;
+
+                if ( Syscall::fork() == 0 )
+                    break;
                 else
-                    return StreamSocket(client_fd);
+                    Syscall::close(client_fd);
 
             } while ( Fork );
+
+            return StreamSocket(client_fd);
         }
 
         METHOD
