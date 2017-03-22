@@ -39,9 +39,15 @@
 #define STRINGIZE(x) #x
 #define TO_STRING(x) STRINGIZE(x)
 
-#define SHELLCODE_ENTRY NO_RETURN static void Shellcode::entry()
+#define SHELLCODE_ENTRY                         \
+    FUNCTION                                    \
+    void Shellcode::init() {                    \
+        BOOTSTRAP_RUN_ALL();                    \
+    }                                           \
+    NO_RETURN static void Shellcode::entry()
 
 namespace Shellcode {
+    FUNCTION void init();
     NO_RETURN FUNCTION void entry();
 }
 
@@ -50,6 +56,7 @@ extern "C" {
     // Shellcode entry point.
     NO_RETURN void _start(void)
     {
+        Shellcode::init();
         Shellcode::entry();
         __builtin_unreachable();
     }
@@ -89,6 +96,7 @@ extern char edata;
 extern char ebss;
 extern char eend;
 
+#include <bootstrap.h>
 #include <memops.h>
 #include <softfloat.h>
 #include <factory-options.h>
