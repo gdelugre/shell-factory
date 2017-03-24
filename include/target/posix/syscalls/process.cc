@@ -51,7 +51,7 @@ namespace Syscall {
 
     #if SYSCALL_EXISTS(fexecve)
     NO_RETURN SYSTEM_CALL
-    int execve(int fd, char *const argv[], char *const envp[])
+    int fexecve(int fd, char *const argv[], char *const envp[])
     {
         DO_SYSCALL(fexecve, fd, argv, envp);
         __builtin_unreachable();
