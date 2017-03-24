@@ -11,11 +11,11 @@ namespace {
         CONSTRUCTOR Bootstrap() = delete;
 
         template <unsigned N>
-        FUNCTION_NOINLINE
+        FUNCTION_INLINE
         void init() {}
 
         template <unsigned N>
-        FUNCTION_NOINLINE
+        FUNCTION_INLINE
         void run()
         {
             run<N-1>();
