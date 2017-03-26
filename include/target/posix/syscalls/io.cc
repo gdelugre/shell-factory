@@ -235,7 +235,7 @@ namespace Syscall {
         #if SYSCALL_EXISTS(lstat)
         return DO_SYSCALL(lstat, pathname, buf);
         #else
-        return fstatat(AT_FDCWD, path, buf, AT_SYMLINK_NOFOLLOW);
+        return fstatat(AT_FDCWD, pathname, buf, AT_SYMLINK_NOFOLLOW);
         #endif
     }
 
