@@ -14,7 +14,6 @@ namespace Syscall {
     SYSTEM_CALL int     creat(const char *, mode_t);
     SYSTEM_CALL int     access(const char *, int);
     SYSTEM_CALL int     dup(int);
-    SYSTEM_CALL int     dup2(int, int);
     SYSTEM_CALL off_t   lseek(int, off_t, int);
     SYSTEM_CALL ssize_t read(int, void *, size_t);
     SYSTEM_CALL ssize_t write(int, const void *, size_t);
@@ -47,6 +46,10 @@ namespace Syscall {
     SYSTEM_CALL int     ioctl(int, unsigned long, long);
 
     // These may not be implemented everywhere.
+    #if SYSCALL_EXISTS(dup2)
+    SYSTEM_CALL int     dup2(int, int);
+    #endif
+
     #if SYSCALL_EXISTS(mkfifo)
     SYSTEM_CALL int     mkfifo(const char *, mode_t);
     #endif
@@ -138,17 +141,29 @@ namespace Syscall {
         #endif
     }
 
+    //
+    // If dup is not available, fallback to using the equivalent call to fcntl.
+    //
     SYSTEM_CALL
     int dup(int oldfd)
     {
+        #if SYSCALL_EXISTS(dup)
         return DO_SYSCALL(dup, oldfd);
+        #else
+        return fcntl(oldfd, F_DUPFD, reinterpret_cast<void *>(0));
+        #endif
     }
 
+    //
+    // Some systems prefer to use fcntl with non-POSIX flags instead of dup2.
+    //
+    #if SYSCALL_EXISTS(dup2)
     SYSTEM_CALL
     int dup2(int filedes, int filedes2)
     {
         return DO_SYSCALL(dup2, filedes, filedes2);
     }
+    #endif
 
     SYSTEM_CALL
     off_t lseek(int fd, off_t offset, int whence)
@@ -370,12 +385,12 @@ namespace Syscall {
         return DO_SYSCALL(fcntl, fd, cmd);
     }
 
-    /*
-     * The best solution would be an 'auto' arg here.
-     * But gcc has a bug and cannot generate the syscall correctly.
-     * Keep it like this until gcc is fixed (probably never), or
-     * until gcc support is definitely dropped in favor of clang.
-     */
+    //
+    // The best solution would be an 'auto' arg here.
+    // But gcc has a bug and cannot generate the syscall correctly.
+    // Keep it like this until gcc is fixed (probably never), or
+    // until gcc support is definitely dropped in favor of clang.
+    //
     SYSTEM_CALL
     int fcntl(int fd, int cmd, void *arg)
     {
@@ -388,9 +403,9 @@ namespace Syscall {
         return DO_SYSCALL(ioctl, fd, request);
     }
 
-    /*
-     * See above comment for fcntl.
-     */
+    //
+    // See above comment for fcntl.
+    //
     SYSTEM_CALL
     int ioctl(int fd, unsigned long request, void *arg)
     {

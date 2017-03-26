@@ -157,6 +157,7 @@ namespace Pico {
         return nr_bytes;
     }
 
+    #if SYSCALL_EXISTS(dup2)
     template <typename Io>
     template <typename T>
     METHOD
@@ -164,6 +165,7 @@ namespace Pico {
     {
         Syscall::dup2(this->file_desc(), stm.file_desc());
     }
+    #endif
 }
 
 #endif
