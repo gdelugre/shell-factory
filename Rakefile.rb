@@ -187,7 +187,7 @@ def detect_compiler(cc, triple)
     when /gcc version (\S+)/ then ["gcc", $1]
     when /clang version (\S+)/, /Apple LLVM version (\S+)/ then ["clang", $1]
     else
-        [cmd, '']
+        [cc, '']
     end
 end
 
