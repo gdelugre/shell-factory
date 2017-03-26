@@ -507,7 +507,7 @@ namespace Pico {
         return tstrncat(dest, src, n);
     }
 
-    static constexpr bool isascii(char c)
+    static constexpr bool isascii(signed char c)
     {
         return ( c >= 0 );
     }
