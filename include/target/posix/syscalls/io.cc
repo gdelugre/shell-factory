@@ -226,7 +226,11 @@ namespace Syscall {
     SYSTEM_CALL
     int fstat(int fd, struct stat *buf)
     {
+        #if SYSCALL_EXISTS(fstat)
         return DO_SYSCALL(fstat, fd, buf);
+        #else
+        return DO_SYSCALL(fstatat, fd, nullptr, buf, 0);
+        #endif
     }
 
     SYSTEM_CALL
@@ -350,7 +354,11 @@ namespace Syscall {
     SYSTEM_CALL
     int fchown(int fd, uid_t owner, gid_t group)
     {
+        #if SYSCALL_EXISTS(fchown)
         return DO_SYSCALL(fchown, fd, owner, group);
+        #else
+        return fchownat(fd, nullptr, owner, group, 0);
+        #endif
     }
 
     SYSTEM_CALL
@@ -369,14 +377,18 @@ namespace Syscall {
         #if SYSCALL_EXISTS(chmod)
         return DO_SYSCALL(chmod, path, mode);
         #else
-        return chmodat(AT_FDCWD, path, mode);
+        return fchmodat(AT_FDCWD, path, mode, 0);
         #endif
     }
 
     SYSTEM_CALL
     int fchmod(int fd, mode_t mode)
     {
+        #if SYSCALL_EXISTS(fchmod)
         return DO_SYSCALL(fchmod, fd, mode);
+        #else
+        return fchmodat(fd, nullptr, mode, 0);
+        #endif
     }
 
     SYSTEM_CALL
