@@ -319,6 +319,10 @@ def compile(target, triple, output_dir, *opts)
         end
     end
 
+    if ENV['64BIT'].to_i == 1
+        cflags << '-m64'
+    end
+
     if ENV['IMAGEBASE']
         base_addr = ENV['IMAGEBASE']
         if target_triple.os =~ /darwin/
@@ -472,6 +476,7 @@ task :help do
  #{'Target specific options:'.color(:cyan)}
 
     #{'32BIT:'.color(:green)}              Set to 1 to compile for a 32-bit environment.
+    #{'64BIT:'.color(:green)}              Set to 1 to compile for a 64-bit environment.
     #{'STACK_REALIGN:'.color(:green)}      Set to 1 to ensure stack alignment to a 16 bytes boundary (Intel only).
     #{'THUMB:'.color(:green)}              Set to 1 to compile to Thumb mode (ARM only).
     #{'CODE_MODEL:'.color(:green)}         Select target code model: tiny, small, large (AArch64 only).
