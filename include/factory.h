@@ -11,7 +11,7 @@
 #define INLINE inline
 #elif defined(RELAX_INLINE) && (RELAX_INLINE == 2)
 #define INLINE
-#elif defined(RELAX_INLINE) && (RELAX_INLINE == 3)
+#elif defined(RELAX_INLINE) && (RELAX_INLINE >= 3)
 #define INLINE NOINLINE
 #else
 #define INLINE ALWAYS_INLINE
