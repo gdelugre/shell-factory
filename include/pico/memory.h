@@ -106,7 +106,7 @@ namespace Pico {
         FUNCTION void * allocate(size_t size, int prot) {
             return allocate(nullptr, size, prot);
         }
-        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, bool can_move = true);
+        FUNCTION void * resize(void *ptr, size_t old_size, size_t new_size, int old_prot, bool can_move = true);
         FUNCTION void   release(void *ptr, size_t size);
         FUNCTION int    set_protection(void *ptr, size_t, int prot);
 
@@ -184,7 +184,7 @@ namespace Pico {
 
                 METHOD int      resize(size_t new_size, bool can_move = true) {
                     new_size = round_up_page_size(new_size);
-                    void *new_ptr = Memory::resize(ptr, region_size, new_size, can_move);
+                    void *new_ptr = Memory::resize(ptr, region_size, new_size, mem_prot, can_move);
                     if ( new_ptr == nullptr )
                         return -1;
 

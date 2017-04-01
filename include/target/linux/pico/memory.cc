@@ -6,7 +6,7 @@ namespace Pico {
     namespace Memory {
 
         METHOD
-        void *resize(void *ptr, size_t old_size, size_t new_size, bool can_move)
+        void *resize(void *ptr, size_t old_size, size_t new_size, int UNUSED old_prot, bool can_move)
         {
             int flags = 0;
 

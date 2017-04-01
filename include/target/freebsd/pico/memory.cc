@@ -6,7 +6,7 @@ namespace Pico {
     namespace Memory {
 
         METHOD
-        void *resize(void *ptr, size_t old_size, size_t new_size, bool can_move)
+        void *resize(void *ptr, size_t old_size, size_t new_size, int old_prot, bool can_move)
         {
             void *base;
             size_t size;
@@ -37,8 +37,7 @@ namespace Pico {
                 size = new_size - old_size;
             }
                 
-            // TODO: handle prot parameter.
-            void *new_ptr = allocate(base, size, Memory::READ | Memory::WRITE);
+            void *new_ptr = allocate(base, size, old_prot);
             if ( Target::is_error(new_ptr) )
                 return nullptr;
 
