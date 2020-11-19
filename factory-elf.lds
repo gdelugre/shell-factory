@@ -41,5 +41,5 @@ SECTIONS
     _end = ALIGN(4096);
     PROVIDE (eend = _end);
 
-    /DISCARD/           : { *(.note.*) }
+    /DISCARD/           : { *(.note.*) *(.ARM.exidx) *(.ARM.attributes) }
 }
